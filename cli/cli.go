@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	commands "github.com/ArthurSudbrackIbarra/cloney/cli/commands"
+	"github.com/ArthurSudbrackIbarra/cloney/cli/commands"
 
-	cobra "github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands.

@@ -2,8 +2,9 @@ package git
 
 import (
 	"fmt"
+	"regexp"
 
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
@@ -11,6 +12,26 @@ import (
 type GitRepository struct {
 	URL    string
 	Branch string
+}
+
+// Regex to match a git repository URL. not only for github.
+var repositoryRegex = regexp.MustCompile(`^(?:https?|git|ssh):\/\/([^\/]+)\/([^\/]+)\/([^\/]+)(?:)?\.git$`)
+
+// ValidateRepositoryURL validates a git repository URL.
+func ValidateRepositoryURL(repositoryURL string) error {
+	if !repositoryRegex.MatchString(repositoryURL) {
+		return fmt.Errorf("invalid repository URL")
+	}
+	return nil
+}
+
+// GetRepositoryName gets the name of a git repository from its URL.
+func GetRepositoryName(repositoryURL string) string {
+	matches := repositoryRegex.FindStringSubmatch(repositoryURL)
+	if len(matches) < 4 {
+		return ""
+	}
+	return matches[3]
 }
 
 // CloneRepository clones a git repository.

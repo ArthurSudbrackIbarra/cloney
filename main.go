@@ -1,9 +1,10 @@
 package main
 
 import (
-	cli "github.com/ArthurSudbrackIbarra/cloney/cli"
+	"github.com/ArthurSudbrackIbarra/cloney/cli"
 )
 
+// main is the entry point of the application.
 func main() {
 	cli.Initialize()
 }
