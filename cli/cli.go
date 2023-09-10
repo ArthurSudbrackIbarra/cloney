@@ -22,6 +22,7 @@ var rootCmd = &cobra.Command{
 func Initialize() {
 	// Add subcommands.
 	commands.InitializeVersion(rootCmd)
+	commands.InitializeInfo(rootCmd)
 	commands.InitializeClone(rootCmd)
 
 	// Execute the root command.

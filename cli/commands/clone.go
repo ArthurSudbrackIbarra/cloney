@@ -22,8 +22,14 @@ func cloneCmdRun(cmd *cobra.Command, args []string) {
 	branch, _ := cmd.Flags().GetString("branch")
 	path, _ := cmd.Flags().GetString("path")
 
+	// Create the repository struct.
+	repository := &git.GitRepository{
+		URL:    repositoryURL,
+		Branch: branch,
+	}
+
 	// Validate arguments.
-	err := git.ValidateRepositoryURL(repositoryURL)
+	err := repository.ValidateURL()
 	if err != nil {
 		fmt.Println("Invalid repository URL.")
 		return
@@ -38,13 +44,9 @@ func cloneCmdRun(cmd *cobra.Command, args []string) {
 	path = filepath.Join(currentDir, path)
 
 	// Clone repository.
-	repository := &git.GitRepository{
-		URL:    repositoryURL,
-		Branch: branch,
-	}
-	repositoryName := git.GetRepositoryName(repositoryURL)
+	repositoryName := repository.GetName()
 	fmt.Printf("Cloning '%s' into '%s' ...\n", repositoryName, path)
-	err = git.CloneRepository(repository, path)
+	err = repository.Clone(path)
 	if err != nil {
 		fmt.Println("Could not clone repository.", err)
 		return
@@ -64,7 +66,7 @@ var cloneCmd = &cobra.Command{
 func InitializeClone(rootCmd *cobra.Command) {
 	// Flags.
 	cloneCmd.Flags().StringP("path", "p", "", "Path to clone the repository to.")
-	cloneCmd.Flags().StringP("branch", "b", "main", "Branch to clone.")
+	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch.")
 
 	rootCmd.AddCommand(cloneCmd)
 }
