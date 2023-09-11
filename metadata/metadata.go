@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/olekukonko/tablewriter"
+	"gopkg.in/yaml.v3"
 )
 
 // CloneyVariable is the struct that represents a variable in a Cloney template repository.
