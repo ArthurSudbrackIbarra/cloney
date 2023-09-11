@@ -65,8 +65,8 @@ var cloneCmd = &cobra.Command{
 // InitializeClone initializes the clone command.
 func InitializeClone(rootCmd *cobra.Command) {
 	// Flags.
-	cloneCmd.Flags().StringP("path", "p", "", "Path to clone the repository to.")
-	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch.")
+	cloneCmd.Flags().StringP("path", "p", "", "Path to clone the repository to")
+	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
 
 	rootCmd.AddCommand(cloneCmd)
 }

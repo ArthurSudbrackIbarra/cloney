@@ -10,7 +10,7 @@ import (
 // This command is used to print the version of the application.
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Prints the current version of Cloney.",
+	Short: "Prints the current version of Cloney",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Cloney v0.1.0")
 	},

@@ -9,13 +9,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// AddNewLine adds prints a new line to the terminal.
+// This is used to add a new line before and after each command.
+func AddNewLine(cmd *cobra.Command, args []string) {
+	fmt.Print("\n")
+}
+
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:   "cloney",
-	Short: "Cloney is a tool to clone template git repositories.",
+	Use:              "cloney",
+	Short:            "Cloney is a tool to clone template git repositories.",
+	PersistentPreRun: AddNewLine,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
+	PersistentPostRun: AddNewLine,
 }
 
 // Initialize initializes the CLI.

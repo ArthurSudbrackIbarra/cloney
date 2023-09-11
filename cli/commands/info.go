@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/git"
 	"github.com/ArthurSudbrackIbarra/cloney/metadata"
 
@@ -34,7 +35,8 @@ func infoCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	// Get the metadata file content.
-	metadataContent, err := repository.GetFileContent(".cloney.yaml")
+	appConfig := config.GetAppConfig()
+	metadataContent, err := repository.GetFileContent(appConfig.MetadataFileName)
 	if err != nil {
 		fmt.Println("Could not get repository metadata.", err)
 		return
@@ -48,19 +50,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	// Print metadata.
-	fmt.Println("Name:", metadata.Name)
-	fmt.Println("Description:", metadata.Description)
-	fmt.Println("Version:", metadata.Version)
-	fmt.Println("Authors:", metadata.Authors)
-	fmt.Println("License:", metadata.License)
-	fmt.Println("Variables:")
-	for _, variable := range metadata.Variables {
-		fmt.Println("\tName:", variable.Name)
-		fmt.Println("\tDescription:", variable.Description)
-		fmt.Println("\tDefault:", variable.Default)
-		fmt.Println("\tType:", variable.Type)
-		fmt.Println()
-	}
+	metadata.PrettyPrint()
 
 }
 
@@ -68,14 +58,14 @@ func infoCmdRun(cmd *cobra.Command, args []string) {
 // This command is used to print information about a Cloney template repository.
 var infoCmd = &cobra.Command{
 	Use:   "info [REPOSITORY_URL]",
-	Short: "Prints information about a Cloney template repository.",
+	Short: "Prints information about a Cloney template repository",
 	Run:   infoCmdRun,
 }
 
 // InitializeInfo initializes the info command.
 func InitializeInfo(rootCmd *cobra.Command) {
 	// Flags.
-	infoCmd.Flags().StringP("branch", "b", "main", "Git branch.")
+	infoCmd.Flags().StringP("branch", "b", "main", "Git branch")
 
 	rootCmd.AddCommand(infoCmd)
 }

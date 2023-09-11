@@ -1,7 +1,12 @@
 package metadata
 
 import (
+	"fmt"
+	"os"
+
 	"gopkg.in/yaml.v3"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 // CloneyVariable is the struct that represents a variable in a Cloney template repository.
@@ -49,4 +54,37 @@ func NewCloneyMetadata(stringYAMLContent string) (*CloneyMetadata, error) {
 		return nil, err
 	}
 	return &metadata, nil
+}
+
+// PrettyPrint prints the Cloney template repository metadata in a pretty way.
+func (m *CloneyMetadata) PrettyPrint() {
+	// Print basic information.
+	fmt.Printf("%s\n\n", m.Name)
+	if m.Description != "" {
+		fmt.Printf("Description: %s\n\n", m.Description)
+	} else {
+		fmt.Print("No description provided.\n\n")
+	}
+	fmt.Printf("Version: %s\n", m.Version)
+	if len(m.Authors) > 0 {
+		fmt.Printf("Authors: %s\n", m.Authors)
+	}
+	if m.License != "" {
+		fmt.Printf("License: %s\n", m.License)
+	}
+
+	// Print variables.
+	if len(m.Variables) == 0 {
+		fmt.Print("\nNo variables provided.\n")
+		return
+	}
+	fmt.Print("\nVariables:\n\n")
+	variablesTable := tablewriter.NewWriter(os.Stdout)
+	variablesTable.SetHeader([]string{"Name", "Description", "Type", "Default"})
+	for _, variable := range m.Variables {
+		variablesTable.Append(
+			[]string{variable.Name, variable.Description, variable.Type, variable.Default},
+		)
+	}
+	variablesTable.Render()
 }
