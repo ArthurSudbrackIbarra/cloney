@@ -32,14 +32,16 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	appConfig := config.GetAppConfig()
 	metadataContent, err := repository.GetFileContent(appConfig.MetadataFileName)
 	if err != nil {
-		fmt.Println("Could not get repository metadata:", err, ".")
+		fmt.Println(
+			fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err,
+		)
 		return err
 	}
 
 	// Create the metadata struct.
 	metadata, err := metadata.NewCloneyMetadata(metadataContent)
 	if err != nil {
-		fmt.Println("Could not parse repository metadata:", err, ".")
+		fmt.Println("Could not parse repository metadata file:", err)
 		return err
 	}
 

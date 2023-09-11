@@ -11,12 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmdPersistentPrePostRun is the function that runs before and after
-// any command is run. This function is used to print new lines.
-func rootCmdPersistentPrePostRun(cmd *cobra.Command, args []string) {
-	fmt.Print("\n")
-}
-
 // rootCmdRun is the function that runs when the root command is called.
 func rootCmdRun(cmd *cobra.Command, args []string) {
 	cloneyASCIIArt := figure.NewFigure("cloney", "ogre", false)
@@ -27,11 +21,11 @@ func rootCmdRun(cmd *cobra.Command, args []string) {
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:               "cloney",
-	Short:             "Cloney is a tool to clone template git repositories.",
-	PersistentPreRun:  rootCmdPersistentPrePostRun,
-	PersistentPostRun: rootCmdPersistentPrePostRun,
-	Run:               rootCmdRun,
+	Use:          "cloney",
+	Short:        "Cloney is a tool to clone template git repositories.",
+	Run:          rootCmdRun,
+	SilenceUsage: true,
+
 	// Errors are printed by the commands.
 	SilenceErrors: true,
 }
@@ -43,14 +37,15 @@ func Initialize() {
 	commands.InitializeInfo(rootCmd)
 	commands.InitializeClone(rootCmd)
 
-	// Add colors to the CLI.
+	// CLI formatting, colors, bold, italic...
 	cc.Init(&cc.Config{
-		RootCmd:  rootCmd,
-		Headings: cc.HiCyan + cc.Bold + cc.Underline,
-		Commands: cc.HiYellow + cc.Bold,
-		Example:  cc.Italic,
-		ExecName: cc.Bold,
-		Flags:    cc.Bold,
+		RootCmd:         rootCmd,
+		Headings:        cc.HiCyan + cc.Bold + cc.Underline,
+		Commands:        cc.HiYellow + cc.Bold,
+		Example:         cc.Italic,
+		ExecName:        cc.Bold,
+		Flags:           cc.Bold,
+		NoExtraNewlines: true,
 	})
 
 	// Execute the root command.
