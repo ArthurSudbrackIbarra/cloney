@@ -18,6 +18,7 @@ func versionCmdRun(cmd *cobra.Command, args []string) {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Prints the current version of Cloney",
+	Long:  "\nPrints the current version of Cloney.",
 	Run:   versionCmdRun,
 }
 

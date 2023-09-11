@@ -38,8 +38,6 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	path = filepath.Join(currentDir, path)
 
 	// Clone repository.
-	repositoryName := repository.GetName()
-	fmt.Printf("Cloning '%s' into '%s' ...\n", repositoryName, path)
 	err = repository.Clone(path)
 	if err != nil {
 		fmt.Println("Could not clone repository.", err)
@@ -54,6 +52,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 var cloneCmd = &cobra.Command{
 	Use:     "clone [repository_url]",
 	Short:   "Clones a template repository.",
+	Long:    "\nClones a template repository.",
 	Example: "  cloney clone https://github.com/ArthurSudbrackIbarra/cloney.git",
 	RunE:    cloneCmdRun,
 }

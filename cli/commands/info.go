@@ -24,7 +24,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	// Create the repository struct.
 	repository, err := git.NewGitRepository(repositoryURL, branch)
 	if err != nil {
-		fmt.Println("Error referencing repository.", err)
+		fmt.Println("Error referencing repository:", err)
 		return err
 	}
 
@@ -32,14 +32,14 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	appConfig := config.GetAppConfig()
 	metadataContent, err := repository.GetFileContent(appConfig.MetadataFileName)
 	if err != nil {
-		fmt.Println("Could not get repository metadata.", err)
+		fmt.Println("Could not get repository metadata:", err, ".")
 		return err
 	}
 
 	// Create the metadata struct.
 	metadata, err := metadata.NewCloneyMetadata(metadataContent)
 	if err != nil {
-		fmt.Println("Could not parse repository metadata.", err)
+		fmt.Println("Could not parse repository metadata:", err, ".")
 		return err
 	}
 
@@ -53,6 +53,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 var infoCmd = &cobra.Command{
 	Use:     "info [repository_url]",
 	Short:   "Prints information about a Cloney template repository",
+	Long:    "\nPrints information about a Cloney template repository.",
 	Example: "  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git",
 	RunE:    infoCmdRun,
 }
