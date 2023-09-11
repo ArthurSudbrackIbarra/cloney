@@ -3,17 +3,22 @@ package commands
 import (
 	"fmt"
 
+	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/spf13/cobra"
 )
+
+// versionCmdRun is the function that runs when the version command is called.
+func versionCmdRun(cmd *cobra.Command, args []string) {
+	appConfig := config.GetAppConfig()
+	fmt.Println(fmt.Sprintf("Cloney version %s", appConfig.Version))
+}
 
 // versionCmd represents the version command.
 // This command is used to print the version of the application.
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Prints the current version of Cloney",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Cloney v0.1.0")
-	},
+	Run:   versionCmdRun,
 }
 
 // InitializeVersion initializes the version command.

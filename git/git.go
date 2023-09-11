@@ -21,12 +21,16 @@ type GitRepository struct {
 // Regex to match a git repository URL. not only for github.
 var repositoryRegex = regexp.MustCompile(`^(?:https?|git|ssh):\/\/([^\/]+)\/([^\/]+)\/([^\/]+)(?:)?\.git$`)
 
-// ValidateURL validates the git repository URL.
-func (r *GitRepository) ValidateURL() error {
-	if !repositoryRegex.MatchString(r.URL) {
-		return fmt.Errorf("invalid repository URL")
+// NewGitRepository creates a new GitRepository struct.
+func NewGitRepository(url string, branch string) (*GitRepository, error) {
+	// Validate parameters.
+	if !repositoryRegex.MatchString(url) {
+		return nil, fmt.Errorf("invalid repository URL")
 	}
-	return nil
+	return &GitRepository{
+		URL:    url,
+		Branch: branch,
+	}, nil
 }
 
 // GetName returns the name of a git repository.

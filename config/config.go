@@ -6,6 +6,9 @@ import (
 
 // AppConfig represents the application configuration.
 type AppConfig struct {
+	// Version is the current version of the application.
+	Version string
+
 	// MetadataFileName is the name of the metadata file in the repository.
 	// This file contains the information about the template.
 	// Default is ".cloney.yaml".
@@ -18,6 +21,7 @@ type AppConfig struct {
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
 	// Default values.
+	Version:          "0.0.0",
 	MetadataFileName: ".cloney.yaml",
 }
 
@@ -39,6 +43,7 @@ func LoadConfig() error {
 // GetAppConfig returns a copy of the global application configuration.
 func GetAppConfig() *AppConfig {
 	return &AppConfig{
+		Version:          globalConfig.Version,
 		MetadataFileName: globalConfig.MetadataFileName,
 		GitToken:         globalConfig.GitToken,
 	}

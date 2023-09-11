@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/ArthurSudbrackIbarra/cloney/cli"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 )
@@ -14,9 +12,6 @@ func main() {
 	if err != nil {
 		panic("Could not load application configuration.")
 	}
-
-	config := config.GetAppConfig()
-	fmt.Println(config)
 
 	// Start the CLI.
 	cli.Initialize()

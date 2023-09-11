@@ -11,10 +11,10 @@ import (
 )
 
 // cloneCmdRun is the function that runs when the clone command is called.
-func cloneCmdRun(cmd *cobra.Command, args []string) {
+func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		cmd.Help()
-		return
+		return nil
 	}
 
 	// Get arguments.
@@ -23,23 +23,17 @@ func cloneCmdRun(cmd *cobra.Command, args []string) {
 	path, _ := cmd.Flags().GetString("path")
 
 	// Create the repository struct.
-	repository := &git.GitRepository{
-		URL:    repositoryURL,
-		Branch: branch,
-	}
-
-	// Validate arguments.
-	err := repository.ValidateURL()
+	repository, err := git.NewGitRepository(repositoryURL, branch)
 	if err != nil {
-		fmt.Println("Invalid repository URL.")
-		return
+		fmt.Println("Error referencing repository.", err)
+		return err
 	}
 
 	// Get user current directory.
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Could not get user's current directory.")
-		return
+		return err
 	}
 	path = filepath.Join(currentDir, path)
 
@@ -49,17 +43,19 @@ func cloneCmdRun(cmd *cobra.Command, args []string) {
 	err = repository.Clone(path)
 	if err != nil {
 		fmt.Println("Could not clone repository.", err)
-		return
+		return err
 	}
 
+	return nil
 }
 
 // cloneCmd represents the clone command.
 // This command is used to clone a template repository.
 var cloneCmd = &cobra.Command{
-	Use:   "clone [REPOSITORY_URL]",
-	Short: "Clones a template repository.",
-	Run:   cloneCmdRun,
+	Use:     "clone [repository_url]",
+	Short:   "Clones a template repository.",
+	Example: "  cloney clone https://github.com/ArthurSudbrackIbarra/cloney.git",
+	RunE:    cloneCmdRun,
 }
 
 // InitializeClone initializes the clone command.

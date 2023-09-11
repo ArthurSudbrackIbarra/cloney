@@ -11,10 +11,10 @@ import (
 )
 
 // infoCmdRun is the function that runs when the info command is called.
-func infoCmdRun(cmd *cobra.Command, args []string) {
+func infoCmdRun(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		cmd.Help()
-		return
+		return nil
 	}
 
 	// Get arguments.
@@ -22,16 +22,10 @@ func infoCmdRun(cmd *cobra.Command, args []string) {
 	branch, _ := cmd.Flags().GetString("branch")
 
 	// Create the repository struct.
-	repository := &git.GitRepository{
-		URL:    repositoryURL,
-		Branch: branch,
-	}
-
-	// Validate arguments.
-	err := repository.ValidateURL()
+	repository, err := git.NewGitRepository(repositoryURL, branch)
 	if err != nil {
-		fmt.Println("Invalid repository URL.")
-		return
+		fmt.Println("Error referencing repository.", err)
+		return err
 	}
 
 	// Get the metadata file content.
@@ -39,27 +33,28 @@ func infoCmdRun(cmd *cobra.Command, args []string) {
 	metadataContent, err := repository.GetFileContent(appConfig.MetadataFileName)
 	if err != nil {
 		fmt.Println("Could not get repository metadata.", err)
-		return
+		return err
 	}
 
 	// Create the metadata struct.
 	metadata, err := metadata.NewCloneyMetadata(metadataContent)
 	if err != nil {
 		fmt.Println("Could not parse repository metadata.", err)
-		return
+		return err
 	}
 
 	// Print metadata.
 	metadata.PrettyPrint()
-
+	return nil
 }
 
 // infoCmd represents the info command.
 // This command is used to print information about a Cloney template repository.
 var infoCmd = &cobra.Command{
-	Use:   "info [REPOSITORY_URL]",
-	Short: "Prints information about a Cloney template repository",
-	Run:   infoCmdRun,
+	Use:     "info [repository_url]",
+	Short:   "Prints information about a Cloney template repository",
+	Example: "  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git",
+	RunE:    infoCmdRun,
 }
 
 // InitializeInfo initializes the info command.
