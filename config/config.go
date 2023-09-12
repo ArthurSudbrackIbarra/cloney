@@ -15,7 +15,7 @@ type AppConfig struct {
 	MetadataFileName string
 
 	// GitToken is the token used to authenticate when dealing with private git repositories.
-	GitToken string `mapstructure:"git_token"`
+	GitToken string `mapstructure:"GIT_TOKEN"`
 }
 
 // globalConfig is the global application configuration.

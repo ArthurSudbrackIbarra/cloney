@@ -30,8 +30,15 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Get the metadata file content.
+	// If a token is provided, authenticate with it.
 	appConfig := config.GetAppConfig()
+	if appConfig.GitToken != "" {
+		fmt.Println("Authenticating with token...")
+		fmt.Println(appConfig.GitToken)
+		repository.AuthenticateWithToken(appConfig.GitToken)
+	}
+
+	// Get the metadata file content.
 	metadataContent, err := repository.GetFileContent(appConfig.MetadataFileName)
 	if err != nil {
 		// Handle errors related to reading the metadata file.
@@ -42,7 +49,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create the metadata struct from raw YAML data.
-	metadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent)
+	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent)
 	if err != nil {
 		// Handle errors related to parsing repository metadata.
 		fmt.Println("Could not parse repository metadata file:", err)
@@ -50,7 +57,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Print metadata.
-	metadata.Show()
+	cloneyMetadata.Show()
 	return nil
 }
 

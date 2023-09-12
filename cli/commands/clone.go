@@ -34,6 +34,13 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// If a token is provided, authenticate with it.
+	appConfig := config.GetAppConfig()
+	if appConfig.GitToken != "" {
+		fmt.Println("Authenticating with token...")
+		repository.AuthenticateWithToken(appConfig.GitToken)
+	}
+
 	// Get the name of the repository.
 	repositoryName := repository.GetName()
 
@@ -57,7 +64,6 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Read the repository metadata file.
-	appConfig := config.GetAppConfig()
 	metadataBytes, err := os.ReadFile(
 		filepath.Join(clonePath, appConfig.MetadataFileName),
 	)
@@ -68,7 +74,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create the metadata struct from raw YAML data.
-	metadata, err := metadata.NewCloneyMetadataFromRawYAML(string(metadataBytes))
+	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(string(metadataBytes))
 	if err != nil {
 		// Handle errors related to parsing repository metadata.
 		fmt.Println("Could not parse repository metadata:", err)
@@ -76,7 +82,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get the template variables.
-	variablesMap, err := metadata.GetVariablesMap()
+	variablesMap, err := cloneyMetadata.GetVariablesMap()
 	if err != nil {
 		// Handle errors related to template variables.
 		fmt.Println("Error with template variables:", err)
