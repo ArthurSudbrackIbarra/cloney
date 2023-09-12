@@ -3,6 +3,7 @@ package metadata
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
@@ -68,27 +69,21 @@ func (m *CloneyMetadata) GetVariablesMap() (map[string]interface{}, error) {
 
 // Show prints the Cloney template repository metadata in a pretty way.
 func (m *CloneyMetadata) Show() {
-	// Print basic information.
-	fmt.Printf("%s\n\n", m.Name)
-	if m.Description != "" {
-		fmt.Printf("Description: %s\n\n", m.Description)
-	} else {
-		fmt.Print("No description provided.\n\n")
-	}
-	fmt.Printf("Version: %s\n", m.Version)
-	if len(m.Authors) > 0 {
-		fmt.Printf("Authors: %s\n", m.Authors)
-	}
-	if m.License != "" {
-		fmt.Printf("License: %s\n", m.License)
-	}
+	// Print general information table.
+	fmt.Print("\nGeneral Information:\n\n")
+	generalInfoTable := tablewriter.NewWriter(os.Stdout)
+	generalInfoTable.SetHeader([]string{"Name", "Description", "Version", "Authors", "License"})
+	generalInfoTable.Append(
+		[]string{m.Name, m.Description, m.Version, strings.Join(m.Authors, ", "), m.License},
+	)
+	generalInfoTable.Render()
 
-	// Print variables.
+	// Print variables table.
 	if len(m.Variables) == 0 {
 		fmt.Print("\nNo variables provided.\n")
 		return
 	}
-	fmt.Print("\nVariables:\n\n")
+	fmt.Print("\nInput Variables:\n\n")
 	variablesTable := tablewriter.NewWriter(os.Stdout)
 	variablesTable.SetHeader([]string{"Name", "Description", "Type", "Default"})
 	for _, variable := range m.Variables {
@@ -97,4 +92,5 @@ func (m *CloneyMetadata) Show() {
 		)
 	}
 	variablesTable.Render()
+	fmt.Println()
 }
