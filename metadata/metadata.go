@@ -7,9 +7,85 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/olekukonko/tablewriter"
+	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
 )
+
+// GetType returns the type of a variable as a string.
+func GetVariableType(variable interface{}) string {
+	// The variable type is determined by checking the type of the example value.
+	variableType := reflect.TypeOf(variable).String()
+
+	// All types of integers are classified as "integer".
+	if strings.HasPrefix(variableType, "int") {
+		return "integer"
+	}
+	// All types of floats are classified as "decimal".
+	if strings.HasPrefix(variableType, "float") {
+		return "decimal"
+	}
+	// All booleans are classified as "boolean".
+	if variableType == "bool" {
+		return "boolean"
+	}
+	// All lists are classified as "list".
+	if strings.HasPrefix(variableType, "[]") {
+		return "list"
+	}
+	// All complex structures are classified as "map".
+	if strings.HasPrefix(variableType, "map") {
+		return "map"
+	}
+
+	// Otherwise, return the type as is.
+	return variableType
+}
+
+// ValueToString returns the value of a variable as a string.
+func ValueToString(value interface{}) string {
+	// If the default value is nil, return an empty string.
+	if value == nil {
+		return ""
+	}
+
+	// Get the type of the variable.
+	variableType := GetVariableType(value)
+
+	// If value is a number or a boolean, return it as a string.
+	if variableType == "integer" ||
+		variableType == "decimal" ||
+		variableType == "boolean" {
+		return fmt.Sprintf("%v", value)
+	}
+
+	// If the value is a string, add quotes to it.
+	if variableType == "string" {
+		return fmt.Sprintf("\"%v\"", value)
+	}
+
+	// If the value is a list (slice), iterate over it and convert each element.
+	if variableType == "list" {
+		sliceValue := reflect.ValueOf(value)
+		result := "["
+		for i := 0; i < sliceValue.Len(); i++ {
+			elementValue := sliceValue.Index(i).Interface()
+			elementStr := ValueToString(elementValue)
+			result += elementStr
+			if i < sliceValue.Len()-1 {
+				result += ", "
+			}
+		}
+		result += "]"
+		return result
+	}
+
+	// If the value is a map, return it as a string representation.
+	if variableType == "map" {
+		return fmt.Sprintf("%v", value)
+	}
+
+	return ""
+}
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
 type CloneyMetadataVariable struct {
@@ -24,13 +100,6 @@ type CloneyMetadataVariable struct {
 
 	// Example is an example value of the variable.
 	Example interface{} `yaml:"example" validate:"required"`
-}
-
-// GetType returns the type of the variable.
-func (v *CloneyMetadataVariable) GetType() string {
-	// The vaiable type is determined by the checking the type of the example value.
-	variableType := reflect.TypeOf(v.Example).String()
-	return variableType
 }
 
 // CloneyMetadata represents the metadata file of a Cloney template repository.
@@ -89,30 +158,50 @@ func (m *CloneyMetadata) GetVariablesMap() (map[string]interface{}, error) {
 
 // ==========================================
 
-// Show prints the Cloney template repository metadata in a pretty way.
-func (m *CloneyMetadata) Show() {
-	// Print general information table.
-	fmt.Print("\nGeneral Information:\n\n")
-	generalInfoTable := tablewriter.NewWriter(os.Stdout)
-	generalInfoTable.SetHeader([]string{"Name", "Description", "Version", "Authors", "License"})
-	generalInfoTable.Append(
+// ShowGeneralInformation prints the general information of the Cloney template repository in a pretty way.
+func (m *CloneyMetadata) ShowGeneralInformation() {
+	table := tw.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Name", "Description", "Version", "Authors", "License"})
+	table.SetHeaderColor(
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+	)
+	table.SetAlignment(tw.ALIGN_LEFT)
+	table.Append(
 		[]string{m.Name, m.Description, m.Version, strings.Join(m.Authors, ", "), m.License},
 	)
-	generalInfoTable.Render()
+	table.Render()
+}
 
-	// Print variables table.
+// ShowVariables prints the variables of the Cloney template repository in a pretty way.
+func (m *CloneyMetadata) ShowVariables() {
 	if len(m.Variables) == 0 {
-		fmt.Print("\nNo variables provided.\n")
+		fmt.Print("No variables provided.")
 		return
 	}
-	fmt.Print("\nInput Variables:\n\n")
-	variablesTable := tablewriter.NewWriter(os.Stdout)
-	variablesTable.SetHeader([]string{"Name", "Description", "Type", "Default", "Example"})
+	table := tw.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Name", "Description", "Type", "Default", "Example"})
+	table.SetHeaderColor(
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+	)
+	table.SetAlignment(tw.ALIGN_LEFT)
 	for _, variable := range m.Variables {
-		variablesTable.Append(
-			[]string{variable.Name, variable.Description, variable.GetType(), "TODO-EXAMPLE"},
+		table.Append(
+			[]string{variable.Name, variable.Description, GetVariableType(variable.Example), ValueToString(variable.Default), "TODO"},
 		)
 	}
-	variablesTable.Render()
-	fmt.Println()
+	table.Render()
+}
+
+// Show prints the Cloney template repository metadata in a pretty way.
+func (m *CloneyMetadata) Show() {
+	m.ShowGeneralInformation()
+	m.ShowVariables()
 }

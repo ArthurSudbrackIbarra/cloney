@@ -4,7 +4,6 @@ go 1.21
 
 require (
   github.com/Masterminds/sprig/v3 v3.2.3
-  github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
   github.com/go-git/go-git/v5 v5.2.0
   github.com/go-playground/validator/v10 v10.15.3
   github.com/ivanpirog/coloredcobra v1.0.1
