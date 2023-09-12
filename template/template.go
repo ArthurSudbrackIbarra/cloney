@@ -5,6 +5,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 	"github.com/Masterminds/sprig/v3"
 )
 
@@ -15,9 +16,9 @@ type TemplateFiller struct {
 }
 
 // NewTemplateFiller creates a new TemplateFiller instance.
-func NewTemplateFiller() *TemplateFiller {
+func NewTemplateFiller(variablesMap map[string]interface{}) *TemplateFiller {
 	return &TemplateFiller{
-		Variables: make(map[string]interface{}),
+		Variables: variablesMap,
 	}
 }
 
@@ -26,14 +27,31 @@ func (t *TemplateFiller) AddVariable(name string, value interface{}) {
 	t.Variables[name] = value
 }
 
-// FillDirectory fills all the files in a directory with the variables in the TemplateFiller.
+// FillDirectory recursively fills all the files in a directory with the variables in the TemplateFiller.
 func (t *TemplateFiller) FillDirectory(directoryPath string) error {
-	// Read directory files.
-	files, err := os.ReadDir(directoryPath)
+	// Get all the files in the directory.
+	// Ignore the .git directory.
+	filePaths, err := utils.GetAllFilePaths(directoryPath, []string{
+		".git",
+	})
 	if err != nil {
-		return fmt.Errorf("Error reading directory: %w", err)
+		return fmt.Errorf("error getting files in directory %s: %w", directoryPath, err)
 	}
 
+	fmt.Println(filePaths)
+
 	// Create the text template.
-	template := template.New("cloneyTemplate").Funcs(sprig.TxtFuncMap())
+	tmpl, err := template.New("cloneyTemplate").Funcs(sprig.TxtFuncMap()).ParseFiles(filePaths...)
+	if err != nil {
+		return fmt.Errorf("error creating template: %w", err)
+	}
+
+	// Fill the template.
+	err = tmpl.Execute(os.Stdout, t.Variables)
+	if err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	return nil
+
 }

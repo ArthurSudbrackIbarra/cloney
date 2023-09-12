@@ -39,7 +39,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create the metadata struct.
-	metadata, err := metadata.NewCloneyMetadata(metadataContent)
+	metadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent)
 	if err != nil {
 		fmt.Println("Could not parse repository metadata file:", err)
 		return err

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 )
 
 // CloneyVariable is the struct that represents a variable in a Cloney template repository.
@@ -32,7 +32,7 @@ type CloneyMetadata struct {
 	Description string `yaml:"description"`
 
 	// Version is the version of the template repository.
-	Version string `yaml:"version" validate:"required" validate:"semver"`
+	Version string `yaml:"version" validate:"required semver"`
 
 	// Authors is the list of authors of the template repository.
 	Authors []string `yaml:"authors"`
@@ -44,15 +44,25 @@ type CloneyMetadata struct {
 	Variables []CloneyVariable `yaml:"variables"`
 }
 
-// NewCloneyMetadata creates a new CloneyMetadata struct from a YAML string.
-func NewCloneyMetadata(stringYAMLContent string) (*CloneyMetadata, error) {
+// NewCloneyMetadataFromRawYAML creates a new CloneyMetadata struct from a YAML string.
+func NewCloneyMetadataFromRawYAML(rawYAML string) (*CloneyMetadata, error) {
 	// Parse YAML.
 	var metadata CloneyMetadata
-	err := yaml.Unmarshal([]byte(stringYAMLContent), &metadata)
+	err := yaml.Unmarshal([]byte(rawYAML), &metadata)
 	if err != nil {
 		return nil, err
 	}
 	return &metadata, nil
+}
+
+// GetVariablesMap returns a map of the variables in the Cloney template repository.
+func (m *CloneyMetadata) GetVariablesMap() (map[string]interface{}, error) {
+	variablesMap := make(map[string]interface{})
+	// Dummy variables.
+	variablesMap["app_name"] = "MyApp"
+	variablesMap["enable_logging"] = true
+	variablesMap["port"] = 8080
+	return variablesMap, nil
 }
 
 // PrettyPrint prints the Cloney template repository metadata in a pretty way.

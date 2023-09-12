@@ -5,7 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/git"
+	"github.com/ArthurSudbrackIbarra/cloney/metadata"
+	"github.com/ArthurSudbrackIbarra/cloney/template"
 
 	"github.com/spf13/cobra"
 )
@@ -25,22 +28,55 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Create the repository struct.
 	repository, err := git.NewGitRepository(repositoryURL, branch)
 	if err != nil {
-		fmt.Println("Error referencing repository.", err)
+		fmt.Println("Error referencing repository:", err)
 		return err
 	}
 
-	// Get user current directory.
+	// Get the clone path.
+	repositoryName := repository.GetName()
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Could not get user's current directory.")
+		fmt.Println("Could not get user's current directory:", err)
 		return err
 	}
-	path = filepath.Join(currentDir, path)
+	clonePath := filepath.Join(currentDir, path, repositoryName)
 
 	// Clone repository.
-	err = repository.Clone(path)
+	err = repository.Clone(clonePath)
 	if err != nil {
-		fmt.Println("Could not clone repository.", err)
+		fmt.Println("Could not clone repository:", err)
+		return err
+	}
+
+	// Read the repository metadata file.
+	appConfig := config.GetAppConfig()
+	metadataBytes, err := os.ReadFile(
+		filepath.Join(clonePath, appConfig.MetadataFileName),
+	)
+	if err != nil {
+		fmt.Printf("Could not read repository '%s' metadata file: %s\n", appConfig.MetadataFileName, err)
+		return err
+	}
+
+	// Create the metadata struct.
+	metadata, err := metadata.NewCloneyMetadataFromRawYAML(string(metadataBytes))
+	if err != nil {
+		fmt.Println("Could not parse repository metadata:", err)
+		return err
+	}
+
+	// Get the template variables.
+	variablesMap, err := metadata.GetVariablesMap()
+	if err != nil {
+		fmt.Println("Error with template variables:", err)
+		return err
+	}
+
+	// Fill the template variables.
+	filler := template.NewTemplateFiller(variablesMap)
+	err = filler.FillDirectory(clonePath)
+	if err != nil {
+		fmt.Println("Error filling template variables:", err)
 		return err
 	}
 
