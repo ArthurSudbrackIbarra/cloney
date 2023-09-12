@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands"
@@ -13,9 +12,11 @@ import (
 
 // rootCmdRun is the function that runs when the root command is called.
 func rootCmdRun(cmd *cobra.Command, args []string) {
+	// Display the Cloney ASCII art logo.
 	cloneyASCIIArt := figure.NewFigure("cloney", "ogre", false)
 	cloneyASCIIArt.Print()
-	fmt.Print("\n")
+
+	// Display the root command's help information.
 	cmd.Help()
 }
 
@@ -50,6 +51,7 @@ func Initialize() {
 
 	// Execute the root command.
 	if err := rootCmd.Execute(); err != nil {
+		// Exit with an error code if there was an issue executing the command.
 		os.Exit(1)
 	}
 }

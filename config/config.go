@@ -10,7 +10,7 @@ type AppConfig struct {
 	Version string
 
 	// MetadataFileName is the name of the metadata file in the repository.
-	// This file contains the information about the template.
+	// This file contains the information about the template repository.
 	// Default is ".cloney.yaml".
 	MetadataFileName string
 
@@ -27,11 +27,11 @@ var globalConfig = &AppConfig{
 
 // LoadConfig loads the global application configuration.
 func LoadConfig() error {
-	// Enable reading environment variables.
+	// Enable reading environment variables with a prefix.
 	viper.SetEnvPrefix("CLONEY")
 	viper.AutomaticEnv()
 
-	// Unmarshal the configuration into the globalConfig variable
+	// Unmarshal the configuration into the globalConfig variable.
 	err := viper.Unmarshal(globalConfig)
 	if err != nil {
 		return err

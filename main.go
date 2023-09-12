@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/ArthurSudbrackIbarra/cloney/cli"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 )
@@ -8,9 +11,9 @@ import (
 // main is the entry point of the application.
 func main() {
 	// Load the application configuration.
-	err := config.LoadConfig()
-	if err != nil {
-		panic("Could not load application configuration.")
+	if err := config.LoadConfig(); err != nil {
+		fmt.Printf("Error loading application configuration: %v\n", err)
+		os.Exit(1)
 	}
 
 	// Start the CLI.

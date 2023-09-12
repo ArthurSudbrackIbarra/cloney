@@ -18,7 +18,7 @@ type GitRepository struct {
 	Branch string
 }
 
-// Regex to match a git repository URL. not only for github.
+// repositoryRegex is a regular expression to match a git repository URL.
 var repositoryRegex = regexp.MustCompile(`^(?:https?|git|ssh):\/\/([^\/]+)\/([^\/]+)\/([^\/]+)(?:)?\.git$`)
 
 // NewGitRepository creates a new GitRepository struct.
@@ -69,6 +69,7 @@ func (r *GitRepository) GetFileContent(filePath string) (string, error) {
 	// Get the file content.
 	fileContent, err := os.ReadFile(fmt.Sprintf("%s/%s", temporaryDir, filePath))
 	if err != nil {
+		// Clean up the temporary directory on error.
 		os.RemoveAll(temporaryDir)
 		return "", err
 	}

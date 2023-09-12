@@ -39,7 +39,7 @@ func GetAllFilePaths(directoryPath string, ignoreDirectories []string) ([]string
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error walking directory %s: %w", directoryPath, err)
 	}
 
 	return filePaths, nil

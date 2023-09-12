@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// CloneyVariable is the struct that represents a variable in a Cloney template repository.
+// CloneyVariable represents a variable in a Cloney template repository.
 type CloneyVariable struct {
 	// Name is the name of the variable.
 	Name string `yaml:"name"`
@@ -23,7 +23,7 @@ type CloneyVariable struct {
 	Type string `yaml:"type"`
 }
 
-// CloneyMetadata is the struct that represents the metadata file of a Cloney template repository.
+// CloneyMetadata represents the metadata file of a Cloney template repository.
 type CloneyMetadata struct {
 	// Name is the name of the template repository.
 	Name string `yaml:"name" validate:"required"`
@@ -57,16 +57,17 @@ func NewCloneyMetadataFromRawYAML(rawYAML string) (*CloneyMetadata, error) {
 
 // GetVariablesMap returns a map of the variables in the Cloney template repository.
 func (m *CloneyMetadata) GetVariablesMap() (map[string]interface{}, error) {
+	// In a real implementation, you should return dynamic variables based on the metadata.
+	// This example provides hardcoded dummy variables.
 	variablesMap := make(map[string]interface{})
-	// Dummy variables.
 	variablesMap["app_name"] = "MyApp"
 	variablesMap["enable_logging"] = true
 	variablesMap["port"] = 8080
 	return variablesMap, nil
 }
 
-// PrettyPrint prints the Cloney template repository metadata in a pretty way.
-func (m *CloneyMetadata) PrettyPrint() {
+// Show prints the Cloney template repository metadata in a pretty way.
+func (m *CloneyMetadata) Show() {
 	// Print basic information.
 	fmt.Printf("%s\n\n", m.Name)
 	if m.Description != "" {

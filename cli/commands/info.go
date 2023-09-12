@@ -13,17 +13,19 @@ import (
 // infoCmdRun is the function that runs when the info command is called.
 func infoCmdRun(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
+		// Display command help if no repository URL is provided.
 		cmd.Help()
 		return nil
 	}
 
-	// Get arguments.
+	// Get command-line arguments.
 	repositoryURL := args[0]
 	branch, _ := cmd.Flags().GetString("branch")
 
-	// Create the repository struct.
+	// Create the Git repository instance.
 	repository, err := git.NewGitRepository(repositoryURL, branch)
 	if err != nil {
+		// Handle errors related to the repository.
 		fmt.Println("Error referencing repository:", err)
 		return err
 	}
@@ -32,21 +34,23 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	appConfig := config.GetAppConfig()
 	metadataContent, err := repository.GetFileContent(appConfig.MetadataFileName)
 	if err != nil {
+		// Handle errors related to reading the metadata file.
 		fmt.Println(
 			fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err,
 		)
 		return err
 	}
 
-	// Create the metadata struct.
+	// Create the metadata struct from raw YAML data.
 	metadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent)
 	if err != nil {
+		// Handle errors related to parsing repository metadata.
 		fmt.Println("Could not parse repository metadata file:", err)
 		return err
 	}
 
 	// Print metadata.
-	metadata.PrettyPrint()
+	metadata.Show()
 	return nil
 }
 
@@ -62,8 +66,9 @@ var infoCmd = &cobra.Command{
 
 // InitializeInfo initializes the info command.
 func InitializeInfo(rootCmd *cobra.Command) {
-	// Flags.
+	// Define command-line flags.
 	infoCmd.Flags().StringP("branch", "b", "main", "Git branch")
 
+	// Add the info command to the root command.
 	rootCmd.AddCommand(infoCmd)
 }
