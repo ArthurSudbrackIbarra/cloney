@@ -64,20 +64,20 @@ func MapVariableToString(value interface{}) string {
 	regexMap := regexp.MustCompile(`map\[interface \{\}\]interface \{\}`)
 
 	// This regex transforms '"key": "value"' into 'group + (string)'.
-	regexString := regexp.MustCompile(`(".+":) ".+"`)
+	regexString := regexp.MustCompile(`(".+":) +".+"`)
 	// This regex transforms '"key": [0-9]+' into 'group + (integer)'.
-	regexInteger := regexp.MustCompile(`(".+":) [0-9]+`)
+	regexInteger := regexp.MustCompile(`(".+":) +[0-9]+`)
 	// This regex transforms '"key": [0-9]+\.[0-9]+' into 'group + (decimal)'.
-	regexDecimal := regexp.MustCompile(`(".+":) [0-9]+\.[0-9]+`)
+	regexDecimal := regexp.MustCompile(`(".+":) +[0-9]+\.[0-9]+`)
 	// This regex transforms '"key": true|false' into 'group + (boolean)'.
-	regexBoolean := regexp.MustCompile(`(".+":) \btrue|false\b`)
+	regexBoolean := regexp.MustCompile(`(".+":) +\btrue|false\b`)
 
 	// This regex transforms 'string(value)' into 'string'.
 	regexString2 := regexp.MustCompile(`string\(.+\)`)
 	// This regex transforms 'int(value)' into 'integer'.
 	regexInteger2 := regexp.MustCompile(`int\(.+\)`)
-	// This regex transforms 'float(value)' into 'decimal'.
-	regexDecimal2 := regexp.MustCompile(`float\(.+\)`)
+	// This regex transforms 'float64(value)' into 'decimal'.
+	regexDecimal2 := regexp.MustCompile(`float64\(.+\)`)
 	// This regex transforms 'bool(value)' into 'boolean'.
 	regexBoolean2 := regexp.MustCompile(`bool\(.+\)`)
 
