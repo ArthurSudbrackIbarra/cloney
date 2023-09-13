@@ -51,37 +51,18 @@ func ValueToString(value interface{}) string {
 	// Get the type of the variable.
 	variableType := GetVariableType(value)
 
-	// If value is a number or a boolean, return it as a string.
+	// If value is a number, a boolean or a string, convert it to a string.
 	if variableType == "integer" ||
 		variableType == "decimal" ||
-		variableType == "boolean" {
+		variableType == "boolean" ||
+		variableType == "string" {
 		return fmt.Sprintf("%v", value)
 	}
 
-	// If the value is a string, add quotes to it.
-	if variableType == "string" {
-		return fmt.Sprintf("\"%v\"", value)
-	}
-
-	// If the value is a list (slice), iterate over it and convert each element.
-	if variableType == "list" {
-		sliceValue := reflect.ValueOf(value)
-		result := "["
-		for i := 0; i < sliceValue.Len(); i++ {
-			elementValue := sliceValue.Index(i).Interface()
-			elementStr := ValueToString(elementValue)
-			result += elementStr
-			if i < sliceValue.Len()-1 {
-				result += ", "
-			}
-		}
-		result += "]"
-		return result
-	}
-
-	// If the value is a map, return it as a string representation.
-	if variableType == "map" {
-		return fmt.Sprintf("%v", value)
+	// If the value is a list or a map, convert it to a YAML string.
+	if variableType == "list" || variableType == "map" {
+		valueYAML, _ := yaml.Marshal(value)
+		return string(valueYAML)
 	}
 
 	return ""
@@ -139,6 +120,14 @@ func NewCloneyMetadataFromRawYAML(rawYAML string) (*CloneyMetadata, error) {
 		return nil, fmt.Errorf("invalid metadata file structure: %w", err)
 	}
 
+	// Validate variables separately because 'validator' package does not validate struct slices.
+	for _, variable := range metadata.Variables {
+		err = validate.Struct(variable)
+		if err != nil {
+			return nil, fmt.Errorf("invalid metadata file structure: %w", err)
+		}
+	}
+
 	return &metadata, nil
 }
 
@@ -179,7 +168,7 @@ func (m *CloneyMetadata) ShowGeneralInformation() {
 // ShowVariables prints the variables of the Cloney template repository in a pretty way.
 func (m *CloneyMetadata) ShowVariables() {
 	if len(m.Variables) == 0 {
-		fmt.Print("No variables provided.")
+		fmt.Println("This template repository has no variables.")
 		return
 	}
 	table := tw.NewWriter(os.Stdout)
@@ -192,9 +181,10 @@ func (m *CloneyMetadata) ShowVariables() {
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
 	)
 	table.SetAlignment(tw.ALIGN_LEFT)
+	table.SetRowLine(true)
 	for _, variable := range m.Variables {
 		table.Append(
-			[]string{variable.Name, variable.Description, GetVariableType(variable.Example), ValueToString(variable.Default), "TODO"},
+			[]string{variable.Name, variable.Description, GetVariableType(variable.Example), ValueToString(variable.Default), ValueToString(variable.Example)},
 		)
 	}
 	table.Render()
