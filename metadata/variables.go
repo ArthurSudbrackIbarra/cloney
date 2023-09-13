@@ -2,10 +2,10 @@ package metadata
 
 import (
 	"fmt"
-	"regexp"
+	"reflect"
 	"strings"
 
-	"github.com/kr/pretty"
+	"gopkg.in/yaml.v2"
 )
 
 // Constants for variable types.
@@ -17,87 +17,163 @@ const LIST_VARIABLE_TYPE = "list"
 const MAP_VARIABLE_TYPE = "map"
 const UNKNOWN_VARIABLE_TYPE = "unknown"
 
-// MapVariableToString converts a variable of type map to a string representation.
-// For example, the following map:
-//
-//	[]interface {}{
-//	    map[interface {}]interface {}{
-//	        "crypto": map[interface {}]interface {}{
-//	            "mode": "TLS",
-//	            "type": "SECURE",
-//	        },
-//	        "name": "SSHKey1",
-//	    },
-//	    map[interface {}]interface {}{
-//	        "crypto": map[interface {}]interface {}{
-//	            "mode": "HTTPS",
-//	            "type": "SECURE",
-//	        },
-//	        "name": "SSHKey2",
-//	    },
-//	}
-//
-// is converted to:
-//
-//	list {
-//	    map {
-//	        "crypto": map {
-//	            "mode": string,
-//	            "type": string,
-//	        },
-//	        "name": string,
-//	    },
-//	    map {
-//	        "crypto": map {
-//	            "mode": string,
-//				 "type": string,
-//	        },
-//	        "name": string,
-//	    },
-//	}
-func MapVariableToString(value interface{}) string {
-	// Define regular expressions for substitutions.
+// VariableType returns the type of a variable as a string.
+func VariableType(variable interface{}) string {
+	// The variable type is determined by checking the type of the example value.
+	variableType := reflect.TypeOf(variable).String()
 
-	// This regex transforms '[]interface' {} into 'list'.
-	regexList := regexp.MustCompile(`\[\]interface \{\}`)
-	// This regex transforms 'map[interface {}]interface {}' into 'map'.
-	regexMap := regexp.MustCompile(`map\[interface \{\}\]interface \{\}`)
+	// All types of integers are classified as "integer".
+	if strings.HasPrefix(variableType, "int") {
+		return INTEGER_VARIABLE_TYPE
+	}
+	// All types of floats are classified as "decimal".
+	if strings.HasPrefix(variableType, "float") {
+		return DECIMAL_VARIABLE_TYPE
+	}
+	// All booleans are classified as "boolean".
+	if variableType == "bool" {
+		return BOOLEAN_VARIABLE_TYPE
+	}
+	// All strings are classified as "string".
+	if variableType == "string" {
+		return STRING_VARIABLE_TYPE
+	}
+	// Maps have their own way of being classified.
+	// We call MapVariableToString to get a string representation of the map.
+	if strings.HasPrefix(variableType, "map") {
+		return MapVariableType(variable)
+	}
 
-	// This regex transforms '"key": "value"' into 'group + (string)'.
-	regexString := regexp.MustCompile(`(".+":) +".+"`)
-	// This regex transforms '"key": [0-9]+' into 'group + (integer)'.
-	regexInteger := regexp.MustCompile(`(".+":) +[0-9]+`)
-	// This regex transforms '"key": [0-9]+\.[0-9]+' into 'group + (decimal)'.
-	regexDecimal := regexp.MustCompile(`(".+":) +[0-9]+\.[0-9]+`)
-	// This regex transforms '"key": true|false' into 'group + (boolean)'.
-	regexBoolean := regexp.MustCompile(`(".+":) +\btrue|false\b`)
+	// Lists also have their own way of being classified.
+	// We call ListVariableToString to get a string representation of the list.
+	if strings.HasPrefix(variableType, "[]") {
+		return ListVariableType(variable)
+	}
 
-	// This regex transforms 'string(value)' into 'string'.
-	regexString2 := regexp.MustCompile(`string\(.+\)`)
-	// This regex transforms 'int(value)' into 'integer'.
-	regexInteger2 := regexp.MustCompile(`int\(.+\)`)
-	// This regex transforms 'float64(value)' into 'decimal'.
-	regexDecimal2 := regexp.MustCompile(`float64\(.+\)`)
-	// This regex transforms 'bool(value)' into 'boolean'.
-	regexBoolean2 := regexp.MustCompile(`bool\(.+\)`)
+	// Otherwise, return "unknown".
+	return UNKNOWN_VARIABLE_TYPE
+}
 
-	// Use 'pretty' to get a string representation of the variable.
-	dumped := pretty.Sprint(value)
+// VariableValue returns the value of a variable as a string.
+func VariableValue(value interface{}) string {
+	// If the value is nil, return an empty string.
+	if value == nil {
+		return ""
+	}
 
-	// Remove commas.
-	dumped = strings.ReplaceAll(dumped, ",", "")
+	// Get the type of the variable.
+	variableType := VariableType(value)
 
-	// Apply the substitutions.
-	dumped = regexList.ReplaceAllString(dumped, fmt.Sprintf("%s ", LIST_VARIABLE_TYPE))
-	dumped = regexMap.ReplaceAllString(dumped, fmt.Sprintf("%s ", MAP_VARIABLE_TYPE))
-	dumped = regexString.ReplaceAllString(dumped, fmt.Sprintf("$1 %s", STRING_VARIABLE_TYPE))
-	dumped = regexInteger.ReplaceAllString(dumped, fmt.Sprintf("$1 %s", INTEGER_VARIABLE_TYPE))
-	dumped = regexDecimal.ReplaceAllString(dumped, fmt.Sprintf("$1 %s", DECIMAL_VARIABLE_TYPE))
-	dumped = regexBoolean.ReplaceAllString(dumped, fmt.Sprintf("$1 %s", BOOLEAN_VARIABLE_TYPE))
-	dumped = regexString2.ReplaceAllString(dumped, STRING_VARIABLE_TYPE)
-	dumped = regexInteger2.ReplaceAllString(dumped, INTEGER_VARIABLE_TYPE)
-	dumped = regexDecimal2.ReplaceAllString(dumped, DECIMAL_VARIABLE_TYPE)
-	dumped = regexBoolean2.ReplaceAllString(dumped, BOOLEAN_VARIABLE_TYPE)
+	// If value is a number, a boolean or a string, convert it to a string.
+	if variableType == INTEGER_VARIABLE_TYPE ||
+		variableType == DECIMAL_VARIABLE_TYPE ||
+		variableType == BOOLEAN_VARIABLE_TYPE ||
+		variableType == STRING_VARIABLE_TYPE {
+		return fmt.Sprintf("%v", value)
+	}
 
-	return dumped
+	// If the variable is not of the types above, and it is not unknown, then it is either a map or a list.
+	// In this case, we convert it to a YAML string.
+	if variableType != UNKNOWN_VARIABLE_TYPE {
+		valueYAML, _ := yaml.Marshal(value)
+		return string(valueYAML)
+	}
+
+	// Otherwise, return "".
+	return ""
+}
+
+// ListVariableType returns a string representation of the type of a list variable.
+func ListVariableType(listVar interface{}) string {
+	// If not a list, return "unknown".
+	variableType := reflect.TypeOf(listVar).String()
+	if !strings.HasPrefix(variableType, "[]") {
+		return UNKNOWN_VARIABLE_TYPE
+	}
+
+	// Convert to a Go slice.
+	slice := listVar.([]interface{})
+
+	// If the list is empty, return just "list".
+	// But this case will never happen in a real template repository
+	// Because the variable[index].example will never be an empty list.
+	if len(slice) == 0 {
+		return LIST_VARIABLE_TYPE
+	}
+
+	// Get the type of the first value.
+	firstValueType := VariableType(slice[0])
+
+	// Assuming all values of the list have the same type,
+	// return the type of the first value.
+	return IndentStringStructure(
+		fmt.Sprintf("%s [\n%s\n]", LIST_VARIABLE_TYPE, firstValueType),
+	)
+}
+
+// MapVariableType returns a string representation of the type of a map variable.
+func MapVariableType(mapVar interface{}) string {
+	// If not a map, return "unknown".
+	variableType := reflect.TypeOf(mapVar).String()
+	if !strings.HasPrefix(variableType, "map") {
+		return UNKNOWN_VARIABLE_TYPE
+	}
+
+	// Convert to a Go map.
+	// Name it 'map_' because 'map' is a reserved word.
+	map_ := mapVar.(map[interface{}]interface{})
+
+	// If the map is empty, return just "map".
+	// But this case will never happen in a real template repository
+	// Because the variable.key.example will never be an empty map.
+	if len(map_) == 0 {
+		return MAP_VARIABLE_TYPE
+	}
+
+	// Iterate over the map values and get their types.
+	variableTypes := ""
+	for key, value := range map_ {
+		// Get the type of the value.
+		valueType := VariableType(value)
+
+		// If the type is unknown, return "unknown".
+		if valueType == UNKNOWN_VARIABLE_TYPE {
+			return UNKNOWN_VARIABLE_TYPE
+		}
+
+		// Add the type to the map.
+		variableTypes += fmt.Sprintf("%s: %s\n", key, valueType)
+	}
+
+	return IndentStringStructure(
+		fmt.Sprintf("%s {\n%s\n}", MAP_VARIABLE_TYPE, variableTypes),
+	)
+}
+
+// IndentStringStructure indents the structure of a string.
+// Used for identing maps and lists.
+func IndentStringStructure(input string) string {
+	lines := strings.Split(input, "\n")
+	indentLevel := 0
+	output := ""
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+
+		if len(line) == 0 {
+			continue
+		}
+
+		if strings.Contains(line, "{") || strings.Contains(line, "[") {
+			output += strings.Repeat("  ", indentLevel) + line + "\n"
+			indentLevel++
+		} else if strings.Contains(line, "}") || strings.Contains(line, "]") {
+			indentLevel--
+			output += strings.Repeat("  ", indentLevel) + line + "\n"
+		} else {
+			output += strings.Repeat("  ", indentLevel) + line + "\n"
+		}
+	}
+
+	return output
 }

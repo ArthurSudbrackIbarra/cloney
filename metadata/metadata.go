@@ -3,70 +3,12 @@ package metadata
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
 )
-
-// GetType returns the type of a variable as a string.
-func GetVariableType(variable interface{}) string {
-	// The variable type is determined by checking the type of the example value.
-	variableType := reflect.TypeOf(variable).String()
-
-	// All types of integers are classified as "integer".
-	if strings.HasPrefix(variableType, "int") {
-		return INTEGER_VARIABLE_TYPE
-	}
-	// All types of floats are classified as "decimal".
-	if strings.HasPrefix(variableType, "float") {
-		return DECIMAL_VARIABLE_TYPE
-	}
-	// All booleans are classified as "boolean".
-	if variableType == "bool" {
-		return BOOLEAN_VARIABLE_TYPE
-	}
-	// All strings are classified as "string".
-	if variableType == "string" {
-		return STRING_VARIABLE_TYPE
-	}
-	// Lists and maps are turned into a string representation.
-	if strings.HasPrefix(variableType, "[]") || strings.HasPrefix(variableType, "map") {
-		return MapVariableToString(variable)
-	}
-
-	// Otherwise, return unknown.
-	return UNKNOWN_VARIABLE_TYPE
-}
-
-// ValueToString returns the value of a variable as a string.
-func ValueToString(value interface{}) string {
-	// If the value is nil, return an empty string.
-	if value == nil {
-		return ""
-	}
-
-	// Get the type of the variable.
-	variableType := GetVariableType(value)
-
-	// If value is a number, a boolean or a string, convert it to a string.
-	if variableType == "integer" ||
-		variableType == "decimal" ||
-		variableType == "boolean" ||
-		variableType == "string" {
-		return fmt.Sprintf("%v", value)
-	}
-
-	// If the value is a list or a map, convert it to a YAML string.
-	if variableType != "unknown" {
-		valueYAML, _ := yaml.Marshal(value)
-		return string(valueYAML)
-	}
-
-	return ""
-}
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
 type CloneyMetadataVariable struct {
@@ -160,7 +102,13 @@ func (m *CloneyMetadata) ShowGeneralInformation() {
 	)
 	table.SetAlignment(tw.ALIGN_LEFT)
 	table.Append(
-		[]string{m.Name, m.Description, m.Version, strings.Join(m.Authors, ", "), m.License},
+		[]string{
+			m.Name,
+			m.Description,
+			m.Version,
+			strings.Join(m.Authors, ", "),
+			m.License,
+		},
 	)
 	table.Render()
 }
@@ -172,7 +120,7 @@ func (m *CloneyMetadata) ShowVariables() {
 		return
 	}
 	table := tw.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Description", "Type", "Default", "Example"})
+	table.SetHeader([]string{"Name", "Description", "Type", "Default", "YAML Example"})
 	table.SetHeaderColor(
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
@@ -185,8 +133,16 @@ func (m *CloneyMetadata) ShowVariables() {
 	table.SetRowLine(true)
 	for _, variable := range m.Variables {
 		table.Append(
-			[]string{variable.Name, variable.Description, GetVariableType(variable.Example), ValueToString(variable.Default), ValueToString(variable.Example)},
+			[]string{
+				variable.Name,
+				variable.Description,
+				VariableType(variable.Example),
+				VariableValue(variable.Default),
+				VariableValue(variable.Example),
+			},
 		)
+
+		fmt.Println(VariableType(variable.Example))
 	}
 	table.Render()
 }
