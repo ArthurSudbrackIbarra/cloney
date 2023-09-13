@@ -141,14 +141,14 @@ func (m *CloneyMetadata) ShowVariables() {
 				VariableValue(variable.Example),
 			},
 		)
-
-		fmt.Println(VariableType(variable.Example))
 	}
 	table.Render()
 }
 
 // Show prints the Cloney template repository metadata in a pretty way.
 func (m *CloneyMetadata) Show() {
+	fmt.Println("General information about this template repository:")
 	m.ShowGeneralInformation()
+	fmt.Print("\nVariables of this template repository:\n")
 	m.ShowVariables()
 }
