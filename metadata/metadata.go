@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-playground/validator/v10"
 	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
@@ -28,17 +29,13 @@ func GetVariableType(variable interface{}) string {
 	if variableType == "bool" {
 		return "boolean"
 	}
-	// All lists are classified as "list".
-	if strings.HasPrefix(variableType, "[]") {
-		return "list"
-	}
-	// All complex structures are classified as "map".
-	if strings.HasPrefix(variableType, "map") {
-		return "map"
+	// Lists and maps are classified using spew.
+	if strings.HasPrefix(variableType, "[]") || strings.HasPrefix(variableType, "map") {
+		return spew.Sdump(variable)
 	}
 
-	// Otherwise, return the type as is.
-	return variableType
+	// Otherwise, return unknown.
+	return "unknown"
 }
 
 // ValueToString returns the value of a variable as a string.
@@ -60,7 +57,7 @@ func ValueToString(value interface{}) string {
 	}
 
 	// If the value is a list or a map, convert it to a YAML string.
-	if variableType == "list" || variableType == "map" {
+	if variableType != "unknown" {
 		valueYAML, _ := yaml.Marshal(value)
 		return string(valueYAML)
 	}
