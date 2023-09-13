@@ -18,6 +18,43 @@ const MAP_VARIABLE_TYPE = "map"
 const UNKNOWN_VARIABLE_TYPE = "unknown"
 
 // MapVariableToString converts a variable of type map to a string representation.
+// For example, the following map:
+//
+//	[]interface {}{
+//	    map[interface {}]interface {}{
+//	        "crypto": map[interface {}]interface {}{
+//	            "mode": "TLS",
+//	            "type": "SECURE",
+//	        },
+//	        "name": "SSHKey1",
+//	    },
+//	    map[interface {}]interface {}{
+//	        "crypto": map[interface {}]interface {}{
+//	            "mode": "HTTPS",
+//	            "type": "SECURE",
+//	        },
+//	        "name": "SSHKey2",
+//	    },
+//	}
+//
+// is converted to:
+//
+//	list {
+//	    map {
+//	        "crypto": map {
+//	            "mode": string,
+//	            "type": string,
+//	        },
+//	        "name": string,
+//	    },
+//	    map {
+//	        "crypto": map {
+//	            "mode": string,
+//				 "type": string,
+//	        },
+//	        "name": string,
+//	    },
+//	}
 func MapVariableToString(value interface{}) string {
 	// Define regular expressions for substitutions.
 
