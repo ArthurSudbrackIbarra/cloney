@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-playground/validator/v10"
 	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
@@ -19,28 +18,32 @@ func GetVariableType(variable interface{}) string {
 
 	// All types of integers are classified as "integer".
 	if strings.HasPrefix(variableType, "int") {
-		return "integer"
+		return INTEGER_VARIABLE_TYPE
 	}
 	// All types of floats are classified as "decimal".
 	if strings.HasPrefix(variableType, "float") {
-		return "decimal"
+		return DECIMAL_VARIABLE_TYPE
 	}
 	// All booleans are classified as "boolean".
 	if variableType == "bool" {
-		return "boolean"
+		return BOOLEAN_VARIABLE_TYPE
 	}
-	// Lists and maps are classified using spew.
+	// All strings are classified as "string".
+	if variableType == "string" {
+		return STRING_VARIABLE_TYPE
+	}
+	// Lists and maps are turned into a string representation.
 	if strings.HasPrefix(variableType, "[]") || strings.HasPrefix(variableType, "map") {
-		return spew.Sdump(variable)
+		return MapVariableToString(variable)
 	}
 
 	// Otherwise, return unknown.
-	return "unknown"
+	return UNKNOWN_VARIABLE_TYPE
 }
 
 // ValueToString returns the value of a variable as a string.
 func ValueToString(value interface{}) string {
-	// If the default value is nil, return an empty string.
+	// If the value is nil, return an empty string.
 	if value == nil {
 		return ""
 	}
@@ -178,6 +181,7 @@ func (m *CloneyMetadata) ShowVariables() {
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
 	)
 	table.SetAlignment(tw.ALIGN_LEFT)
+	table.SetAutoWrapText(false)
 	table.SetRowLine(true)
 	for _, variable := range m.Variables {
 		table.Append(
