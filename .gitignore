@@ -20,3 +20,7 @@ go.work
 # Application binary files.
 cloney
 cloney.exe
+
+# Cloney files.
+.cloney.yaml
+.cloney-vars.yaml

@@ -5,9 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
-	"github.com/ArthurSudbrackIbarra/cloney/git"
-	"github.com/ArthurSudbrackIbarra/cloney/metadata"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
 
 	"github.com/spf13/cobra"
@@ -24,7 +23,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
 	repositoryURL := args[0]
 	branch, _ := cmd.Flags().GetString("branch")
-	path, _ := cmd.Flags().GetString("path")
+	output, _ := cmd.Flags().GetString("output")
 	tag, _ := cmd.Flags().GetString("tag")
 	variablesFilePath, _ := cmd.Flags().GetString("variables-file")
 	variablesJSON, _ := cmd.Flags().GetString("variables")
@@ -33,68 +32,38 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	var err error
 
 	// Get the current working directory.
-	currentDir, err := os.Getwd()
+	currentDir, err := steps.GetCurrentWorkingDirectory()
 	if err != nil {
-		fmt.Println("Could not get user's current directory:", err)
 		return err
 	}
 
 	// Get the template variables provided by the user.
-	var variablesMap map[string]interface{}
-	if variablesJSON != "" {
-		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
-		if err != nil {
-			fmt.Println("Could not parse template variables:", err)
-			return err
-		}
-	} else {
-		variablesFilePath = filepath.Join(currentDir, variablesFilePath)
-		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
-		if err != nil {
-			fmt.Println("Could not read template variables file:", err)
-			return err
-		}
-	}
-
-	// Create the Git repository instance.
-	repository := &git.GitRepository{
-		URL:    repositoryURL,
-		Branch: branch,
-		Tag:    tag,
-	}
-
-	// Validate the repository.
-	err = repository.Validate()
+	variablesMap, err := steps.GetUserVariablesMap(currentDir, variablesJSON, variablesFilePath)
 	if err != nil {
-		fmt.Println("Error validating repository:", err)
 		return err
 	}
 
+	// Create and validate the git repository.
+	repository, err := steps.CreateAndValidateRepository(repositoryURL, branch, tag, output)
+
 	// If a token is provided, authenticate with it.
 	appConfig := config.GetAppConfig()
-	if appConfig.GitToken != "" {
-		fmt.Println("Authenticating with token...")
-		repository.AuthenticateWithToken(appConfig.GitToken)
-	}
-
-	// Get the name of the repository.
-	repositoryName := repository.GetName()
+	steps.AuthenticateToRepository(repository, appConfig.GitToken)
 
 	// Calculate the clone path.
-	clonePath := filepath.Join(currentDir, path, repositoryName)
+	clonePath := steps.CalculateClonePath(repository, currentDir, output)
 
 	// Clone the repository.
-	err = repository.Clone(clonePath)
+	err = steps.CloneRepository(repository, clonePath)
 	if err != nil {
-		fmt.Println("Could not clone repository:", err)
 		return err
 	}
 
 	// Read the repository metadata file.
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
-	metadataBytes, err := os.ReadFile(metadataFilePath)
+	metadataContent, err := steps.ReadRepositoryMetadata(clonePath, metadataFilePath)
 	if err != nil {
-		fmt.Printf("Could not read repository '%s' metadata file: %s\n", appConfig.MetadataFileName, err)
+		// If it was not possible to read the metadata file, delete the cloned repository.
 		os.RemoveAll(clonePath)
 		return err
 	}
@@ -102,35 +71,35 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Delete the repository metadata file.
 	os.Remove(metadataFilePath)
 
-	// Create the metadata struct from raw YAML data.
-	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(string(metadataBytes))
+	// Parse the metadata file.
+	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent)
 	if err != nil {
-		fmt.Println("Could not parse repository metadata:", err)
+		// If it was not possible to parse the metadata file, delete the cloned repository.
 		os.RemoveAll(clonePath)
 		return err
 	}
 
 	// Validate if the user variables match the template variables.
 	// Also fill default values of the variables if they are not defined.
-	variablesMap, err = cloneyMetadata.MatchUserVariables(variablesMap)
+	err = steps.MatchUserVariables(cloneyMetadata, variablesMap)
 	if err != nil {
-		fmt.Println("Error validating template variables:", err)
+		// If the user variables do not match the template variables, delete the cloned repository.
 		os.RemoveAll(clonePath)
 		return err
 	}
 
 	// Fill the template variables in the cloned directory.
-	filler := templates.NewTemplateFiller(variablesMap)
 	options := templates.TemplateFillOptions{
 		SourceDirectoryPath: clonePath,
 	}
-	err = filler.FillDirectory(options)
+	err = steps.FillTemplateVariables(options, variablesMap)
 	if err != nil {
-		fmt.Println("Error filling template variables:", err)
+		// If it was not possible to fill the template variables, delete the cloned repository.
 		os.RemoveAll(clonePath)
 		return err
 	}
 
+	fmt.Println("\nDone!")
 	return nil
 }
 
@@ -150,7 +119,7 @@ func InitializeClone(rootCmd *cobra.Command) {
 	appConfig := config.GetAppConfig()
 
 	// Define command-line flags.
-	cloneCmd.Flags().StringP("path", "p", "", "Path to clone the repository to")
+	cloneCmd.Flags().StringP("output", "o", "", "Path to clone the repository to")
 	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
 	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
 	cloneCmd.Flags().StringP("variables-file", "f", appConfig.DefaultUserVariablesFileName, "Path to a template variables YAML or JSON file")
