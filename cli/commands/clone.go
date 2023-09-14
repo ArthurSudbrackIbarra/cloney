@@ -110,6 +110,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("\nDone!")
+
 	return nil
 }
 

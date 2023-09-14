@@ -11,12 +11,14 @@ type AppConfig struct {
 
 	// MetadataFileName is the name of the metadata file in the repository.
 	// This file contains the information about the template repository.
-	// Default is ".cloney.yaml".
 	MetadataFileName string
 
 	// DefaultUserVariablesFileName is the default name of the file containing the user variables.
 	// This file is used to fill the template variables in the cloned directory.'
 	DefaultUserVariablesFileName string
+
+	// DefaultDryRunDirectoryName is the default name of the directory created when running a template in dryrun mode.
+	DefaultDryRunDirectoryName string
 
 	// GitToken is the token used to authenticate when dealing with private git repositories.
 	GitToken string `mapstructure:"GIT_TOKEN"`
@@ -28,6 +30,7 @@ var globalConfig = &AppConfig{
 	Version:                      "v0.0.0",
 	MetadataFileName:             ".cloney.yaml",
 	DefaultUserVariablesFileName: ".cloney-vars.yaml",
+	DefaultDryRunDirectoryName:   "cloney-dry-run-results",
 }
 
 // LoadConfig loads the global application configuration.
@@ -50,6 +53,7 @@ func GetAppConfig() *AppConfig {
 		Version:                      globalConfig.Version,
 		MetadataFileName:             globalConfig.MetadataFileName,
 		DefaultUserVariablesFileName: globalConfig.DefaultUserVariablesFileName,
+		DefaultDryRunDirectoryName:   globalConfig.DefaultDryRunDirectoryName,
 		GitToken:                     globalConfig.GitToken,
 	}
 }

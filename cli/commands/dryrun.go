@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -65,7 +66,6 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Fill the template variables.
-	// If ouput in terminal is enabled, the filled template files will be printed to the terminal instead of being saved to the files.
 	templateOptions := templates.TemplateFillOptions{
 		SourceDirectoryPath: targetPath,
 		TargetDirectoryPath: &outputPath,
@@ -76,7 +76,7 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 		// Ignore the user variables file when filling the template variables.
 		IgnoreFiles: []string{appConfig.MetadataFileName, filepath.Base(variablesFilePath)},
 
-		// Ignore '.git' directories when filling the template variables.
+		// Ignore '.git' directory when filling the template variables.
 		IgnoreDirectories: []string{".git"},
 	}
 	err = steps.FillTemplateVariables(templateOptions, ignoreOptions, variablesMap)
@@ -86,6 +86,10 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 			os.RemoveAll(outputPath)
 		}
 		return err
+	}
+
+	if !outputInTerminal {
+		fmt.Println("\nDone!")
 	}
 
 	return nil
@@ -108,7 +112,7 @@ func InitializeDryrun(rootCmd *cobra.Command) {
 	appConfig := config.GetAppConfig()
 	// Define command-line flags.
 	dryrunCmd.Flags().StringP("path", "p", "", "Path to your local template repository")
-	dryrunCmd.Flags().StringP("output", "o", "dry-run-result", "Path to output the filled template files")
+	dryrunCmd.Flags().StringP("output", "o", appConfig.DefaultDryRunDirectoryName, "Path to output the filled template files")
 	dryrunCmd.Flags().BoolP("output-in-terminal", "i", false, "Output the filled template file contents in the terminal instead of creating the files")
 	dryrunCmd.Flags().StringP("variables-file", "f", appConfig.DefaultUserVariablesFileName, "Path to a template variables YAML or JSON file")
 	dryrunCmd.Flags().StringP("variables", "v", "", "Inline template variables as JSON")
