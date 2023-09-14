@@ -98,8 +98,8 @@ func CloneRepository(repository *git.GitRepository, clonePath string) error {
 }
 
 // ReadRepositoryMetadata reads the repository metadata.
-func ReadRepositoryMetadata(repositoryPath, metadataPath string) (string, error) {
-	metadataBytes, err := os.ReadFile(metadataPath)
+func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
+	metadataBytes, err := os.ReadFile(metadataFilePath)
 	if err != nil {
 		fmt.Println("Could not read the template repository metadata file:", err)
 		return "", err

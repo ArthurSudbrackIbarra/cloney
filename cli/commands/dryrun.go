@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
-	"github.com/ArthurSudbrackIbarra/cloney/metadata"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
 	"github.com/spf13/cobra"
 )
@@ -28,47 +28,59 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	var err error
 
 	// Get the current working directory.
-	currentDir, err := os.Getwd()
+	currentDir, err := steps.GetCurrentWorkingDirectory()
 	if err != nil {
-		fmt.Println("Could not get user's current directory:", err)
 		return err
 	}
 
 	// Get the template variables provided by the user.
-	var variablesMap map[string]interface{}
-	if variablesJSON != "" {
-		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
-		if err != nil {
-			fmt.Println("Could not parse template variables:", err)
-			return err
-		}
-	} else {
-		variablesFilePath = filepath.Join(currentDir, variablesFilePath)
-		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
-		if err != nil {
-			fmt.Println("Could not read template variables file:", err)
-			return err
-		}
+	variablesMap, err := steps.GetUserVariablesMap(currentDir, variablesJSON, variablesFilePath)
+	if err != nil {
+		return err
 	}
 
 	// Calculate the directory paths.
 	targetPath := filepath.Join(currentDir, path)
 	outputPath := filepath.Join(currentDir, output)
 
+	// Read the repository metadata file.
+	appConfig := config.GetAppConfig()
+	metadataFilePath := filepath.Join(targetPath, appConfig.MetadataFileName)
+	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
+	if err != nil {
+		return err
+	}
+
+	// Parse the metadata file.
+	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent)
+	if err != nil {
+		return err
+	}
+
+	// Validate if the user variables match the template variables.
+	// Also fill default values of the variables if they are not defined.
+	err = steps.MatchUserVariables(cloneyMetadata, variablesMap)
+	if err != nil {
+		return err
+	}
+
 	// Fill the template variables.
 	// If ouput in terminal is enabled, the filled template files will be printed to the terminal instead of being saved to the files.
-	filler := templates.NewTemplateFiller(variablesMap)
 	options := templates.TemplateFillOptions{
 		SourceDirectoryPath: targetPath,
 		TargetDirectoryPath: &outputPath,
 		TerminalMode:        outputInTerminal,
 	}
-	err = filler.FillDirectory(options)
+	err = steps.FillTemplateVariables(options, variablesMap)
 	if err != nil {
-		fmt.Println("Could not fill template:", err)
+		// If it was not possible to fill the template variables, delete the created directory.
+		if !outputInTerminal {
+			os.RemoveAll(outputPath)
+		}
 		return err
 	}
 
+	fmt.Println("\nDone!")
 	return nil
 }
 

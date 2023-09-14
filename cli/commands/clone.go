@@ -61,7 +61,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Read the repository metadata file.
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
-	metadataContent, err := steps.ReadRepositoryMetadata(clonePath, metadataFilePath)
+	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
 	if err != nil {
 		// If it was not possible to read the metadata file, delete the cloned repository.
 		os.RemoveAll(clonePath)
