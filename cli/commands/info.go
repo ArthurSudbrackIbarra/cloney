@@ -21,12 +21,20 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
 	repositoryURL := args[0]
 	branch, _ := cmd.Flags().GetString("branch")
+	tag, _ := cmd.Flags().GetString("tag")
 
 	// Create the Git repository instance.
-	repository, err := git.NewGitRepository(repositoryURL, branch)
+	repository := &git.GitRepository{
+		URL:    repositoryURL,
+		Branch: branch,
+		Tag:    tag,
+	}
+
+	// Validate the repository.
+	err := repository.Validate()
 	if err != nil {
 		// Handle errors related to the repository.
-		fmt.Println("Error referencing repository:", err)
+		fmt.Println("Error validating repository:", err)
 		return err
 	}
 
@@ -75,6 +83,7 @@ var infoCmd = &cobra.Command{
 func InitializeInfo(rootCmd *cobra.Command) {
 	// Define command-line flags.
 	infoCmd.Flags().StringP("branch", "b", "main", "Git branch")
+	infoCmd.Flags().StringP("tag", "t", "", "Git tag")
 
 	// Add the info command to the root command.
 	rootCmd.AddCommand(infoCmd)

@@ -14,6 +14,10 @@ type AppConfig struct {
 	// Default is ".cloney.yaml".
 	MetadataFileName string
 
+	// DefaultUserVariablesFileName is the default name of the file containing the user variables.
+	// This file is used to fill the template variables in the cloned directory.'
+	DefaultUserVariablesFileName string
+
 	// GitToken is the token used to authenticate when dealing with private git repositories.
 	GitToken string `mapstructure:"GIT_TOKEN"`
 }
@@ -21,8 +25,9 @@ type AppConfig struct {
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
 	// Default values.
-	Version:          "v0.0.0",
-	MetadataFileName: ".cloney.yaml",
+	Version:                      "v0.0.0",
+	MetadataFileName:             ".cloney.yaml",
+	DefaultUserVariablesFileName: ".cloney-vars.yaml",
 }
 
 // LoadConfig loads the global application configuration.
@@ -42,8 +47,9 @@ func LoadConfig() error {
 // GetAppConfig returns a copy of the global application configuration.
 func GetAppConfig() *AppConfig {
 	return &AppConfig{
-		Version:          globalConfig.Version,
-		MetadataFileName: globalConfig.MetadataFileName,
-		GitToken:         globalConfig.GitToken,
+		Version:                      globalConfig.Version,
+		MetadataFileName:             globalConfig.MetadataFileName,
+		DefaultUserVariablesFileName: globalConfig.DefaultUserVariablesFileName,
+		GitToken:                     globalConfig.GitToken,
 	}
 }

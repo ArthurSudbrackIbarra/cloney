@@ -25,12 +25,22 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	repositoryURL := args[0]
 	branch, _ := cmd.Flags().GetString("branch")
 	path, _ := cmd.Flags().GetString("path")
+	tag, _ := cmd.Flags().GetString("tag")
+	variablesFilePath, _ := cmd.Flags().GetString("variables-file")
+	variablesJSON, _ := cmd.Flags().GetString("variables")
 
 	// Create the Git repository instance.
-	repository, err := git.NewGitRepository(repositoryURL, branch)
+	repository := &git.GitRepository{
+		URL:    repositoryURL,
+		Branch: branch,
+		Tag:    tag,
+	}
+
+	// Validate the repository.
+	err := repository.Validate()
 	if err != nil {
 		// Handle errors related to the repository.
-		fmt.Println("Error referencing repository:", err)
+		fmt.Println("Error validating repository:", err)
 		return err
 	}
 
@@ -81,11 +91,31 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Get the template variables.
-	variablesMap, err := cloneyMetadata.GetVariablesMap()
+	// Get the template variables provided by the user.
+	var variablesMap map[string]interface{}
+	if variablesJSON != "" {
+		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
+		if err != nil {
+			// Handle errors related to parsing user template variables.
+			fmt.Println("Could not parse template variables:", err)
+			return err
+		}
+	} else {
+		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
+		if err != nil {
+			// Handle errors related to reading user template variables.
+			fmt.Println("Could not read template variables:", err)
+			return err
+		}
+	}
+
+	// Validate if the user variables match the template variables.
+	err = cloneyMetadata.ValidateVariablesMatch(variablesMap)
 	if err != nil {
-		// Handle errors related to template variables.
-		fmt.Println("Error with template variables:", err)
+		// Handle errors related to validating template variables.
+		fmt.Println("Error validating template variables:", err)
+		// Delete the cloned directory.
+		os.RemoveAll(clonePath)
 		return err
 	}
 
@@ -95,6 +125,8 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		// Handle errors related to filling template variables.
 		fmt.Println("Error filling template variables:", err)
+		// Delete the cloned directory.
+		os.RemoveAll(clonePath)
 		return err
 	}
 
@@ -113,9 +145,14 @@ var cloneCmd = &cobra.Command{
 
 // InitializeClone initializes the clone command.
 func InitializeClone(rootCmd *cobra.Command) {
+	appConfig := config.GetAppConfig()
+
 	// Define command-line flags.
 	cloneCmd.Flags().StringP("path", "p", "", "Path to clone the repository to")
 	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
+	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
+	cloneCmd.Flags().StringP("variables-file", "f", appConfig.DefaultUserVariablesFileName, "Path to a template variables YAML or JSON file")
+	cloneCmd.Flags().StringP("variables", "v", "", "Inline template variables as JSON")
 
 	// Add the clone command to the root command.
 	rootCmd.AddCommand(cloneCmd)

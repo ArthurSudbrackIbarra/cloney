@@ -20,6 +20,9 @@ type GitRepository struct {
 	// Branch is the branch of the git repository.
 	Branch string
 
+	// Tag is the tag of the git repository.
+	Tag string
+
 	// Auth is the authentication method to use when cloning the repository.
 	Auth transport.AuthMethod
 }
@@ -27,16 +30,19 @@ type GitRepository struct {
 // repositoryRegex is a regular expression to match a git repository URL.
 var repositoryRegex = regexp.MustCompile(`^(?:https?|git|ssh):\/\/([^\/]+)\/([^\/]+)\/([^\/]+)(?:)?\.git$`)
 
-// NewGitRepository creates a new GitRepository struct.
-func NewGitRepository(url string, branch string) (*GitRepository, error) {
-	// Validate parameters.
-	if !repositoryRegex.MatchString(url) {
-		return nil, fmt.Errorf("invalid repository URL")
+// Validate validates if a git repository is valid.
+func (r *GitRepository) Validate() error {
+	if !repositoryRegex.MatchString(r.URL) {
+		return fmt.Errorf("invalid repository URL")
 	}
-	return &GitRepository{
-		URL:    url,
-		Branch: branch,
-	}, nil
+	// Either branch or tag must be specified, but not both.
+	if r.Branch == "" && r.Tag == "" {
+		return fmt.Errorf("branch or tag must be specified")
+	}
+	if r.Branch != "" && r.Tag != "" {
+		return fmt.Errorf("branch and tag cannot be specified at the same time")
+	}
+	return nil
 }
 
 // GetName returns the name of a git repository.
@@ -62,17 +68,26 @@ func (r *GitRepository) AuthenticateWithToken(token string) {
 
 // Clone clones the git repository.
 func (r *GitRepository) Clone(path string) error {
-	var auth transport.AuthMethod
+	var referenceName plumbing.ReferenceName
+	// If the branch is specified, use it as the reference name.
+	// If the tag is specified, use it as the reference name.
+	if r.Branch != "" {
+		referenceName = plumbing.NewBranchReferenceName(r.Branch)
+	} else if r.Tag != "" {
+		referenceName = plumbing.NewTagReferenceName(r.Tag)
+	}
+
 	// If the URL is HTTPS, use the token authentication method.
+	var auth transport.AuthMethod
 	if strings.HasPrefix(r.URL, "https://") {
 		auth = r.Auth
 	}
+
+	// Clone the repository.
 	_, err := git.PlainClone(path, false, &git.CloneOptions{
-		URL: r.URL,
-		ReferenceName: plumbing.ReferenceName(
-			fmt.Sprintf("refs/heads/%s", r.Branch),
-		),
-		Auth: auth,
+		URL:           r.URL,
+		ReferenceName: referenceName,
+		Auth:          auth,
 	})
 	return err
 }
