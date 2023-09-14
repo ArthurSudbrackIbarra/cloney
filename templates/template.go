@@ -44,13 +44,11 @@ type TemplateFillOptions struct {
 
 // FillDirectory recursively processes all files in a directory with the variables from the TemplateFiller.
 // If dryrunMode is enabled, the resulting content will be printed to the terminal instead of writing to the files.
-func (t *TemplateFiller) FillDirectory(options TemplateFillOptions) error {
-	// Get a list of all files in the specified directory, excluding the ".git" directory.
-	filePaths, err := utils.GetAllFilePaths(options.SourceDirectoryPath, []string{
-		".git",
-	})
+func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions utils.IgnorePathOptions) error {
+	// Get a list of all files in the specified directory.
+	filePaths, err := utils.GetAllFilePaths(templateOptions.SourceDirectoryPath, ignoreOptions)
 	if err != nil {
-		return fmt.Errorf("error while obtaining file paths in directory %s: %w", options.SourceDirectoryPath, err)
+		return fmt.Errorf("error while obtaining file paths in directory %s: %w", templateOptions.SourceDirectoryPath, err)
 	}
 
 	// Iterate over each file in the directory, applying the template to each file.
@@ -79,13 +77,13 @@ func (t *TemplateFiller) FillDirectory(options TemplateFillOptions) error {
 		}
 
 		// If terminal mode is enabled, print the result to the terminal instead of writing it to the file.
-		if options.TerminalMode {
-			fmt.Printf("File: %s\n%s\n\n", filePath, resultBuffer.String())
+		if templateOptions.TerminalMode {
+			fmt.Printf("\n----- File: %s\n%s\n", filePath, resultBuffer.String())
 			continue
 		}
 
 		// Write the resulting content back to the file, overwriting the original file, if TargetDirectoryPath is not defined.
-		if options.TargetDirectoryPath == nil {
+		if templateOptions.TargetDirectoryPath == nil {
 			err = os.WriteFile(filePath, resultBuffer.Bytes(), os.ModePerm)
 			if err != nil {
 				return fmt.Errorf("error while writing file %s: %w", filePath, err)
@@ -93,13 +91,13 @@ func (t *TemplateFiller) FillDirectory(options TemplateFillOptions) error {
 		} else {
 			// Calculate the path of the file relative to the source directory.
 			// This is done to preserve the directory structure when copying files.
-			relativeFilePath, err := filepath.Rel(options.SourceDirectoryPath, filePath)
+			relativeFilePath, err := filepath.Rel(templateOptions.SourceDirectoryPath, filePath)
 			if err != nil {
 				return fmt.Errorf("error while calculating relative file path: %w", err)
 			}
 
 			// Calculate the path of the file in the target directory.
-			targetFilePath := filepath.Join(*options.TargetDirectoryPath, relativeFilePath)
+			targetFilePath := filepath.Join(*templateOptions.TargetDirectoryPath, relativeFilePath)
 
 			// If necessary, create the directory where the file will be saved.
 			directory := filepath.Dir(targetFilePath)

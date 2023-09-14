@@ -16,9 +16,18 @@ func ListContainsString(list []string, value string) bool {
 	return false
 }
 
+// IgnorePathOptions is a struct used to configure the GetAllFilePaths function.
+type IgnorePathOptions struct {
+	// IgnoreFiles is a list of file names to ignore.
+	IgnoreFiles []string
+
+	// IgnoreDirectories is a list of directory names to ignore.
+	IgnoreDirectories []string
+}
+
 // GetAllFilePaths returns a list of all file paths within a directory and its subdirectories,
 // while allowing you to specify directories to ignore.
-func GetAllFilePaths(directoryPath string, ignoreDirectories []string) ([]string, error) {
+func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]string, error) {
 	var filePaths []string
 
 	// Walk the directory and its subdirectories.
@@ -26,14 +35,18 @@ func GetAllFilePaths(directoryPath string, ignoreDirectories []string) ([]string
 		if err != nil {
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
-		if !info.IsDir() {
-			// Add file path to the list.
-			filePaths = append(filePaths, path)
-		} else {
+		if info.IsDir() {
 			// Check if the directory should be ignored.
-			if ListContainsString(ignoreDirectories, info.Name()) {
+			if ListContainsString(ignoreOptions.IgnoreDirectories, info.Name()) {
 				return filepath.SkipDir
 			}
+		} else {
+			// Check if the file should be ignored.
+			if ListContainsString(ignoreOptions.IgnoreFiles, info.Name()) {
+				return nil
+			}
+			// Add file path to the list.
+			filePaths = append(filePaths, path)
 		}
 		return nil
 	})

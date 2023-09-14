@@ -1,13 +1,13 @@
 package commands
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -66,12 +66,20 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Fill the template variables.
 	// If ouput in terminal is enabled, the filled template files will be printed to the terminal instead of being saved to the files.
-	options := templates.TemplateFillOptions{
+	templateOptions := templates.TemplateFillOptions{
 		SourceDirectoryPath: targetPath,
 		TargetDirectoryPath: &outputPath,
 		TerminalMode:        outputInTerminal,
 	}
-	err = steps.FillTemplateVariables(options, variablesMap)
+	ignoreOptions := utils.IgnorePathOptions{
+		// Ignore the metadata file when filling the template variables.
+		// Ignore the user variables file when filling the template variables.
+		IgnoreFiles: []string{appConfig.MetadataFileName, filepath.Base(variablesFilePath)},
+
+		// Ignore '.git' directories when filling the template variables.
+		IgnoreDirectories: []string{".git"},
+	}
+	err = steps.FillTemplateVariables(templateOptions, ignoreOptions, variablesMap)
 	if err != nil {
 		// If it was not possible to fill the template variables, delete the created directory.
 		if !outputInTerminal {
@@ -80,7 +88,6 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println("\nDone!")
 	return nil
 }
 

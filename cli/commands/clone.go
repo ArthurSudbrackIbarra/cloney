@@ -8,6 +8,7 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -38,6 +39,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get the template variables provided by the user.
+	variablesFilePath = filepath.Join(currentDir, variablesFilePath)
 	variablesMap, err := steps.GetUserVariablesMap(currentDir, variablesJSON, variablesFilePath)
 	if err != nil {
 		return err
@@ -89,10 +91,18 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Fill the template variables in the cloned directory.
-	options := templates.TemplateFillOptions{
+	templateOptions := templates.TemplateFillOptions{
 		SourceDirectoryPath: clonePath,
 	}
-	err = steps.FillTemplateVariables(options, variablesMap)
+	ignoreOptions := utils.IgnorePathOptions{
+		// Ignore the metadata file when filling the template variables.
+		// Ignore the user variables file when filling the template variables.
+		IgnoreFiles: []string{appConfig.MetadataFileName, filepath.Base(variablesFilePath)},
+
+		// Ignore '.git' directories when filling the template variables.
+		IgnoreDirectories: []string{".git"},
+	}
+	err = steps.FillTemplateVariables(templateOptions, ignoreOptions, variablesMap)
 	if err != nil {
 		// If it was not possible to fill the template variables, delete the cloned repository.
 		os.RemoveAll(clonePath)

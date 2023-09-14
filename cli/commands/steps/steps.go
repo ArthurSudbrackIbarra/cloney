@@ -8,6 +8,7 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/git"
 	"github.com/ArthurSudbrackIbarra/cloney/metadata"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 )
 
 // This file defines common steps used by multiple commands.
@@ -35,7 +36,6 @@ func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath str
 			return nil, err
 		}
 	} else {
-		variablesFilePath = filepath.Join(currentDir, variablesFilePath)
 		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
 		if err != nil {
 			fmt.Println("Could not read your template variables file:", err)
@@ -138,14 +138,20 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 }
 
 // FillTemplateVariables fills the template variables in the cloned directory.
-func FillTemplateVariables(options templates.TemplateFillOptions, variablesMap map[string]interface{}) error {
+func FillTemplateVariables(
+	templateOptions templates.TemplateFillOptions,
+	ignoreOptions utils.IgnorePathOptions,
+	variablesMap map[string]interface{},
+) error {
 	filler := templates.NewTemplateFiller(variablesMap)
-	err := filler.FillDirectory(options)
+	err := filler.FillDirectory(templateOptions, ignoreOptions)
 	if err != nil {
 		fmt.Println("Error filling template variables:", err)
 		return err
 	}
-	fmt.Println("[OK] The template variables were filled.")
+	if !templateOptions.TerminalMode {
+		fmt.Println("[OK] The template variables were filled.")
+	}
 
 	return nil
 }
