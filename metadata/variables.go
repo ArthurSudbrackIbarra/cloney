@@ -121,7 +121,7 @@ func MapVariableType(mapVar interface{}) string {
 
 	// Convert to a Go map.
 	// Name it 'map_' because 'map' is a reserved word.
-	map_ := mapVar.(map[string]interface{})
+	map_ := mapVar.(map[interface{}]interface{})
 
 	// If the map is empty, return just "map".
 	// But this case will never happen in a real template repository
@@ -150,7 +150,7 @@ func MapVariableType(mapVar interface{}) string {
 	)
 }
 
-// IndentStringStructure indents the structure of a string.
+// IndentStringStructure indents the structure of a string, which is a list or map-like structure.
 // Used for identing maps and lists.
 func IndentStringStructure(input string) string {
 	lines := strings.Split(input, "\n")
