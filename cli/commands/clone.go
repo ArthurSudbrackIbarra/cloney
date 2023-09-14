@@ -141,6 +141,7 @@ var cloneCmd = &cobra.Command{
 	Short:   "Clones a template repository.",
 	Long:    "\nClones a template repository.",
 	Example: "  cloney clone https://github.com/ArthurSudbrackIbarra/cloney.git",
+	Aliases: []string{"cl"},
 	RunE:    cloneCmdRun,
 }
 

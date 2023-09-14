@@ -76,6 +76,7 @@ var infoCmd = &cobra.Command{
 	Short:   "Prints information about a Cloney template repository",
 	Long:    "\nPrints information about a Cloney template repository.",
 	Example: "  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git",
+	Aliases: []string{"more"},
 	RunE:    infoCmdRun,
 }
 
