@@ -3,7 +3,6 @@ package metadata
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -74,23 +73,32 @@ func NewCloneyMetadataFromRawYAML(rawYAML string) (*CloneyMetadata, error) {
 	return &metadata, nil
 }
 
-// ValidateVariablesMatch validates if a given map of variables matches the variables defined
+// MatchUserVariables validates if a given map of variables matches the variables defined
 // in the template repository metadata file.
-func (m *CloneyMetadata) ValidateVariablesMatch(userVariables map[string]interface{}) error {
-	// Convert the template variables to a map.
-	templateVariables := make(map[string]interface{})
+// It also adds the default values of the variables to the user variables if they are not defined.
+func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}) (map[string]interface{}, error) {
+	// Iterate over the variables defined in the template repository metadata file.
 	for _, variable := range m.Variables {
-		// User variable types are compared to the type of the example
-		// variables defined in the template metadata file.
-		templateVariables[variable.Name] = variable.Example
-	}
+		// Check if the variable is defined in the user variables.
+		if _, contains := userVariables[variable.Name]; !contains {
+			// If not defined, it could be that the variable is optional, so check if it has a default value.
+			if variable.Default == nil {
+				return nil, fmt.Errorf("variable '%s' is not defined", variable.Name)
+			} else {
+				// If the variable has a default value, add it to the user variables.
+				userVariables[variable.Name] = variable.Default
+			}
+		}
 
-	// Check if the user variables match the template variables.
-	if !reflect.DeepEqual(templateVariables, userVariables) {
-		return fmt.Errorf("user variables do not match the template variables")
+		// Check if the variables are of the same type.
+		// User variables are compared against the example value of the template repository metadata file.
+		type1 := VariableType(variable.Example)
+		type2 := VariableType(userVariables[variable.Name])
+		if type1 != type2 {
+			return nil, fmt.Errorf("variable '%s' is of type '%s' but should be of type '%s'", variable.Name, type2, type1)
+		}
 	}
-
-	return nil
+	return userVariables, nil
 }
 
 // ShowGeneralInformation prints the general information of the Cloney template repository in a pretty way.

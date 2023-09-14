@@ -110,7 +110,8 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate if the user variables match the template variables.
-	err = cloneyMetadata.ValidateVariablesMatch(variablesMap)
+	// Also fill default values of the variables if they are not defined.
+	variablesMap, err = cloneyMetadata.MatchUserVariables(variablesMap)
 	if err != nil {
 		// Handle errors related to validating template variables.
 		fmt.Println("Error validating template variables:", err)
