@@ -121,7 +121,10 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Fill the template variables in the cloned directory.
 	filler := templates.NewTemplateFiller(variablesMap)
-	err = filler.FillDirectory(clonePath)
+	options := templates.TemplateFillOptions{
+		SourceDirectoryPath: clonePath,
+	}
+	err = filler.FillDirectory(options)
 	if err != nil {
 		fmt.Println("Error filling template variables:", err)
 		os.RemoveAll(clonePath)
