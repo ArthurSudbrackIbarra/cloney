@@ -99,6 +99,9 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Delete the repository metadata file.
+	os.Remove(metadataFilePath)
+
 	// Create the metadata struct from raw YAML data.
 	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(string(metadataBytes))
 	if err != nil {
