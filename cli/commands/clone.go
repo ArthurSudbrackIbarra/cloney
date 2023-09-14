@@ -29,6 +29,33 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	variablesFilePath, _ := cmd.Flags().GetString("variables-file")
 	variablesJSON, _ := cmd.Flags().GetString("variables")
 
+	// Variable to store errors.
+	var err error
+
+	// Get the current working directory.
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Could not get user's current directory:", err)
+		return err
+	}
+
+	// Get the template variables provided by the user.
+	var variablesMap map[string]interface{}
+	if variablesJSON != "" {
+		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
+		if err != nil {
+			fmt.Println("Could not parse template variables:", err)
+			return err
+		}
+	} else {
+		variablesFilePath = filepath.Join(currentDir, variablesFilePath)
+		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
+		if err != nil {
+			fmt.Println("Could not read template variables file:", err)
+			return err
+		}
+	}
+
 	// Create the Git repository instance.
 	repository := &git.GitRepository{
 		URL:    repositoryURL,
@@ -37,9 +64,8 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate the repository.
-	err := repository.Validate()
+	err = repository.Validate()
 	if err != nil {
-		// Handle errors related to the repository.
 		fmt.Println("Error validating repository:", err)
 		return err
 	}
@@ -54,68 +80,38 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Get the name of the repository.
 	repositoryName := repository.GetName()
 
-	// Get the current working directory.
-	currentDir, err := os.Getwd()
-	if err != nil {
-		// Handle errors related to getting the current user's directory.
-		fmt.Println("Could not get user's current directory:", err)
-		return err
-	}
-
 	// Calculate the clone path.
 	clonePath := filepath.Join(currentDir, path, repositoryName)
 
 	// Clone the repository.
 	err = repository.Clone(clonePath)
 	if err != nil {
-		// Handle errors related to cloning the repository.
 		fmt.Println("Could not clone repository:", err)
 		return err
 	}
 
 	// Read the repository metadata file.
-	metadataBytes, err := os.ReadFile(
-		filepath.Join(clonePath, appConfig.MetadataFileName),
-	)
+	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
+	metadataBytes, err := os.ReadFile(metadataFilePath)
 	if err != nil {
-		// Handle errors related to reading the metadata file.
 		fmt.Printf("Could not read repository '%s' metadata file: %s\n", appConfig.MetadataFileName, err)
+		os.RemoveAll(clonePath)
 		return err
 	}
 
 	// Create the metadata struct from raw YAML data.
 	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(string(metadataBytes))
 	if err != nil {
-		// Handle errors related to parsing repository metadata.
 		fmt.Println("Could not parse repository metadata:", err)
+		os.RemoveAll(clonePath)
 		return err
-	}
-
-	// Get the template variables provided by the user.
-	var variablesMap map[string]interface{}
-	if variablesJSON != "" {
-		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
-		if err != nil {
-			// Handle errors related to parsing user template variables.
-			fmt.Println("Could not parse template variables:", err)
-			return err
-		}
-	} else {
-		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
-		if err != nil {
-			// Handle errors related to reading user template variables.
-			fmt.Println("Could not read template variables:", err)
-			return err
-		}
 	}
 
 	// Validate if the user variables match the template variables.
 	// Also fill default values of the variables if they are not defined.
 	variablesMap, err = cloneyMetadata.MatchUserVariables(variablesMap)
 	if err != nil {
-		// Handle errors related to validating template variables.
 		fmt.Println("Error validating template variables:", err)
-		// Delete the cloned directory.
 		os.RemoveAll(clonePath)
 		return err
 	}
@@ -124,9 +120,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	filler := templates.NewTemplateFiller(variablesMap)
 	err = filler.FillDirectory(clonePath)
 	if err != nil {
-		// Handle errors related to filling template variables.
 		fmt.Println("Error filling template variables:", err)
-		// Delete the cloned directory.
 		os.RemoveAll(clonePath)
 		return err
 	}
