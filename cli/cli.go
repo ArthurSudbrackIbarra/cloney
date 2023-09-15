@@ -33,6 +33,7 @@ func Initialize() {
 	commands.InitializeInfo(rootCmd)
 	commands.InitializeClone(rootCmd)
 	commands.InitializeDryrun(rootCmd)
+	commands.InitializeStart(rootCmd)
 
 	// CLI formatting, colors, bold, italic...
 	cc.Init(&cc.Config{

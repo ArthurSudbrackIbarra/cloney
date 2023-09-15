@@ -24,3 +24,5 @@ cloney.exe
 # Cloney files.
 .cloney.yaml
 .cloney-vars.yaml
+.cloney-vars.yml
+.cloney-vars.json

@@ -47,6 +47,9 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Create and validate the git repository.
 	repository, err := steps.CreateAndValidateRepository(repositoryURL, branch, tag, output)
+	if err != nil {
+		return err
+	}
 
 	// If a token is provided, authenticate with it.
 	appConfig := config.GetAppConfig()
