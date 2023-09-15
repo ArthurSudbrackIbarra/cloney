@@ -26,7 +26,7 @@ func SetSuppressPrints(value bool) {
 func GetCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Could not get user's current directory:", err)
+		fmt.Printf("[%s] Could not get user's current directory: %v.\n", utils.Red("Error"), err)
 		return "", err
 	}
 
@@ -42,14 +42,14 @@ func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath str
 	if variablesJSON != "" {
 		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
 		if err != nil {
-			fmt.Println("Could not parse your template variables raw JSON:", err)
+			fmt.Printf("[%s] Could not parse your template variables raw JSON: %v.\n", utils.Red("Error"), err)
 			return nil, err
 		}
 	} else {
 		// If the user provided the variables as a file path, read it.
 		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
 		if err != nil {
-			fmt.Println("Could not read your template variables file:", err)
+			fmt.Printf("[%s] Could not read your template variables file: %v.\n", utils.Red("Error"), err)
 			return nil, err
 		}
 	}

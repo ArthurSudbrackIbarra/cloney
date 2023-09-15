@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/fatih/color"
 )
 
 // ListContainsString checks if a given list contains a specific string value.
@@ -57,3 +59,8 @@ func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]s
 
 	return filePaths, nil
 }
+
+// Colors in the terminal.
+var Green = color.New(color.FgGreen).SprintFunc()
+var Yellow = color.New(color.FgYellow).SprintFunc()
+var Red = color.New(color.FgRed).SprintFunc()
