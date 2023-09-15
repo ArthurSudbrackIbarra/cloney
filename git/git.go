@@ -30,9 +30,14 @@ type GitRepository struct {
 // repositoryRegex is a regular expression to match a git repository URL.
 var repositoryRegex = regexp.MustCompile(`^(?:https?|git|ssh):\/\/([^\/]+)\/([^\/]+)\/([^\/]+)(?:)?\.git$`)
 
+// MatchesGitRepositoryURL returns true if a string matches a git repository URL.
+func MatchesGitRepositoryURL(str string) bool {
+	return repositoryRegex.MatchString(str)
+}
+
 // Validate validates if a git repository is valid.
 func (r *GitRepository) Validate() error {
-	if !repositoryRegex.MatchString(r.URL) {
+	if !MatchesGitRepositoryURL(r.URL) {
 		return fmt.Errorf("invalid repository URL")
 	}
 	// Either branch or tag must be specified, but not both.

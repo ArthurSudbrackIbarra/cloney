@@ -37,7 +37,7 @@ type CloneyMetadata struct {
 	TemplateVersion string `yaml:"template_version" validate:"required,semver"`
 
 	// ManifestVersion is the version of the manifest file.
-	ManifestVersion string `yaml:"manifest_version" validate:"required,semver"`
+	ManifestVersion string `yaml:"manifest_version" validate:"required"`
 
 	// Authors is the list of authors of the template repository.
 	Authors []string `yaml:"authors"`
