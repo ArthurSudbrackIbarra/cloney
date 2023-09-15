@@ -8,7 +8,6 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/git"
-	"github.com/ArthurSudbrackIbarra/cloney/metadata"
 
 	"github.com/spf13/cobra"
 )
@@ -22,34 +21,28 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	}
 	branch, _ := cmd.Flags().GetString("branch")
 	tag, _ := cmd.Flags().GetString("tag")
+	token, _ := cmd.Flags().GetString("token")
+
+	// Suppress prints for this command.
+	steps.SetSuppressPrints(true)
 
 	// Variable to store the metadata file content.
 	var metadataContent string
 
 	// If the argument is a git repository URL, use it.
+	appConfig := config.GetAppConfig()
 	if git.MatchesGitRepositoryURL(repositorySource) {
-		// Create the Git repository instance.
-		repository := &git.GitRepository{
-			URL:    repositorySource,
-			Branch: branch,
-			Tag:    tag,
-		}
-
-		// Validate the repository.
-		err := repository.Validate()
+		// Create and validate the git repository.
+		repository, err := steps.CreateAndValidateRepository(repositorySource, branch, tag)
 		if err != nil {
-			// Handle errors related to the repository.
-			fmt.Println("Error validating repository:", err)
 			return err
 		}
 
 		// If a token is provided, authenticate with it.
-		appConfig := config.GetAppConfig()
-		if appConfig.GitToken != "" {
-			fmt.Println("Authenticating with token...")
-			fmt.Println(appConfig.GitToken)
-			repository.AuthenticateWithToken(appConfig.GitToken)
+		if token == "" {
+			token = appConfig.GitToken
 		}
+		steps.AuthenticateToRepository(repository, token)
 
 		// Get the metadata file content.
 		metadataContent, err = repository.GetFileContent(appConfig.MetadataFileName)
@@ -70,25 +63,22 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 		}
 
 		// Get the metadata file content.
-		steps.SetSuppressPrints(true)
 		metadataFilePath := filepath.Join(currentDir, repositorySource, config.GetAppConfig().MetadataFileName)
 		metadataContent, err = steps.ReadRepositoryMetadata(metadataFilePath)
 		if err != nil {
 			return err
 		}
-		steps.SetSuppressPrints(false)
 	}
 
 	// Create the metadata struct from raw YAML data.
-	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent)
+	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
 	if err != nil {
-		// Handle errors related to parsing repository metadata.
-		fmt.Println("Could not parse repository metadata file:", err)
 		return err
 	}
 
 	// Print metadata.
 	cloneyMetadata.Show()
+
 	return nil
 }
 
@@ -112,6 +102,7 @@ func InitializeInfo(rootCmd *cobra.Command) {
 	// Define command-line flags.
 	infoCmd.Flags().StringP("branch", "b", "main", "Git branch, if referencing a git repository")
 	infoCmd.Flags().StringP("tag", "t", "", "Git tag, if referencing a git repository")
+	infoCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
 
 	// Add the info command to the root command.
 	rootCmd.AddCommand(infoCmd)

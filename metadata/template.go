@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 	"github.com/go-playground/validator/v10"
 	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
@@ -50,12 +51,21 @@ type CloneyMetadata struct {
 }
 
 // NewCloneyMetadataFromRawYAML creates a new CloneyMetadata struct from a YAML string.
-func NewCloneyMetadataFromRawYAML(rawYAML string) (*CloneyMetadata, error) {
+func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []string) (*CloneyMetadata, error) {
 	// Parse YAML.
 	var metadata CloneyMetadata
 	err := yaml.Unmarshal([]byte(rawYAML), &metadata)
 	if err != nil {
 		return nil, err
+	}
+
+	// Check if manifest version is supported.
+	if !utils.ListContainsString(supportedManifestVersions, metadata.ManifestVersion) {
+		return nil, fmt.Errorf(
+			"manifest version '%s' is not supported in this Cloney version.\nPlease update or downgrade your Cloney version.\n\nSupported versions: %s",
+			metadata.ManifestVersion,
+			strings.Join(supportedManifestVersions, ", "),
+		)
 	}
 
 	// Validate metadata.

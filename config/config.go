@@ -16,6 +16,9 @@ type AppConfig struct {
 	// MetadataManifestVersion is the version of the metadata manifest supported by this version of cloney.
 	MetadataManifestVersion string
 
+	// SupportedManifestVersions is a list of the supported metadata manifest versions by this version of cloney.
+	SupportedManifestVersions []string
+
 	// DefaultUserVariablesFileName is the default name of the file containing the user variables.
 	// This file is used to fill the template variables in the cloned directory.'
 	DefaultUserVariablesFileName string
@@ -46,6 +49,9 @@ var globalConfig = &AppConfig{
 
 	MetadataFileName:        ".cloney.yaml",
 	MetadataManifestVersion: "v1",
+	SupportedManifestVersions: []string{
+		"v1",
+	},
 
 	DefaultUserVariablesFileName: ".cloney-vars.yaml",
 	DefaultDryRunDirectoryName:   "cloney-dry-run-results",
@@ -78,6 +84,9 @@ func GetAppConfig() *AppConfig {
 
 		MetadataFileName:        globalConfig.MetadataFileName,
 		MetadataManifestVersion: globalConfig.MetadataManifestVersion,
+		SupportedManifestVersions: []string{
+			globalConfig.SupportedManifestVersions[0],
+		},
 
 		DefaultUserVariablesFileName: globalConfig.DefaultUserVariablesFileName,
 		DefaultDryRunDirectoryName:   globalConfig.DefaultDryRunDirectoryName,

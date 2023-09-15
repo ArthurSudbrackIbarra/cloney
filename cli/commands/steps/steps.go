@@ -59,7 +59,7 @@ func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath str
 }
 
 // CreateAndValidateRepository creates the Git repository instance and validates it.
-func CreateAndValidateRepository(repositoryURL, branch, tag, output string) (*git.GitRepository, error) {
+func CreateAndValidateRepository(repositoryURL, branch, tag string) (*git.GitRepository, error) {
 	// Create the Git repository instance.
 	repository := &git.GitRepository{
 		URL:    repositoryURL,
@@ -84,7 +84,6 @@ func CreateAndValidateRepository(repositoryURL, branch, tag, output string) (*gi
 func AuthenticateToRepository(repository *git.GitRepository, gitToken string) {
 	// If a token is provided, authenticate with it.
 	if gitToken != "" {
-		fmt.Println("[Remove Later] Authenticating with token...")
 		repository.AuthenticateWithToken(gitToken)
 	}
 }
@@ -127,9 +126,9 @@ func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 }
 
 // ParseRepositoryMetadata parses the repository metadata.
-func ParseRepositoryMetadata(metadataContent string) (*metadata.CloneyMetadata, error) {
+func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions []string) (*metadata.CloneyMetadata, error) {
 	// Create the metadata struct from raw YAML data.
-	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent)
+	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent, supportedManifestVersions)
 	if err != nil {
 		fmt.Println("Could not parse the template repository template metadata:", err)
 		return nil, err

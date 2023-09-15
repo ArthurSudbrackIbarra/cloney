@@ -53,7 +53,7 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Parse the metadata file.
-	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent)
+	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
 	if err != nil {
 		return err
 	}

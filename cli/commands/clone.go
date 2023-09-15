@@ -28,6 +28,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	tag, _ := cmd.Flags().GetString("tag")
 	variablesFilePath, _ := cmd.Flags().GetString("variables-file")
 	variablesJSON, _ := cmd.Flags().GetString("variables")
+	token, _ := cmd.Flags().GetString("token")
 
 	// Variable to store errors.
 	var err error
@@ -46,14 +47,17 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create and validate the git repository.
-	repository, err := steps.CreateAndValidateRepository(repositoryURL, branch, tag, output)
+	repository, err := steps.CreateAndValidateRepository(repositoryURL, branch, tag)
 	if err != nil {
 		return err
 	}
 
 	// If a token is provided, authenticate with it.
 	appConfig := config.GetAppConfig()
-	steps.AuthenticateToRepository(repository, appConfig.GitToken)
+	if token == "" {
+		token = appConfig.GitToken
+	}
+	steps.AuthenticateToRepository(repository, token)
 
 	// Calculate the clone path.
 	clonePath := steps.CalculateClonePath(repository, currentDir, output)
@@ -77,7 +81,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	os.Remove(metadataFilePath)
 
 	// Parse the metadata file.
-	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent)
+	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
 	if err != nil {
 		// If it was not possible to parse the metadata file, delete the cloned repository.
 		os.RemoveAll(clonePath)
@@ -138,6 +142,7 @@ func InitializeClone(rootCmd *cobra.Command) {
 	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
 	cloneCmd.Flags().StringP("variables-file", "f", appConfig.DefaultUserVariablesFileName, "Path to a template variables YAML or JSON file")
 	cloneCmd.Flags().StringP("variables", "v", "", "Inline template variables as JSON")
+	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
 
 	// Add the clone command to the root command.
 	rootCmd.AddCommand(cloneCmd)

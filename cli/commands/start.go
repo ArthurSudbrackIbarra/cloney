@@ -124,7 +124,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Create and validate a reference to the Cloney example repository.
 	repository, err := steps.CreateAndValidateRepository(
-		appConfig.CloneyExampleRepositoryURL, "main", "", output,
+		appConfig.CloneyExampleRepositoryURL, "main", "",
 	)
 	if err != nil {
 		fmt.Println("Error when cloning the example Cloney repository from GitHub:", err)
