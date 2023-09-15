@@ -39,7 +39,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		fmt.Print("Press enter to use the default values.\n\n")
 
 		if name == "" {
-			fmt.Printf("What is the name of the template repository [%s]: ", appConfig.DefaultMetadataNameValue)
+			fmt.Printf("What is the name of the template repository [%s]: ", appConfig.DefaultCloneyProjectName)
 			scanner.Scan()
 			name = scanner.Text()
 		}
@@ -74,7 +74,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Set default values.
 	if name == "" {
-		name = appConfig.DefaultMetadataNameValue
+		name = appConfig.DefaultCloneyProjectName
 	}
 	if description == "" {
 		description = appConfig.DefaultMetadataDescriptionValue
@@ -82,28 +82,27 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	if license == "" {
 		license = appConfig.DefaultMetadataLicenseValue
 	}
-	template_version := "0.0.0"
-	manifest_version := appConfig.DefaultMetadataManifestVersionValue
 
 	// Build the raw YAML metadata string.
-	rawMetadata := "# The name of the template repository.\n"
+	rawMetadata := "# The name of this template repository.\n"
 	rawMetadata += fmt.Sprintf("name: %s\n\n", name)
-	rawMetadata += fmt.Sprintf("# The description of the template repository.\n")
+	rawMetadata += "# The description of this template repository.\n"
 	rawMetadata += fmt.Sprintf("description: %s\n\n", description)
-	rawMetadata += fmt.Sprintf("# The version of your template repository. Change it as you make changes to your template.\n")
-	rawMetadata += fmt.Sprintf("template_version: %s\n\n", template_version)
-	rawMetadata += fmt.Sprintf("# The version of this manifest.\n")
-	rawMetadata += fmt.Sprintf("manifest_version: %s\n\n", manifest_version)
-	rawMetadata += fmt.Sprintf("# The license of the template repository.\n")
+	rawMetadata += "# The version of this template repository. Change it as you make changes to your template.\n"
+	rawMetadata += "template_version: \"0.0.0\"\n\n"
+	rawMetadata += "# The version of this manifest. Do not change this value unless you know what you are doing.\n"
+	rawMetadata += fmt.Sprintf("manifest_version: %s\n\n", appConfig.MetadataManifestVersion)
+	rawMetadata += "# The license of the template repository.\n"
 	rawMetadata += fmt.Sprintf("license: %s\n", license)
 	if len(authors) > 0 {
+		rawMetadata += "\n# The authors of the template repository.\n"
 		rawMetadata += "authors:\n"
 		for _, author := range authors {
 			rawMetadata += fmt.Sprintf("  - %s\n", author)
 		}
 	}
 	// Example variables.
-	rawMetadata += "\n# Example variables.\n"
+	rawMetadata += "\n# Example variables. Delete this section and add your own variables.\n"
 	rawMetadata += "variables:\n"
 	rawMetadata += "  - name: app_name\n"
 	rawMetadata += "    description: The name of the application.\n"
@@ -120,24 +119,32 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Calculate the directory paths.
-	var outputPath string
-	if output == "" {
-		outputPath = filepath.Join(currentDir, appConfig.DefaultCloneyProjectName)
-	} else {
-		outputPath = filepath.Join(currentDir, output)
-	}
-	metadataFilePath := filepath.Join(outputPath, appConfig.MetadataFileName)
+	// Suppress prints for common-steps functions.
+	steps.SetSuppressPrints(true)
 
-	// Create the template repository directory.
-	err = os.MkdirAll(outputPath, os.ModePerm)
+	// Create and validate a reference to the Cloney example repository.
+	repository, err := steps.CreateAndValidateRepository(
+		appConfig.CloneyExampleRepositoryURL, "main", "", output,
+	)
 	if err != nil {
-		fmt.Println("Error creating template repository directory:", err)
+		fmt.Println("Error when cloning the example Cloney repository from GitHub:", err)
 		return err
 	}
+
+	// Calculate the clone path.
+	clonePath := steps.CalculateClonePath(repository, currentDir, output)
+
+	// Clone the repository.
+	err = steps.CloneRepository(repository, clonePath)
+	if err != nil {
+		return err
+	}
+
+	// Update the metadata file.
+	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
 	err = os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
 	if err != nil {
-		fmt.Println("Error creating metadata file:", err)
+		fmt.Println("Error creating the repository metadata file:", err)
 		return err
 	}
 

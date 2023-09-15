@@ -9,10 +9,9 @@ import (
 
 // versionCmdRun is the function that runs when the version command is called.
 func versionCmdRun(cmd *cobra.Command, args []string) {
-	// Get the application configuration.
 	appConfig := config.GetAppConfig()
 	// Print the current version of Cloney.
-	fmt.Printf("Cloney version %s\n", appConfig.Version)
+	fmt.Printf("Cloney version %s\n", appConfig.AppVersion)
 }
 
 // versionCmd represents the version command.

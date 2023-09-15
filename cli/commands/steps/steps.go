@@ -13,6 +13,15 @@ import (
 
 // This file defines common steps used by multiple commands.
 
+// Global variables
+// suppressPrints is a flag to determine if the functions in this package should print to the terminal.
+var suppressPrints bool
+
+// SetSuppressPrints sets the suppressPrints flag.
+func SetSuppressPrints(value bool) {
+	suppressPrints = value
+}
+
 // GetCurrentWorkingDirectory returns the current working directory.
 func GetCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
@@ -42,7 +51,9 @@ func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath str
 			return nil, err
 		}
 	}
-	fmt.Println("[OK] Your template variables were found and parsed.")
+	if !suppressPrints {
+		fmt.Println("[OK] Your template variables were found and parsed.")
+	}
 
 	return variablesMap, nil
 }
@@ -62,7 +73,9 @@ func CreateAndValidateRepository(repositoryURL, branch, tag, output string) (*gi
 		fmt.Println("Error validating repository:", err)
 		return nil, err
 	}
-	fmt.Println("[OK] The template repository reference is valid.")
+	if !suppressPrints {
+		fmt.Println("[OK] The template repository reference is valid.")
+	}
 
 	return repository, nil
 }
@@ -92,7 +105,9 @@ func CloneRepository(repository *git.GitRepository, clonePath string) error {
 		fmt.Println("Could not clone repository:", err)
 		return err
 	}
-	fmt.Println("[OK] The template repository was cloned.")
+	if !suppressPrints {
+		fmt.Println("[OK] The template repository was cloned.")
+	}
 
 	return nil
 }
@@ -104,7 +119,9 @@ func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 		fmt.Println("Could not read the template repository metadata file:", err)
 		return "", err
 	}
-	fmt.Println("[OK] The template repository metadata file was found.")
+	if !suppressPrints {
+		fmt.Println("[OK] The template repository metadata file was found.")
+	}
 
 	return string(metadataBytes), nil
 }
@@ -117,7 +134,9 @@ func ParseRepositoryMetadata(metadataContent string) (*metadata.CloneyMetadata, 
 		fmt.Println("Could not parse the template repository template metadata:", err)
 		return nil, err
 	}
-	fmt.Println("[OK] The template repository metadata file is valid.")
+	if !suppressPrints {
+		fmt.Println("[OK] The template repository metadata file is valid.")
+	}
 
 	return cloneyMetadata, nil
 }
@@ -127,12 +146,14 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 	// Validate if the user variables match the template variables.
 	// Also fill default values of the variables if they are not defined.
 	var err error
-	variablesMap, err = cloneyMetadata.MatchUserVariables(variablesMap)
+	_, err = cloneyMetadata.MatchUserVariables(variablesMap)
 	if err != nil {
 		fmt.Println("Error validating your template variables:", err)
 		return err
 	}
-	fmt.Println("[OK] Your variables match the template repository variables.")
+	if !suppressPrints {
+		fmt.Println("[OK] Your variables match the template repository variables.")
+	}
 
 	return nil
 }
@@ -149,7 +170,7 @@ func FillTemplateVariables(
 		fmt.Println("Error filling template variables:", err)
 		return err
 	}
-	if !templateOptions.TerminalMode {
+	if !suppressPrints && !templateOptions.TerminalMode {
 		fmt.Println("[OK] The template variables were filled.")
 	}
 
