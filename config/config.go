@@ -20,6 +20,21 @@ type AppConfig struct {
 	// DefaultDryRunDirectoryName is the default name of the directory created when running a template in dryrun mode.
 	DefaultDryRunDirectoryName string
 
+	// DefaultCloneyProjectName is the default name to use when creating a new cloney project.
+	DefaultCloneyProjectName string
+
+	// DefaultMetadataNameValue is the default value for the name field in the metadata file.
+	DefaultMetadataNameValue string
+
+	// DefaultMetadataDescriptionValue is the default value for the description field in the metadata file.
+	DefaultMetadataDescriptionValue string
+
+	// DefaultMetadataLicenseValue is the default value for the license field in the metadata file.
+	DefaultMetadataLicenseValue string
+
+	// DefaultMetadataManifestVersionValue is the default value for the manifest_version field in the metadata file.
+	DefaultMetadataManifestVersionValue string
+
 	// GitToken is the token used to authenticate when dealing with private git repositories.
 	GitToken string `mapstructure:"GIT_TOKEN"`
 }
@@ -27,10 +42,17 @@ type AppConfig struct {
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
 	// Default values.
-	Version:                      "v0.0.0",
+	Version: "0.0.0",
+
 	MetadataFileName:             ".cloney.yaml",
 	DefaultUserVariablesFileName: ".cloney-vars.yaml",
 	DefaultDryRunDirectoryName:   "cloney-dry-run-results",
+	DefaultCloneyProjectName:     "cloney-template",
+
+	DefaultMetadataNameValue:            "cloney-template",
+	DefaultMetadataDescriptionValue:     "A cloney template repository",
+	DefaultMetadataLicenseValue:         "MIT",
+	DefaultMetadataManifestVersionValue: "0.0.0",
 }
 
 // LoadConfig loads the global application configuration.
@@ -50,10 +72,18 @@ func LoadConfig() error {
 // GetAppConfig returns a copy of the global application configuration.
 func GetAppConfig() *AppConfig {
 	return &AppConfig{
-		Version:                      globalConfig.Version,
+		Version: globalConfig.Version,
+
 		MetadataFileName:             globalConfig.MetadataFileName,
 		DefaultUserVariablesFileName: globalConfig.DefaultUserVariablesFileName,
 		DefaultDryRunDirectoryName:   globalConfig.DefaultDryRunDirectoryName,
-		GitToken:                     globalConfig.GitToken,
+		DefaultCloneyProjectName:     globalConfig.DefaultCloneyProjectName,
+
+		DefaultMetadataNameValue:            globalConfig.DefaultMetadataNameValue,
+		DefaultMetadataDescriptionValue:     globalConfig.DefaultMetadataDescriptionValue,
+		DefaultMetadataLicenseValue:         globalConfig.DefaultMetadataLicenseValue,
+		DefaultMetadataManifestVersionValue: globalConfig.DefaultMetadataManifestVersionValue,
+
+		GitToken: globalConfig.GitToken,
 	}
 }

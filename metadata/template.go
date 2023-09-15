@@ -33,8 +33,11 @@ type CloneyMetadata struct {
 	// Description is the description of the template repository.
 	Description string `yaml:"description"`
 
-	// Version is the version of the template repository.
-	Version string `yaml:"version" validate:"required,semver"`
+	// TemplateVersion is the version of the template repository.
+	TemplateVersion string `yaml:"template_version" validate:"required,semver"`
+
+	// ManifestVersion is the version of the manifest file.
+	ManifestVersion string `yaml:"manifest_version" validate:"required,semver"`
 
 	// Authors is the list of authors of the template repository.
 	Authors []string `yaml:"authors"`
@@ -104,7 +107,7 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 // ShowGeneralInformation prints the general information of the Cloney template repository in a pretty way.
 func (m *CloneyMetadata) ShowGeneralInformation() {
 	table := tw.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Description", "Version", "Authors", "License"})
+	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
 	table.SetHeaderColor(
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
@@ -117,7 +120,7 @@ func (m *CloneyMetadata) ShowGeneralInformation() {
 		[]string{
 			m.Name,
 			m.Description,
-			m.Version,
+			m.TemplateVersion,
 			strings.Join(m.Authors, ", "),
 			m.License,
 		},
