@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/davecgh/go-spew v1.1.1
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/go-playground/validator/v10 v10.15.3
 	github.com/ivanpirog/coloredcobra v1.0.1
@@ -32,8 +31,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
@@ -44,7 +41,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
-	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
