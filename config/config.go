@@ -9,11 +9,12 @@ type AppConfig struct {
 	// AppVersion is the current version of the application.
 	AppVersion string
 
-	// MetadataFileName is the name of the metadata file in the repository.
+	// MetadataFileName is the name of the metadata file in the template repository.
 	// This file contains the information about the template repository.
 	MetadataFileName string
 
-	// MetadataManifestVersion is the version of the metadata manifest supported by this version of cloney.
+	// MetadataManifestVersion is used when creating a new template repository.
+	// It will always be the latest version supported by the current version of cloney.
 	MetadataManifestVersion string
 
 	// SupportedManifestVersions is a list of the supported metadata manifest versions by this version of cloney.
@@ -23,22 +24,23 @@ type AppConfig struct {
 	// This file is used to fill the template variables in the cloned directory.'
 	DefaultUserVariablesFileName string
 
-	// DefaultDryRunDirectoryName is the default name of the directory created when running a template in dryrun mode.
+	// DefaultDryRunDirectoryName is the default name of the directory created when running a template repository in dryrun mode.
 	DefaultDryRunDirectoryName string
 
-	// DefaultCloneyProjectName is the default name to use when creating a new cloney project.
+	// DefaultCloneyProjectName is the default name to use when creating a new Cloney project.
 	DefaultCloneyProjectName string
 
-	// DefaultMetadataDescriptionValue is the default value for the description field in the metadata file.
+	// DefaultMetadataDescriptionValue is the default value for the description field in the metadata file when creating a new template repository.
 	DefaultMetadataDescriptionValue string
 
-	// DefaultMetadataLicenseValue is the default value for the license field in the metadata file.
+	// DefaultMetadataLicenseValue is the default value for the license field in the metadata file when creating a new template repository.
 	DefaultMetadataLicenseValue string
 
-	// CloneyExampleRepositoryURL is the URL of the cloney example repository.
+	// CloneyExampleRepositoryURL is the URL of the cloney example repository used when creating a new template repository.
 	CloneyExampleRepositoryURL string
 
 	// GitToken is the token used to authenticate when dealing with private git repositories.
+	// This variable is configured using the CLONEY_GIT_TOKEN environment variable.
 	GitToken string `mapstructure:"GIT_TOKEN"`
 }
 

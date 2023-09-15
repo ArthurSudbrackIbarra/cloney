@@ -96,7 +96,7 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 		if _, contains := userVariables[variable.Name]; !contains {
 			// If not defined, it could be that the variable is optional, so check if it has a default value.
 			if variable.Default == nil {
-				return nil, fmt.Errorf("variable '%s' is not defined", variable.Name)
+				return nil, fmt.Errorf("variable '%s' is required but is not defined", variable.Name)
 			} else {
 				// If the variable has a default value, add it to the user variables.
 				userVariables[variable.Name] = variable.Default
@@ -108,7 +108,7 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 		type1 := VariableType(variable.Example)
 		type2 := VariableType(userVariables[variable.Name])
 		if type1 != type2 {
-			return nil, fmt.Errorf("variable '%s' is of type '%s' but should be of type '%s'", variable.Name, type2, type1)
+			return nil, fmt.Errorf("variable '%s' is of type '%s' but must be of type '%s'", variable.Name, type2, type1)
 		}
 	}
 	return userVariables, nil
