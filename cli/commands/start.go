@@ -157,9 +157,12 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 // startCmd represents the start command.
 // This command is used to create a new cloney template repository.
 var startCmd = &cobra.Command{
-	Use:     "start",
-	Short:   "Creates a new cloney template repository",
-	Long:    "\nCreates a new cloney template repository.",
+	Use:   "start",
+	Short: "Creates a new cloney template repository",
+	Long: `
+Creates a new cloney template repository.
+
+cloney start will create a directory with the necessary files to start a new cloney template repository.`,
 	Example: "  cloney start",
 	RunE:    startCmdRun,
 }
