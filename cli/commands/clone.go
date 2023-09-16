@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
@@ -12,6 +13,10 @@ import (
 
 	"github.com/spf13/cobra"
 )
+
+// Get the application configuration.
+// This is only done once, then all comands can use the same configuration.
+var appConfig = config.GetAppConfig()
 
 // cloneCmdRun is the function that runs when the clone command is called.
 func cloneCmdRun(cmd *cobra.Command, args []string) error {
@@ -53,7 +58,6 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// If a token is provided, authenticate with it.
-	appConfig := config.GetAppConfig()
 	if token == "" {
 		token = appConfig.GitToken
 	}
@@ -124,10 +128,19 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 // cloneCmd represents the clone command.
 // This command is used to clone a template repository.
 var cloneCmd = &cobra.Command{
-	Use:     "clone [repository_url]",
-	Short:   "Clones a template repository.",
-	Long:    "\nClones a template repository.",
-	Example: "  cloney clone https://github.com/ArthurSudbrackIbarra/cloney.git",
+	Use:   "clone [repository_url]",
+	Short: "Clones a template repository.",
+	Long: fmt.Sprintf(`
+Clones a template repository.
+
+cloney clone will search, by default, for a file named '%s' in your current directory.
+You can, however, specify a different file using the '--variables-file' flag or opt to
+pass the variables inline as JSON using the '--variables' flag.`, appConfig.DefaultUserVariablesFileName),
+	Example: strings.Join([]string{
+		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git",
+		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -f variables.yaml",
+		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{\"app_name\": \"my-app\"}'",
+	}, "\n"),
 	Aliases: []string{"cl"},
 	RunE:    cloneCmdRun,
 }

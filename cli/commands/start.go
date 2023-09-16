@@ -14,6 +14,7 @@ import (
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +69,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		}
 
 		if err != nil {
-			fmt.Println("Error reading user input:", err)
+			utils.ErrorMessage("Error reading user input", err)
 		}
 	}
 
@@ -127,7 +128,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		appConfig.CloneyExampleRepositoryURL, "main", "",
 	)
 	if err != nil {
-		fmt.Println("Error when cloning the example Cloney repository from GitHub:", err)
+		fmt.Println("Error when cloning the example Cloney repository from GitHub.")
 		return err
 	}
 
@@ -144,7 +145,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
 	err = os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
 	if err != nil {
-		fmt.Println("Error creating the repository metadata file:", err)
+		utils.ErrorMessage("Error creating the repository metadata file", err)
 		return err
 	}
 

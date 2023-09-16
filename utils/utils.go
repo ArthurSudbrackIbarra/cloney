@@ -64,3 +64,27 @@ func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]s
 var Green = color.New(color.FgGreen).SprintFunc()
 var Yellow = color.New(color.FgYellow).SprintFunc()
 var Red = color.New(color.FgRed).SprintFunc()
+var Blue = color.New(color.FgBlue).SprintFunc()
+
+// Messages.
+
+// OKMessage prints a message with a green [OK] prefix.
+func OKMessage(message string) {
+	fmt.Printf("%s %s.\n", Green("[OK]"), message)
+}
+
+// WarningMessage prints a message with a yellow [Warning] prefix.
+func WarningMessage(message string) {
+	fmt.Printf("%s %s.\n", Yellow("[Warning]"), message)
+}
+
+// ErrorMessage prints a message with a red [Error] prefix.
+func ErrorMessage(message string, err error) {
+	fmt.Printf("%s %s: %v.\n", Red("[Error]"), message, err)
+}
+
+// CommandExampleWithExplanation return a string with the command example and explanation
+// using an yellow color to separate the example from the explanation.
+func CommandExampleWithExplanation(example, explanation string) string {
+	return fmt.Sprintf("%s %s %s", example, Yellow("==>"), explanation)
+}

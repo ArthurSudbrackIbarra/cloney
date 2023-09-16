@@ -8,6 +8,7 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/git"
+	"github.com/ArthurSudbrackIbarra/cloney/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -47,10 +48,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 		// Get the metadata file content.
 		metadataContent, err = repository.GetFileContent(appConfig.MetadataFileName)
 		if err != nil {
-			// Handle errors related to reading the metadata file.
-			fmt.Println(
-				fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err,
-			)
+			utils.ErrorMessage(fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err)
 			return err
 		}
 	} else {
@@ -87,11 +85,18 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 var infoCmd = &cobra.Command{
 	Use:   "info [local_path OR repository_url]",
 	Short: "Prints information about a Cloney template repository",
-	Long:  "\nPrints information about a Cloney template repository.",
+	Long: `
+Prints information about a Cloney template repository.
+
+cloney info will give you information about a Cloney template repository, such as its name, description, and variables.
+
+It can get information from a local template repository, or from a remote template repository.
+By default, it will get information from the current directory, assuming it is a template repository.
+`,
 	Example: strings.Join([]string{
-		"  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git -- Info about a remote template repository",
-		"  cloney info ./my-template -- Info about a local template repository in the given path",
-		"  cloney info -- Info about the current directory as a template repository",
+		utils.CommandExampleWithExplanation("  cloney info", "Info about the current directory as a template repository"),
+		utils.CommandExampleWithExplanation("  cloney info ./my-template", "Info about a local template repository in the given path"),
+		utils.CommandExampleWithExplanation("  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git", "Info about a remote template repository"),
 	}, "\n"),
 	Aliases: []string{"more"},
 	RunE:    infoCmdRun,

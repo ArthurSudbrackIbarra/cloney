@@ -12,10 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Dryrun command is used to run a template repository in dryrun mode.
-// Check what the output will be with the given variables.
-// Flags: path, var-..., var-file, output.
-
 // dryrunCmdRun is the function that runs when the dryrun command is called.
 func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
@@ -45,7 +41,6 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	outputPath := filepath.Join(currentDir, output)
 
 	// Read the repository metadata file.
-	appConfig := config.GetAppConfig()
 	metadataFilePath := filepath.Join(targetPath, appConfig.MetadataFileName)
 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
 	if err != nil {
@@ -99,9 +94,17 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 // It is used to run a template repository in dryrun mode.
 // It is used to check what the output will be with the given variables.
 var dryrunCmd = &cobra.Command{
-	Use:     "dryrun",
-	Short:   "Run a template repository in dryrun mode",
-	Long:    "\nRun a template repository in dryrun mode.",
+	Use:   "dryrun",
+	Short: "Run a template repository in dryrun mode",
+	Long: fmt.Sprintf(`
+Run a template repository in dryrun mode.
+
+cloney dryrun is a command for debugging purposes.
+With this command you can check what is the output that your template repository will generate with the given variables.
+
+cloney dryrun will search, by default, for a file named '%s' in your current directory.
+You can, however, specify a different file using the '--variables-file' flag or opt to
+pass the variables inline as JSON using the '--variables' flag.`, appConfig.DefaultUserVariablesFileName),
 	Example: " cloney dryrun",
 	Aliases: []string{"dry-run", "dr"},
 	RunE:    dryrunCmdRun,

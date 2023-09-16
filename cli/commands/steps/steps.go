@@ -1,7 +1,6 @@
 package steps
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -26,7 +25,7 @@ func SetSuppressPrints(value bool) {
 func GetCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("[%s] Could not get user's current directory: %v.\n", utils.Red("Error"), err)
+		utils.ErrorMessage("Could not get user's current directory", err)
 		return "", err
 	}
 
@@ -42,19 +41,19 @@ func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath str
 	if variablesJSON != "" {
 		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
 		if err != nil {
-			fmt.Printf("[%s] Could not parse your template variables raw JSON: %v.\n", utils.Red("Error"), err)
+			utils.ErrorMessage("Could not parse your template variables raw JSON", err)
 			return nil, err
 		}
 	} else {
 		// If the user provided the variables as a file path, read it.
 		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
 		if err != nil {
-			fmt.Printf("[%s] Could not read your template variables file: %v.\n", utils.Red("Error"), err)
+			utils.ErrorMessage("Could not read your template variables file", err)
 			return nil, err
 		}
 	}
 	if !suppressPrints {
-		fmt.Println("[OK] Your template variables were found and parsed.")
+		utils.OKMessage("Your template variables were found and parsed")
 	}
 
 	return variablesMap, nil
@@ -72,11 +71,11 @@ func CreateAndValidateRepository(repositoryURL, branch, tag string) (*git.GitRep
 	// Validate the repository.
 	err := repository.Validate()
 	if err != nil {
-		fmt.Println("Error validating repository:", err)
+		utils.ErrorMessage("Error validating repository", err)
 		return nil, err
 	}
 	if !suppressPrints {
-		fmt.Println("[OK] The template repository reference is valid.")
+		utils.OKMessage("The template repository reference is valid")
 	}
 
 	return repository, nil
@@ -103,11 +102,11 @@ func CalculateClonePath(repository *git.GitRepository, currentDir, output string
 func CloneRepository(repository *git.GitRepository, clonePath string) error {
 	err := repository.Clone(clonePath)
 	if err != nil {
-		fmt.Println("Could not clone repository:", err)
+		utils.ErrorMessage("Could not clone repository", err)
 		return err
 	}
 	if !suppressPrints {
-		fmt.Println("[OK] The template repository was cloned.")
+		utils.OKMessage("The template repository was cloned")
 	}
 
 	return nil
@@ -117,11 +116,11 @@ func CloneRepository(repository *git.GitRepository, clonePath string) error {
 func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 	metadataBytes, err := os.ReadFile(metadataFilePath)
 	if err != nil {
-		fmt.Println("Could not read the template repository metadata file:", err)
+		utils.ErrorMessage("Could not find the template repository metadata file", err)
 		return "", err
 	}
 	if !suppressPrints {
-		fmt.Println("[OK] The template repository metadata file was found.")
+		utils.OKMessage("The template repository metadata file was found.")
 	}
 
 	return string(metadataBytes), nil
@@ -132,11 +131,11 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 	// Create the metadata struct from raw YAML data.
 	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent, supportedManifestVersions)
 	if err != nil {
-		fmt.Println("Could not parse the template repository template metadata:", err)
+		utils.ErrorMessage("Could not parse the template repository template metadata", err)
 		return nil, err
 	}
 	if !suppressPrints {
-		fmt.Println("[OK] The template repository metadata file is valid.")
+		utils.OKMessage("The template repository metadata file is valid")
 	}
 
 	return cloneyMetadata, nil
@@ -149,11 +148,11 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 	var err error
 	_, err = cloneyMetadata.MatchUserVariables(variablesMap)
 	if err != nil {
-		fmt.Println("Error validating your template variables:", err)
+		utils.ErrorMessage("Error validating your template variables", err)
 		return err
 	}
 	if !suppressPrints {
-		fmt.Println("[OK] Your variables match the template repository variables.")
+		utils.OKMessage("Your variables are valid and match the template repository variables")
 	}
 
 	return nil
@@ -168,11 +167,11 @@ func FillTemplateVariables(
 	filler := templates.NewTemplateFiller(variablesMap)
 	err := filler.FillDirectory(templateOptions, ignoreOptions)
 	if err != nil {
-		fmt.Println("Error filling template variables:", err)
+		utils.ErrorMessage("Error filling template variables", err)
 		return err
 	}
 	if !suppressPrints && !templateOptions.TerminalMode {
-		fmt.Println("[OK] The template variables were filled.")
+		utils.OKMessage("The template variables were filled")
 	}
 
 	return nil
