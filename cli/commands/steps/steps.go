@@ -33,27 +33,19 @@ func GetCurrentWorkingDirectory() (string, error) {
 }
 
 // GetUserVariablesMap returns the template variables provided by the user.
-func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath string) (map[string]interface{}, error) {
+func GetUserVariablesMap(currentDir, variables string) (map[string]interface{}, error) {
 	var err error
 	var variablesMap map[string]interface{}
 
-	// If the user provided the variables as a JSON string, parse it.
-	if variablesJSON != "" {
-		variablesMap, err = metadata.NewCloneyUserVariablesFromRawYAML(variablesJSON)
+	// First, assume 'variables' is a raw YAML string.
+	variablesMap, err = metadata.NewCloneyUserVariablesFromRawYAML(variables)
+	if err != nil {
+		// In case of error, assume 'variables' is a file path.
+		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variables)
 		if err != nil {
-			utils.ErrorMessage("Could not parse your template variables raw JSON", err)
+			utils.ErrorMessage("Error parsing template variables", err)
 			return nil, err
 		}
-	} else {
-		// If the user provided the variables as a file path, read it.
-		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variablesFilePath)
-		if err != nil {
-			utils.ErrorMessage("Could not read your template variables file", err)
-			return nil, err
-		}
-	}
-	if !suppressPrints {
-		utils.OKMessage("Your template variables were found and parsed")
 	}
 
 	return variablesMap, nil

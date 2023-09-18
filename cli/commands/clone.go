@@ -31,8 +31,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	branch, _ := cmd.Flags().GetString("branch")
 	output, _ := cmd.Flags().GetString("output")
 	tag, _ := cmd.Flags().GetString("tag")
-	variablesFilePath, _ := cmd.Flags().GetString("variables-file")
-	variablesJSON, _ := cmd.Flags().GetString("variables")
+	variables, _ := cmd.Flags().GetString("variables")
 	token, _ := cmd.Flags().GetString("token")
 
 	// Variable to store errors.
@@ -45,8 +44,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get the template variables provided by the user.
-	variablesFilePath = filepath.Join(currentDir, variablesFilePath)
-	variablesMap, err := steps.GetUserVariablesMap(currentDir, variablesJSON, variablesFilePath)
+	variablesMap, err := steps.GetUserVariablesMap(currentDir, variables)
 	if err != nil {
 		return err
 	}
@@ -108,7 +106,14 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	ignoreOptions := utils.IgnorePathOptions{
 		// Ignore the metadata file when filling the template variables.
 		// Ignore the user variables file when filling the template variables.
-		IgnoreFiles: []string{appConfig.MetadataFileName, filepath.Base(variablesFilePath)},
+		IgnoreFiles: []string{
+			appConfig.MetadataFileName,
+
+			// Will only have effect if the user passed the variables flag as a file path.
+			filepath.Base(
+				filepath.Join(currentDir, variables),
+			),
+		},
 
 		// Ignore '.git' directories when filling the template variables.
 		IgnoreDirectories: []string{".git"},
@@ -133,12 +138,12 @@ var cloneCmd = &cobra.Command{
 	Long: fmt.Sprintf(`Clones a template repository.
 
 cloney clone will search, by default, for a file named '%s' in your current directory.
-You can, however, specify a different file using the '--variables-file' flag or opt to
-pass the variables inline as JSON using the '--variables' flag.`, appConfig.DefaultUserVariablesFileName),
+You can, however, specify a different file using the '--variables' flag or opt to
+pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 	Example: strings.Join([]string{
 		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git",
-		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -f variables.yaml",
-		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{\"app_name\": \"my-app\"}'",
+		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v variables.yaml",
+		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{ app_name: my-app }'",
 	}, "\n"),
 	Aliases: []string{"cl"},
 	RunE:    cloneCmdRun,
@@ -152,8 +157,7 @@ func InitializeClone(rootCmd *cobra.Command) {
 	cloneCmd.Flags().StringP("output", "o", "", "Path to clone the repository to")
 	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
 	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
-	cloneCmd.Flags().StringP("variables-file", "f", appConfig.DefaultUserVariablesFileName, "Path to a template variables YAML or JSON file")
-	cloneCmd.Flags().StringP("variables", "v", "", "Inline template variables as JSON")
+	cloneCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
 	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
 
 	// Add the clone command to the root command.
