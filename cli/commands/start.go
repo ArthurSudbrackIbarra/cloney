@@ -141,6 +141,10 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Delete the .git directory.
+	gitDirPath := filepath.Join(clonePath, ".git")
+	os.RemoveAll(gitDirPath)
+
 	// Update the metadata file.
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
 	err = os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
@@ -159,8 +163,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Creates a new cloney template repository",
-	Long: `
-Creates a new cloney template repository.
+	Long: `Creates a new cloney template repository.
 
 cloney start will create a directory with the necessary files to start a new cloney template repository.`,
 	Example: "  cloney start",

@@ -44,6 +44,8 @@ func NewCloneyUserVariablesFromFile(filePath string) (map[string]interface{}, er
 func NewCloneyUserVariablesFromRawJSON(rawJSON string) (map[string]interface{}, error) {
 	variables := make(map[string]interface{})
 
+	fmt.Println(rawJSON)
+
 	err := json.Unmarshal([]byte(rawJSON), &variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse variables JSON string: %w", err)

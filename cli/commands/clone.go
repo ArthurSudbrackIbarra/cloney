@@ -130,8 +130,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 var cloneCmd = &cobra.Command{
 	Use:   "clone [repository_url]",
 	Short: "Clones a template repository.",
-	Long: fmt.Sprintf(`
-Clones a template repository.
+	Long: fmt.Sprintf(`Clones a template repository.
 
 cloney clone will search, by default, for a file named '%s' in your current directory.
 You can, however, specify a different file using the '--variables-file' flag or opt to

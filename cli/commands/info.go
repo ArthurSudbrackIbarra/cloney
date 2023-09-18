@@ -85,8 +85,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 var infoCmd = &cobra.Command{
 	Use:   "info [local_path OR repository_url]",
 	Short: "Prints information about a Cloney template repository",
-	Long: `
-Prints information about a Cloney template repository.
+	Long: `Prints information about a Cloney template repository.
 
 cloney info will give you information about a Cloney template repository, such as its name, description, and variables.
 

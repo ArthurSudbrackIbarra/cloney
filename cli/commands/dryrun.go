@@ -96,8 +96,7 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 var dryrunCmd = &cobra.Command{
 	Use:   "dryrun",
 	Short: "Run a template repository in dryrun mode",
-	Long: fmt.Sprintf(`
-Run a template repository in dryrun mode.
+	Long: fmt.Sprintf(`Run a template repository in dryrun mode.
 
 cloney dryrun is a command for debugging purposes.
 With this command you can check what is the output that your template repository will generate with the given variables.
