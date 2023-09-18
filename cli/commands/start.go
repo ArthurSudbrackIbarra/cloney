@@ -133,6 +133,10 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Calculate the clone path.
+	if output == "" {
+		// If the output flag is not set, use the name of the template repository as the name of the directory.
+		output = name
+	}
 	clonePath := steps.CalculateClonePath(repository, currentDir, output)
 
 	// Clone the repository.
