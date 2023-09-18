@@ -40,13 +40,13 @@ func NewCloneyUserVariablesFromFile(filePath string) (map[string]interface{}, er
 	return variables, nil
 }
 
-// NewCloneyUserVariablesFromRawJSON returns a map with the variables defined in the given JSON string.
-func NewCloneyUserVariablesFromRawJSON(rawJSON string) (map[string]interface{}, error) {
+// NewCloneyUserVariablesFromRawJSON returns a map with the variables defined in the given raw YAML string.
+func NewCloneyUserVariablesFromRawYAML(rawJSON string) (map[string]interface{}, error) {
 	variables := make(map[string]interface{})
 
 	fmt.Println(rawJSON)
 
-	err := json.Unmarshal([]byte(rawJSON), &variables)
+	err := yaml.Unmarshal([]byte(rawJSON), &variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse variables JSON string: %w", err)
 	}

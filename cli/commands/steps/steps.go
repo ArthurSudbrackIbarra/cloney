@@ -39,7 +39,7 @@ func GetUserVariablesMap(currentDir, variablesJSON string, variablesFilePath str
 
 	// If the user provided the variables as a JSON string, parse it.
 	if variablesJSON != "" {
-		variablesMap, err = metadata.NewCloneyUserVariablesFromRawJSON(variablesJSON)
+		variablesMap, err = metadata.NewCloneyUserVariablesFromRawYAML(variablesJSON)
 		if err != nil {
 			utils.ErrorMessage("Could not parse your template variables raw JSON", err)
 			return nil, err
