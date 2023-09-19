@@ -1,7 +1,6 @@
 package metadata
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -10,7 +9,7 @@ import (
 )
 
 // NewCloneyUserVariablesFromFile reads a file and returns a map with the variables defined in it.
-// It accepts files with the following extensions: '.json', '.yaml' or '.yml'.
+// It accepts files with the following extensions: '.yaml' or '.yml'.
 func NewCloneyUserVariablesFromFile(filePath string) (map[string]interface{}, error) {
 	// Read file content.
 	content, err := os.ReadFile(filePath)
@@ -20,35 +19,27 @@ func NewCloneyUserVariablesFromFile(filePath string) (map[string]interface{}, er
 
 	variables := make(map[string]interface{})
 
-	// If the file extension is '.json', parse it as JSON.
 	// If the file extension is '.yaml' or '.yml', parse it as YAML.
 	// Otherwise, return an error.
-	if strings.HasSuffix(filePath, ".json") {
-		err = json.Unmarshal(content, &variables)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse variables JSON file: %w", err)
-		}
-	} else if strings.HasSuffix(filePath, ".yaml") || strings.HasSuffix(filePath, ".yml") {
+	if strings.HasSuffix(filePath, ".yaml") || strings.HasSuffix(filePath, ".yml") {
 		err = yaml.Unmarshal(content, &variables)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse variables YAML file: %w", err)
 		}
 	} else {
-		return nil, fmt.Errorf("unsupported file extension, expected '.json', '.yaml' or '.yml'")
+		return nil, fmt.Errorf("unsupported file extension, expected '.yaml' or '.yml'")
 	}
 
 	return variables, nil
 }
 
-// NewCloneyUserVariablesFromRawJSON returns a map with the variables defined in the given raw YAML string.
-func NewCloneyUserVariablesFromRawYAML(rawJSON string) (map[string]interface{}, error) {
+// NewCloneyUserVariablesFromRawYAML returns a map with the variables defined in the given raw YAML string.
+func NewCloneyUserVariablesFromRawYAML(rawYAML string) (map[string]interface{}, error) {
 	variables := make(map[string]interface{})
 
-	fmt.Println(rawJSON)
-
-	err := yaml.Unmarshal([]byte(rawJSON), &variables)
+	err := yaml.Unmarshal([]byte(rawYAML), &variables)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse variables JSON string: %w", err)
+		return nil, fmt.Errorf("failed to parse variables inline YAML: %w", err)
 	}
 
 	return variables, nil
