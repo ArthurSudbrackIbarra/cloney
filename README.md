@@ -6,7 +6,6 @@
 </p>
 <br>
 
-
 ## Introduction
 
 Have you ever used a template Git repository and found yourself in the tedious task of replacing values manually or making extensive adjustments to fit your specific needs? If you have, you're not alone. Traditional Git templates often leave you with the burden of customizing every detail, which can be time-consuming and error-prone. This is where Cloney comes into play, revolutionizing the way you work with Git repositories.
@@ -39,13 +38,9 @@ A Cloney Template Repository consists of the following components:
 
 By leveraging the `.cloney.yaml` metadata file, you enable users to customize the template during the cloning process, creating a unique project that adapts to specific requirements.
 
-**Understanding `.cloney.yaml` Metadata**
+## Understanding the `.cloney.yaml` Metadata File
 
-To harness the full potential of Cloney Template Repositories, it's crucial to grasp the structure and content of the `.cloney.yaml` metadata file. This file serves as the blueprint for your template, defining its characteristics, variables, and default settings.
-
-## Template Information
-
-The `.cloney.yaml` metadata file begins with essential information about your template repository:
+To harness the full potential of Cloney Template Repositories, it's crucial to grasp the structure and content of the `.cloney.yaml` metadata file. This file serves as the blueprint for your template, defining its characteristics, variables, and default settings. It begins with essential information about your template repository:
 
 - **Name**: The name of your template, providing a clear identifier for users.
 
