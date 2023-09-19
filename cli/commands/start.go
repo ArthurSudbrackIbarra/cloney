@@ -1,10 +1,5 @@
 package commands
 
-// Start command creates a new cloney template repository.
-// Already creates the .cloney.yml file and asks the user
-// for informatin such as name, description, etc.
-// Flags: path, name, description, authors, license... --yes
-
 import (
 	"bufio"
 	"fmt"
@@ -176,7 +171,7 @@ cloney start will create a directory with the necessary files to start a new clo
 
 // InitializeStart initializes the start command.
 func InitializeStart(rootCmd *cobra.Command) {
-	// Define command-line flags.
+	// Define command-line flags for the 'start' command.
 	startCmd.Flags().StringP("output", "o", "", "Where to save the template repository")
 	startCmd.Flags().StringP("name", "n", "", "The name of the template repository")
 	startCmd.Flags().StringP("description", "d", "", "The description of the template repository")
@@ -184,6 +179,6 @@ func InitializeStart(rootCmd *cobra.Command) {
 	startCmd.Flags().StringP("license", "l", "", "The license of the template repository")
 	startCmd.Flags().BoolP("non-interactive", "y", false, "Skip the questions and use the default values and/or flags")
 
-	// Add the start command to the root command.
+	// Add the 'start' command to the root command.
 	rootCmd.AddCommand(startCmd)
 }

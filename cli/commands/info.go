@@ -103,11 +103,11 @@ By default, it will get information from the current directory, assuming it is a
 
 // InitializeInfo initializes the info command.
 func InitializeInfo(rootCmd *cobra.Command) {
-	// Define command-line flags.
+	// Define command-line flags for the 'info' command.
 	infoCmd.Flags().StringP("branch", "b", "main", "Git branch, if referencing a git repository")
 	infoCmd.Flags().StringP("tag", "t", "", "Git tag, if referencing a git repository")
 	infoCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
 
-	// Add the info command to the root command.
+	// Add the 'info' command to the root command.
 	rootCmd.AddCommand(infoCmd)
 }

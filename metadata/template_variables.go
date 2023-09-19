@@ -9,48 +9,41 @@ import (
 )
 
 // Constants for variable types.
-const STRING_VARIABLE_TYPE = "string"
-const INTEGER_VARIABLE_TYPE = "integer"
-const DECIMAL_VARIABLE_TYPE = "decimal"
-const BOOLEAN_VARIABLE_TYPE = "boolean"
-const LIST_VARIABLE_TYPE = "list"
-const MAP_VARIABLE_TYPE = "map"
-const UNKNOWN_VARIABLE_TYPE = "unknown"
+const (
+	STRING_VARIABLE_TYPE  = "string"
+	INTEGER_VARIABLE_TYPE = "integer"
+	DECIMAL_VARIABLE_TYPE = "decimal"
+	BOOLEAN_VARIABLE_TYPE = "boolean"
+	LIST_VARIABLE_TYPE    = "list"
+	MAP_VARIABLE_TYPE     = "map"
+	UNKNOWN_VARIABLE_TYPE = "unknown"
+)
 
 // VariableType returns the type of a variable as a string.
 func VariableType(variable interface{}) string {
-	// The variable type is determined by checking the type of the example value.
+	// Determine the variable type by checking the type of the example value.
 	variableType := reflect.TypeOf(variable).String()
 
-	// All types of integers are classified as "integer".
-	if strings.HasPrefix(variableType, "int") {
+	// Check for common types and classify them.
+	switch variableType {
+	case "string":
+		return STRING_VARIABLE_TYPE
+	case "int", "int8", "int16", "int32", "int64":
 		return INTEGER_VARIABLE_TYPE
-	}
-	// All types of floats are classified as "decimal".
-	if strings.HasPrefix(variableType, "float") {
+	case "float32", "float64":
 		return DECIMAL_VARIABLE_TYPE
-	}
-	// All booleans are classified as "boolean".
-	if variableType == "bool" {
+	case "bool":
 		return BOOLEAN_VARIABLE_TYPE
 	}
-	// All strings are classified as "string".
-	if variableType == "string" {
-		return STRING_VARIABLE_TYPE
-	}
-	// Maps have their own way of being classified.
-	// We call MapVariableToString to get a string representation of the map.
+
+	// Handle maps and lists separately.
 	if strings.HasPrefix(variableType, "map") {
 		return MapVariableType(variable)
-	}
-
-	// Lists also have their own way of being classified.
-	// We call ListVariableToString to get a string representation of the list.
-	if strings.HasPrefix(variableType, "[]") {
+	} else if strings.HasPrefix(variableType, "[]") {
 		return ListVariableType(variable)
 	}
 
-	// Otherwise, return "unknown".
+	// Return "unknown" for other types.
 	return UNKNOWN_VARIABLE_TYPE
 }
 
@@ -85,7 +78,7 @@ func VariableValue(value interface{}) string {
 
 // ListVariableType returns a string representation of the type of a list variable.
 func ListVariableType(listVar interface{}) string {
-	// If not a list, return "unknown".
+	// Check if it's a list.
 	variableType := reflect.TypeOf(listVar).String()
 	if !strings.HasPrefix(variableType, "[]") {
 		return UNKNOWN_VARIABLE_TYPE
@@ -94,38 +87,28 @@ func ListVariableType(listVar interface{}) string {
 	// Convert to a Go slice.
 	slice := listVar.([]interface{})
 
-	// If the list is empty, return just "list".
-	// But this case will never happen in a real template repository
-	// Because the variable[index].example will never be an empty list.
 	if len(slice) == 0 {
 		return LIST_VARIABLE_TYPE
 	}
 
-	// Get the type of the first value.
+	// Get the type of the first value in the list.
 	firstValueType := VariableType(slice[0])
 
-	// Assuming all values of the list have the same type,
-	// return the type of the first value.
-	return IndentStringStructure(
-		fmt.Sprintf("%s [\n%s\n]", LIST_VARIABLE_TYPE, firstValueType),
-	)
+	// Assuming all values in the list have the same type, return the type.
+	return fmt.Sprintf("%s [%s]", LIST_VARIABLE_TYPE, firstValueType)
 }
 
 // MapVariableType returns a string representation of the type of a map variable.
 func MapVariableType(mapVar interface{}) string {
-	// If not a map, return "unknown".
+	// Check if it's a map.
 	variableType := reflect.TypeOf(mapVar).String()
 	if !strings.HasPrefix(variableType, "map") {
 		return UNKNOWN_VARIABLE_TYPE
 	}
 
 	// Convert to a Go map.
-	// Name it 'map_' because 'map' is a reserved word.
 	map_ := mapVar.(map[interface{}]interface{})
 
-	// If the map is empty, return just "map".
-	// But this case will never happen in a real template repository
-	// Because the variable.key.example will never be an empty map.
 	if len(map_) == 0 {
 		return MAP_VARIABLE_TYPE
 	}
@@ -133,25 +116,21 @@ func MapVariableType(mapVar interface{}) string {
 	// Iterate over the map values and get their types.
 	variableTypes := ""
 	for key, value := range map_ {
-		// Get the type of the value.
 		valueType := VariableType(value)
 
-		// If the type is unknown, return "unknown".
+		// If any value has an unknown type, return "unknown" for the map.
 		if valueType == UNKNOWN_VARIABLE_TYPE {
 			return UNKNOWN_VARIABLE_TYPE
 		}
 
-		// Add the type to the map.
 		variableTypes += fmt.Sprintf("%s: %s\n", key, valueType)
 	}
 
-	return IndentStringStructure(
-		fmt.Sprintf("%s {\n%s\n}", MAP_VARIABLE_TYPE, variableTypes),
-	)
+	return fmt.Sprintf("%s {\n%s}", MAP_VARIABLE_TYPE, variableTypes)
 }
 
-// IndentStringStructure indents the structure of a string, which is a list or map-like structure.
-// Used for identing maps and lists.
+// IndentStringStructure indents the structure of a string (list or map-like structure).
+// Used for formatting maps and lists.
 func IndentStringStructure(input string) string {
 	lines := strings.Split(input, "\n")
 	indentLevel := 0

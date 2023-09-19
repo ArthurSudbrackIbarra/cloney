@@ -53,7 +53,7 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate if the user variables match the template variables.
-	// Also fill default values of the variables if they are not defined.
+	// Also, fill default values of the variables if they are not defined.
 	err = steps.MatchUserVariables(cloneyMetadata, variablesMap)
 	if err != nil {
 		return err
@@ -66,17 +66,12 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 		TerminalMode:        outputInTerminal,
 	}
 	ignoreOptions := utils.IgnorePathOptions{
-		// Ignore the metadata file when filling the template variables.
-		// Ignore the user variables file when filling the template variables.
+		// Ignore specific files when filling the template variables.
 		IgnoreFiles: []string{
 			appConfig.MetadataFileName,
-
-			// Will only have effect if the user passed the variables flag as a file path.
-			filepath.Base(
-				filepath.Join(currentDir, variables),
-			),
+			appConfig.DefaultUserVariablesFileName,
+			filepath.Base(filepath.Join(currentDir, variables)),
 		},
-
 		// Ignore '.git' directory when filling the template variables.
 		IgnoreDirectories: []string{".git"},
 	}
@@ -104,12 +99,11 @@ var dryrunCmd = &cobra.Command{
 	Short: "Run a template repository in dryrun mode",
 	Long: fmt.Sprintf(`Run a template repository in dryrun mode.
 
-cloney dryrun is a command for debugging purposes.
-With this command you can check what is the output that your template repository will generate with the given variables.
+The 'cloney dryrun' command is for debugging purposes.
+With this command, you can check the output your template repository will generate with the given variables.
 
-cloney dryrun will search, by default, for a file named '%s' in your current directory.
-You can, however, specify a different file using the '--variables' flag or opt to
-pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
+By default, 'cloney dryrun' searches for a file named '%s' in your current directory.
+You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 	Example: " cloney dryrun",
 	Aliases: []string{"dry-run", "dr"},
 	RunE:    dryrunCmdRun,
@@ -118,12 +112,12 @@ pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 // InitializeDryrun initializes the dryrun command.
 func InitializeDryrun(rootCmd *cobra.Command) {
 	appConfig := config.GetAppConfig()
-	// Define command-line flags.
+	// Define command-line flags for the 'dryrun' command.
 	dryrunCmd.Flags().StringP("path", "p", "", "Path to your local template repository")
 	dryrunCmd.Flags().StringP("output", "o", appConfig.DefaultDryRunDirectoryName, "Path to output the filled template files")
 	dryrunCmd.Flags().BoolP("output-in-terminal", "i", false, "Output the filled template file contents in the terminal instead of creating the files")
 	dryrunCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
 
-	// Add command to the root command.
+	// Add the 'dryrun' command to the root command.
 	rootCmd.AddCommand(dryrunCmd)
 }

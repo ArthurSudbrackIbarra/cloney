@@ -14,11 +14,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Get the application configuration.
-// This is only done once, then all comands can use the same configuration.
+// appConfig stores the application configuration.
+// This configuration is retrieved once and shared across all commands.
 var appConfig = config.GetAppConfig()
 
-// cloneCmdRun is the function that runs when the clone command is called.
+// cloneCmdRun is the function that runs when the 'clone' command is called.
 func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		// Display command help if no repository URL is provided.
@@ -49,7 +49,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Create and validate the git repository.
+	// Create and validate the Git repository.
 	repository, err := steps.CreateAndValidateRepository(repositoryURL, branch, tag)
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate if the user variables match the template variables.
-	// Also fill default values of the variables if they are not defined.
+	// Also, fill default values of the variables if they are not defined.
 	err = steps.MatchUserVariables(cloneyMetadata, variablesMap)
 	if err != nil {
 		// If the user variables do not match the template variables, delete the cloned repository.
@@ -104,17 +104,12 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		SourceDirectoryPath: clonePath,
 	}
 	ignoreOptions := utils.IgnorePathOptions{
-		// Ignore the metadata file when filling the template variables.
-		// Ignore the user variables file when filling the template variables.
+		// Ignore specific files when filling the template variables.
 		IgnoreFiles: []string{
 			appConfig.MetadataFileName,
-
-			// Will only have effect if the user passed the variables flag as a file path.
-			filepath.Base(
-				filepath.Join(currentDir, variables),
-			),
+			appConfig.DefaultUserVariablesFileName,
+			filepath.Base(filepath.Join(currentDir, variables)),
 		},
-
 		// Ignore '.git' directories when filling the template variables.
 		IgnoreDirectories: []string{".git"},
 	}
@@ -130,16 +125,15 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// cloneCmd represents the clone command.
+// cloneCmd represents the 'clone' command.
 // This command is used to clone a template repository.
 var cloneCmd = &cobra.Command{
 	Use:   "clone [repository_url]",
 	Short: "Clones a template repository.",
 	Long: fmt.Sprintf(`Clones a template repository.
 
-cloney clone will search, by default, for a file named '%s' in your current directory.
-You can, however, specify a different file using the '--variables' flag or opt to
-pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
+The 'cloney clone' command will search for a file named '%s' in your current directory by default.
+You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 	Example: strings.Join([]string{
 		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git",
 		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v variables.yaml",
@@ -149,17 +143,17 @@ pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 	RunE:    cloneCmdRun,
 }
 
-// InitializeClone initializes the clone command.
+// InitializeClone initializes the 'clone' command.
 func InitializeClone(rootCmd *cobra.Command) {
 	appConfig := config.GetAppConfig()
 
-	// Define command-line flags.
+	// Define command-line flags for the 'clone' command.
 	cloneCmd.Flags().StringP("output", "o", "", "Path to clone the repository to")
 	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
 	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
 	cloneCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
-	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
+	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private Git repository")
 
-	// Add the clone command to the root command.
+	// Add the 'clone' command to the root command.
 	rootCmd.AddCommand(cloneCmd)
 }

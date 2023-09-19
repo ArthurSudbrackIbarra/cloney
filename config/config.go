@@ -10,18 +10,18 @@ type AppConfig struct {
 	AppVersion string
 
 	// MetadataFileName is the name of the metadata file in the template repository.
-	// This file contains the information about the template repository.
+	// This file contains information about the template repository.
 	MetadataFileName string
 
 	// MetadataManifestVersion is used when creating a new template repository.
-	// It will always be the latest version supported by the current version of cloney.
+	// It will always be the latest version supported by the current version of Cloney.
 	MetadataManifestVersion string
 
-	// SupportedManifestVersions is a list of the supported metadata manifest versions by this version of cloney.
+	// SupportedManifestVersions is a list of the supported metadata manifest versions by this version of Cloney.
 	SupportedManifestVersions []string
 
 	// DefaultUserVariablesFileName is the default name of the file containing the user variables.
-	// This file is used to fill the template variables in the cloned directory.'
+	// This file is used to fill the template variables in the cloned directory.
 	DefaultUserVariablesFileName string
 
 	// DefaultDryRunDirectoryName is the default name of the directory created when running a template repository in dryrun mode.
@@ -36,7 +36,7 @@ type AppConfig struct {
 	// DefaultMetadataLicenseValue is the default value for the license field in the metadata file when creating a new template repository.
 	DefaultMetadataLicenseValue string
 
-	// CloneyExampleRepositoryURL is the URL of the cloney example repository used when creating a new template repository.
+	// CloneyExampleRepositoryURL is the URL of the Cloney example repository used when creating a new template repository.
 	CloneyExampleRepositoryURL string
 
 	// GitToken is the token used to authenticate when dealing with private git repositories.
@@ -59,7 +59,7 @@ var globalConfig = &AppConfig{
 	DefaultDryRunDirectoryName:   "cloney-dry-run-results",
 	DefaultCloneyProjectName:     "cloney-template",
 
-	DefaultMetadataDescriptionValue: "A cloney template repository",
+	DefaultMetadataDescriptionValue: "A Cloney template repository",
 	DefaultMetadataLicenseValue:     "MIT",
 
 	CloneyExampleRepositoryURL: "https://github.com/ArthurSudbrackIbarra/cloney-test.git",

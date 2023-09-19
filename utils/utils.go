@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// ListContainsString checks if a given list contains a specific string value.
+// ListContainsString checks if a given list of strings contains a specific value.
 func ListContainsString(list []string, value string) bool {
 	for _, item := range list {
 		if item == value {
@@ -20,15 +20,15 @@ func ListContainsString(list []string, value string) bool {
 
 // IgnorePathOptions is a struct used to configure the GetAllFilePaths function.
 type IgnorePathOptions struct {
-	// IgnoreFiles is a list of file names to ignore.
+	// IgnoreFiles is a list of file names to be ignored.
 	IgnoreFiles []string
 
-	// IgnoreDirectories is a list of directory names to ignore.
+	// IgnoreDirectories is a list of directory names to be ignored.
 	IgnoreDirectories []string
 }
 
 // GetAllFilePaths returns a list of all file paths within a directory and its subdirectories,
-// while allowing you to specify directories to ignore.
+// with options to specify directories and files to ignore.
 func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]string, error) {
 	var filePaths []string
 
@@ -47,7 +47,7 @@ func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]s
 			if ListContainsString(ignoreOptions.IgnoreFiles, info.Name()) {
 				return nil
 			}
-			// Add file path to the list.
+			// Add the file path to the list.
 			filePaths = append(filePaths, path)
 		}
 		return nil
@@ -60,11 +60,13 @@ func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]s
 	return filePaths, nil
 }
 
-// Colors in the terminal.
-var Green = color.New(color.FgGreen).SprintFunc()
-var Yellow = color.New(color.FgYellow).SprintFunc()
-var Red = color.New(color.FgRed).SprintFunc()
-var Blue = color.New(color.FgBlue).SprintFunc()
+// Colors for terminal output.
+var (
+	Green  = color.New(color.FgGreen).SprintFunc()
+	Yellow = color.New(color.FgYellow).SprintFunc()
+	Red    = color.New(color.FgRed).SprintFunc()
+	Blue   = color.New(color.FgBlue).SprintFunc()
+)
 
 // Messages.
 
@@ -83,8 +85,8 @@ func ErrorMessage(message string, err error) {
 	fmt.Printf("%s %s: %v.\n", Red("[Error]"), message, err)
 }
 
-// CommandExampleWithExplanation return a string with the command example and explanation
-// using an yellow color to separate the example from the explanation.
+// CommandExampleWithExplanation returns a string with the command example and explanation,
+// using a yellow color to separate the example from the explanation.
 func CommandExampleWithExplanation(example, explanation string) string {
 	return fmt.Sprintf("%s %s %s", example, Yellow("==>"), explanation)
 }

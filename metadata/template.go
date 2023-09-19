@@ -13,10 +13,10 @@ import (
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
 type CloneyMetadataVariable struct {
-	// Name is the name of the variable.
+	// Name is the variable name.
 	Name string `yaml:"name" validate:"required"`
 
-	// Description is the description of the variable.
+	// Description is the variable description.
 	Description string `yaml:"description"`
 
 	// Default is the default value of the variable.
@@ -28,10 +28,10 @@ type CloneyMetadataVariable struct {
 
 // CloneyMetadata represents the metadata file of a Cloney template repository.
 type CloneyMetadata struct {
-	// Name is the name of the template repository.
+	// Name is the template repository name.
 	Name string `yaml:"name" validate:"required"`
 
-	// Description is the description of the template repository.
+	// Description is the template repository description.
 	Description string `yaml:"description"`
 
 	// TemplateVersion is the version of the template repository.
@@ -51,6 +51,7 @@ type CloneyMetadata struct {
 }
 
 // NewCloneyMetadataFromRawYAML creates a new CloneyMetadata struct from a YAML string.
+// It also validates the manifest version and the metadata structure.
 func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []string) (*CloneyMetadata, error) {
 	// Parse YAML.
 	var metadata CloneyMetadata
@@ -114,7 +115,7 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 	return userVariables, nil
 }
 
-// ShowGeneralInformation prints the general information of the Cloney template repository in a pretty way.
+// ShowGeneralInformation prints the general information of the Cloney template repository.
 func (m *CloneyMetadata) ShowGeneralInformation() {
 	table := tw.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
@@ -126,19 +127,11 @@ func (m *CloneyMetadata) ShowGeneralInformation() {
 		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
 	)
 	table.SetAlignment(tw.ALIGN_LEFT)
-	table.Append(
-		[]string{
-			m.Name,
-			m.Description,
-			m.TemplateVersion,
-			strings.Join(m.Authors, ", "),
-			m.License,
-		},
-	)
+	table.Append([]string{m.Name, m.Description, m.TemplateVersion, strings.Join(m.Authors, ", "), m.License})
 	table.Render()
 }
 
-// ShowVariables prints the variables of the Cloney template repository in a pretty way.
+// ShowVariables prints the variables of the Cloney template repository.
 func (m *CloneyMetadata) ShowVariables() {
 	if len(m.Variables) == 0 {
 		fmt.Println("This template repository has no variables.")
@@ -158,13 +151,7 @@ func (m *CloneyMetadata) ShowVariables() {
 	table.SetRowLine(true)
 	for _, variable := range m.Variables {
 		table.Append(
-			[]string{
-				variable.Name,
-				variable.Description,
-				VariableType(variable.Example),
-				VariableValue(variable.Default),
-				VariableValue(variable.Example),
-			},
+			[]string{variable.Name, variable.Description, VariableType(variable.Example), VariableValue(variable.Default), VariableValue(variable.Example)},
 		)
 	}
 	table.Render()

@@ -11,44 +11,44 @@ import (
 	"github.com/Masterminds/sprig/v3"
 )
 
-// TemplateFiller is a struct used to fill Go templates with variables.
+// TemplateFiller is a struct used for populating Go templates with variables.
 type TemplateFiller struct {
-	// Variables to be injected into the template.
+	// Variables contains the variables to be injected into the template.
 	Variables map[string]interface{}
 }
 
-// NewTemplateFiller creates a new TemplateFiller instance with the provided variables.
+// NewTemplateFiller creates a new TemplateFiller instance initialized with the provided variables.
 func NewTemplateFiller(variablesMap map[string]interface{}) *TemplateFiller {
 	return &TemplateFiller{
 		Variables: variablesMap,
 	}
 }
 
-// AddVariable adds a new variable to the TemplateFiller.
+// AddVariable adds a new variable to the TemplateFiller instance.
 func (t *TemplateFiller) AddVariable(name string, value interface{}) {
 	t.Variables[name] = value
 }
 
 // TemplateFillOptions is a struct used to configure the FillDirectory function.
 type TemplateFillOptions struct {
-	// Path to the directory containing the template files.
+	// SourceDirectoryPath is the path to the directory containing the template files.
 	SourceDirectoryPath string
 
-	// Path to the directory where the filled template files will be saved.
-	// It is a pointer because it can be nil, in which case the files will be saved in the same directory as the template files.
+	// TargetDirectoryPath is the path to the directory where the filled template files will be saved.
+	// If nil, the files will be saved in the same directory as the template files.
 	TargetDirectoryPath *string
 
-	// If true, the filled template files will be printed to the terminal instead of being saved to the files.
+	// TerminalMode, if true, causes the filled template files to be printed to the terminal instead of being saved to files.
 	TerminalMode bool
 }
 
-// FillDirectory recursively processes all files in a directory with the variables from the TemplateFiller.
-// If dryrunMode is enabled, the resulting content will be printed to the terminal instead of writing to the files.
+// FillDirectory processes all files in a directory with variables from the TemplateFiller.
+// If TerminalMode is enabled, the filled template content is printed to the terminal instead of being saved to files.
 func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions utils.IgnorePathOptions) error {
 	// Get a list of all files in the specified directory.
 	filePaths, err := utils.GetAllFilePaths(templateOptions.SourceDirectoryPath, ignoreOptions)
 	if err != nil {
-		return fmt.Errorf("error while obtaining file paths in directory %s: %w", templateOptions.SourceDirectoryPath, err)
+		return fmt.Errorf("error obtaining file paths in directory %s: %w", templateOptions.SourceDirectoryPath, err)
 	}
 
 	// Iterate over each file in the directory, applying the template to each file.
@@ -56,44 +56,43 @@ func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, igno
 		// Read the content of the file.
 		fileContent, err := os.ReadFile(filePath)
 		if err != nil {
-			return fmt.Errorf("error while reading file %s: %w", filePath, err)
+			return fmt.Errorf("error reading file %s: %w", filePath, err)
 		}
 
-		// Create the template and add the custom functions.
+		// Create the template and add custom functions.
 		tmpl := template.New("cloneyTemplate")
 		tmpl.Funcs(sprig.TxtFuncMap()).Funcs(CustomTxtFuncMap(tmpl))
 
 		// Parse the template.
 		tmpl, err = tmpl.Parse(string(fileContent))
 		if err != nil {
-			return fmt.Errorf("error while parsing template: %w", err)
+			return fmt.Errorf("error parsing template: %w", err)
 		}
 
 		// Execute the template, replacing placeholders with variables.
 		var resultBuffer bytes.Buffer
 		err = tmpl.Execute(&resultBuffer, t.Variables)
 		if err != nil {
-			return fmt.Errorf("error while executing template: %w", err)
+			return fmt.Errorf("error executing template: %w", err)
 		}
 
-		// If terminal mode is enabled, print the result to the terminal instead of writing it to the file.
+		// If TerminalMode is enabled, print the result to the terminal instead of writing it to the file.
 		if templateOptions.TerminalMode {
 			fmt.Printf("\n----- File: %s\n%s\n", filePath, resultBuffer.String())
 			continue
 		}
 
-		// Write the resulting content back to the file, overwriting the original file, if TargetDirectoryPath is not defined.
+		// Write the resulting content back to the file, overwriting the original file if TargetDirectoryPath is not defined.
 		if templateOptions.TargetDirectoryPath == nil {
 			err = os.WriteFile(filePath, resultBuffer.Bytes(), os.ModePerm)
 			if err != nil {
-				return fmt.Errorf("error while writing file %s: %w", filePath, err)
+				return fmt.Errorf("error writing file %s: %w", filePath, err)
 			}
 		} else {
-			// Calculate the path of the file relative to the source directory.
-			// This is done to preserve the directory structure when copying files.
+			// Calculate the path of the file relative to the source directory to preserve the directory structure.
 			relativeFilePath, err := filepath.Rel(templateOptions.SourceDirectoryPath, filePath)
 			if err != nil {
-				return fmt.Errorf("error while calculating relative file path: %w", err)
+				return fmt.Errorf("error calculating relative file path: %w", err)
 			}
 
 			// Calculate the path of the file in the target directory.
@@ -109,7 +108,7 @@ func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, igno
 			// Write the resulting content to the file.
 			err = os.WriteFile(targetFilePath, resultBuffer.Bytes(), os.ModePerm)
 			if err != nil {
-				return fmt.Errorf("error while writing file %s: %w", targetFilePath, err)
+				return fmt.Errorf("error writing file %s: %w", targetFilePath, err)
 			}
 		}
 	}
