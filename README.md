@@ -10,13 +10,13 @@
 
 Have you ever used a template Git repository and found yourself in the tedious task of replacing values manually or making extensive adjustments to fit your specific needs? If you have, you're not alone. Traditional Git templates often leave you with the burden of customizing every detail, which can be time-consuming and error-prone. This is where Cloney comes into play, revolutionizing the way you work with Git repositories.
 
-## The Pain of Manual Adjustments
+### The Pain of Manual Adjustments
 
 Imagine you've stumbled upon a fantastic template Git repository on GitHub that promises to kickstart your project. Excited, you fork the repository or download the ZIP archive, only to realize that it's not quite ready for your unique requirements. You need to replace placeholder values, tweak configurations, and adapt the code to match your project's specifications.
 
 This process can be both frustrating and error-prone. Manually searching and replacing values throughout the codebase can lead to mistakes and inconsistencies. What if you could automate this entire customization process and have a template repository that adapts itself to your needs effortlessly? This is precisely what Cloney is designed to do.
 
-## Cloney: Redefining Git Templates
+### Cloney: Redefining Git Templates
 
 Cloney is not just another Git template manager; it's a unique tool that redefines how you work with template repositories. With Cloney, you can say goodbye to manual adjustments and hello to dynamic template creation and management.
 
@@ -28,7 +28,7 @@ Here's how Cloney transforms your Git template experience:
 
 - **Streamlined Workflow**: Cloney accelerates your template utilization. Instead of sifting through code and making manual adjustments, you provide custom variables, and Cloney takes care of the rest.
 
-### What Makes a Cloney Template Repository?
+## What Makes a Cloney Template Repository?
 
 A Cloney Template Repository consists of the following components:
 
@@ -72,9 +72,11 @@ Within the `.cloney.yaml` metadata file, Cloney allows you to define variables t
 
 While default values are optional, Cloney mandates the inclusion of example values to ensure that users have a clear understanding of how to utilize variables effectively. This requirement enhances user experience and reduces the likelihood of configuration errors, resulting in more efficient and error-free template customization.
 
-### Cloney Metadata Example
+### Cloney Metadata File Example
 
 To better understand the structure and content of a Cloney Template Repository's `.cloney.yaml` metadata file, consider the following comprehensive example:
+
+**File**: `.cloney.yaml`
 
 ```yaml
 name: "Billing REST API Template"
@@ -101,9 +103,11 @@ variables:
       - "Yen"
 ```
 
-### Customizing Variables
+## Customizing Variables
 
 When cloning a Cloney Template Repository, users can customize variables by providing values that align with the variable definitions in the `.cloney.yaml` metadata file. For example:
+
+**File**: `.cloney-vars.yaml`
 
 ```yaml
 app_name: "MyApp"
@@ -116,9 +120,7 @@ currencies:
 
 These user-defined values replace the corresponding variables within the template files, resulting in a tailored template that meets specific requirements.
 
-With a firm grasp of `.cloney.yaml` metadata and variable configuration, you're ready to dive into Cloney's command-line interface (CLI) and explore how to create, customize, and utilize Cloney Template Repositories to streamline your development workflow.
-
-### Accessing Variables in Template Files
+## Accessing Variables in Template Files
 
 Cloney makes it effortless to access and utilize variables within your template files. It employs the Go template syntax, a powerful and flexible language for generating text and code. When working with Cloney Template Repositories, you can leverage the Go template syntax to incorporate dynamic variables into your code, making it adaptable to various scenarios.
 
@@ -130,24 +132,49 @@ To access and use variables within your template files, follow these steps:
 
 Here's an example of how you can use variables within your template files:
 
-Let's assume you have a Cloney variable named `app_name` defined in your `.cloney.yaml` metadata file:
+Let's assume you have a Cloney variable named `app_name` and a variable named `currencies` defined in your `.cloney.yaml` metadata file:
 
 ```yaml
 variables:
   - name: "app_name"
     description: "The name of your application."
-    default: "my_app"
-    example: "my_app"
+    example: "MyApp"
+
+  - name: "currencies"
+    description: "List of currencies to use."
+    example:
+      - "Real"
+      - "US Dollar"
+      - "Yene"
 ```
 
-In your template files, you can use this variable as follows:
+In your template files, you can use the variables as follows:
 
 ```go
-// Define the application name using the Cloney variable.
 appName := "{{ .app_name }}"
 ```
 
-When Cloney generates the customized template based on user input, it replaces `{{ .app_name }}` with the value provided for `app_name` during the cloning process.
+```go
+currencies := []string{
+  {{ range .currencies }}
+    "{{ . }}",
+  {{ end }}
+}
+```
+
+When Cloney generates the customized template based on user input, it replaces `{{ .app_name }}` and `{{ .currencies }}` with the corresponding values, resulting in the following code:
+
+```go
+appName := "MyApp"
+```
+
+```go
+currencies := []string{
+  "Real",
+  "US Dollar",
+  "Yene",
+}
+```
 
 ### Go Template Tutorials
 
