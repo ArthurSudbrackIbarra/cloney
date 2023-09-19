@@ -94,8 +94,10 @@ func ListVariableType(listVar interface{}) string {
 	// Get the type of the first value in the list.
 	firstValueType := VariableType(slice[0])
 
-	// Assuming all values in the list have the same type, return the type.
-	return fmt.Sprintf("%s [%s]", LIST_VARIABLE_TYPE, firstValueType)
+	// Assuming all values in the list have the same type, return the type idented.
+	return IndentStringStructure(
+		fmt.Sprintf("%s [\n%s\n]", LIST_VARIABLE_TYPE, firstValueType),
+	)
 }
 
 // MapVariableType returns a string representation of the type of a map variable.
@@ -126,7 +128,10 @@ func MapVariableType(mapVar interface{}) string {
 		variableTypes += fmt.Sprintf("%s: %s\n", key, valueType)
 	}
 
-	return fmt.Sprintf("%s {\n%s}", MAP_VARIABLE_TYPE, variableTypes)
+	// Return the map type indented.
+	return IndentStringStructure(
+		fmt.Sprintf("%s {\n%s\n}", MAP_VARIABLE_TYPE, variableTypes),
+	)
 }
 
 // IndentStringStructure indents the structure of a string (list or map-like structure).
