@@ -8,38 +8,28 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
+- [Introduction](#introduction)
 
-   - [The Pain of Manual Adjustments](#the-pain-of-manual-adjustments)
-   - [Cloney Template Repositories](#cloney-template-repositories)
-   - [Custom Variables](#custom-variables)
+  - [The Pain of Manual Adjustments](#the-pain-of-manual-adjustments)
+  - [Cloney Template Repositories](#cloney-template-repositories)
+  - [Custom Variables](#custom-variables)
 
-1. [What Makes a Cloney Template Repository?](#what-makes-a-cloney-template-repository)
+- [What Makes a Cloney Template Repository?](#what-makes-a-cloney-template-repository)
 
-   - [Git Repository](#git-repository)
-   - [`.cloney.yaml` Metadata File](#cloney-yaml-metadata-file)
+- [Cloney Example Template Repository](#cloney-example-template-repository)
 
-1. [Cloney Example Template Repository](#cloney-example-template-repository)
+- [Understanding the `.cloney.yaml` Metadata File](#understanding-the-cloneyyaml-metadata-file)
 
-   - [Understanding the `.cloney.yaml` Metadata File](#understanding-the-cloney-yaml-metadata-file)
+  - [Template Variables](#template-variables)
 
-1. [Customizing Variables](#customizing-variables)
+- [Providing Custom variables](#providing-custom-variables)
 
-   - [Accessing Variables in Template Files](#accessing-variables-in-template-files)
+- [Accessing Variables in Template Files](#accessing-variables-in-template-files)
 
-1. [Go Template Tutorials](#go-template-tutorials)
+  - [Go Template Tutorials](#go-template-tutorials)
 
-   - [Official Go Documentation](#official-go-documentation)
-   - [Go Text Templates](#go-text-templates)
-   - [Sprig Functions](#sprig-functions)
-   - [Helm Template Functions](#helm-template-functions)
-
-1. [Cloney Command-Line Interface (CLI)](#cloney-command-line-interface-cli)
-   - [Cloney CLI Commands](#cloney-cli-commands)
-     - [Start Command](#start-command)
-     - [Info Command](#info-command)
-     - [Clone Command](#clone-command)
-     - [Dry Run Command](#dry-run-command)
+- [Cloney Command-Line Interface (CLI)](#cloney-command-line-interface-cli)
+  - [Cloney CLI Commands](#cloney-cli-commands)
 
 ## Introduction
 
@@ -139,7 +129,7 @@ Within the `.cloney.yaml` metadata file, Cloney allows you to define variables t
 
 - **Example Value**: Every variable must include an example value that demonstrates how it should be formatted and used. This example serves as a practical reference for users, helping them correctly configure variables within their customized templates.
 
-## Customizing Variables
+## Providing Custom Variables
 
 When cloning a Cloney Template Repository, users can customize variables by providing values that align with the variable definitions in the `.cloney.yaml` metadata file. Here's an example of a `.cloney-vars.yaml` file that contains custom values for the variables:
 
