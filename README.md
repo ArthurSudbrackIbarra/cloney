@@ -236,6 +236,13 @@ The `cloney` CLI is used to interact with Cloney Template Repositories, allowing
      cloney start
      ```
 
+    <br>
+    <p align="center">
+      <img src="images/commands/start.png">
+    </p>
+    <br>
+    <br>
+
 1. **Info Command**
 
    - To retrieve information about a Cloney Template Repository in the current directory:
@@ -256,6 +263,13 @@ The `cloney` CLI is used to interact with Cloney Template Repositories, allowing
      cloney info https://github.com/username/template-repo.git
      ```
 
+     <br>
+     <p align="center">
+       <img src="images/commands/info.png">
+     </p>
+     <br>
+     <br>
+
 1. **Clone Command**
 
    - To clone a Cloney Template Repository with custom variable values from a variables file (e.g., `my-vars.yaml`) in the same directory:
@@ -272,6 +286,13 @@ The `cloney` CLI is used to interact with Cloney Template Repositories, allowing
      cloney clone https://github.com/username/template-repo.git -v '{ app_name: "MyApp", enable_https: true }'
      ```
 
+    <br>
+    <p align="center">
+      <img src="images/commands/clone.png">
+    </p>
+    <br>
+    <br>
+
 1. **Dry Run Command**
 
    - To debug your own Cloney Template Repository, seeing how variables are replaced, and checking for errors:
@@ -281,3 +302,10 @@ The `cloney` CLI is used to interact with Cloney Template Repositories, allowing
      ```
 
    Just like the `clone` command, you can pass variables in the same way.
+
+    <br>
+    <p align="center">
+      <img src="images/commands/dry-run.png">
+    </p>
+    <br>
+    <br>

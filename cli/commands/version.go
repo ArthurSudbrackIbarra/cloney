@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/spf13/cobra"
@@ -9,11 +10,10 @@ import (
 
 // versionCmdRun is the function that runs when the version command is called.
 func versionCmdRun(cmd *cobra.Command, args []string) {
-	// Get the application configuration.
 	appConfig := config.GetAppConfig()
 
-	// Print the current version of Cloney.
-	fmt.Printf("Cloney version %s\n", appConfig.AppVersion)
+	// Print the current version of Cloney, the operating system and the architecture.
+	fmt.Printf("Cloney version %s %s %s\n", appConfig.AppVersion, runtime.GOOS, runtime.GOARCH)
 }
 
 // versionCmd represents the version command.

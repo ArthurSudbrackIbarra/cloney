@@ -1,6 +1,8 @@
 package steps
 
 import (
+	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -112,7 +114,7 @@ func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 		return "", err
 	}
 	if !suppressPrints {
-		utils.OKMessage("The template repository metadata file was found.")
+		utils.OKMessage("The template repository metadata file was found")
 	}
 
 	return string(metadataBytes), nil
@@ -167,4 +169,15 @@ func FillTemplateVariables(
 	}
 
 	return nil
+}
+
+// InputWithDefaultValue asks the user for input and returns the value or the default value.
+func InputWithDefaultValue(scanner *bufio.Scanner, message, defaultValue string) string {
+	fmt.Printf("%s [%s]: ", message, utils.Blue(defaultValue))
+	scanner.Scan()
+	input := scanner.Text()
+	if input == "" {
+		return defaultValue
+	}
+	return input
 }

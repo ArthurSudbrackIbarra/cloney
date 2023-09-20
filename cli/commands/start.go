@@ -35,27 +35,25 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		fmt.Print("Press enter to use the default values.\n\n")
 
 		if name == "" {
-			fmt.Printf("What is the name of the template repository [%s]: ", appConfig.DefaultCloneyProjectName)
-			scanner.Scan()
-			name = scanner.Text()
+			name = steps.InputWithDefaultValue(
+				scanner, "What is the name of the template repository", appConfig.DefaultCloneyProjectName,
+			)
 		}
 
 		if description == "" {
-			fmt.Printf("What is the description of the template repository [%s]: ", appConfig.DefaultMetadataDescriptionValue)
-			scanner.Scan()
-			description = scanner.Text()
+			description = steps.InputWithDefaultValue(
+				scanner, "What is the description of the template repository", appConfig.DefaultMetadataDescriptionValue,
+			)
 		}
 
 		if license == "" {
-			fmt.Printf("What is the license of the template repository [%s]: ", appConfig.DefaultMetadataLicenseValue)
-			scanner.Scan()
-			license = scanner.Text()
+			license = steps.InputWithDefaultValue(
+				scanner, "What is the license of the template repository", appConfig.DefaultMetadataLicenseValue,
+			)
 		}
 
 		if len(authors) == 0 {
-			fmt.Print("What are the authors of the template repository (separated by commas): ")
-			scanner.Scan()
-			authorsStr = scanner.Text()
+			authorsStr = steps.InputWithDefaultValue(scanner, "What are the authors of the template repository (separated by commas)", "")
 			if authorsStr != "" {
 				for _, author := range strings.Split(authorsStr, ",") {
 					authors = append(authors, strings.TrimSpace(author))
@@ -68,45 +66,34 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Set default values.
-	if name == "" {
-		name = appConfig.DefaultCloneyProjectName
-	}
-	if description == "" {
-		description = appConfig.DefaultMetadataDescriptionValue
-	}
-	if license == "" {
-		license = appConfig.DefaultMetadataLicenseValue
-	}
-
 	// Build the raw YAML metadata string.
-	rawMetadata := "# The name of this template repository.\n"
-	rawMetadata += fmt.Sprintf("name: %s\n\n", name)
-	rawMetadata += "# The description of this template repository.\n"
-	rawMetadata += fmt.Sprintf("description: %s\n\n", description)
-	rawMetadata += "# The version of this template repository. Change it as you make changes to your template.\n"
-	rawMetadata += "template_version: \"0.0.0\"\n\n"
-	rawMetadata += "# The version of this manifest. Do not change this value unless you know what you are doing.\n"
+	rawMetadata := "# The version of this Cloney manifest file, ensuring compatibility with different versions of Cloney.\n"
 	rawMetadata += fmt.Sprintf("manifest_version: %s\n\n", appConfig.MetadataManifestVersion)
-	rawMetadata += "# The license of the template repository.\n"
+	rawMetadata += "# The name of your template, providing a clear identifier for users.\n"
+	rawMetadata += fmt.Sprintf("name: %s\n\n", name)
+	rawMetadata += "# A brief but informative description of your template's purpose and functionality.\n"
+	rawMetadata += fmt.Sprintf("description: %s\n\n", description)
+	rawMetadata += "# The version number of your template. Update it as you make new changes to your template.\n"
+	rawMetadata += "template_version: \"0.0.0\"\n\n"
+	rawMetadata += "# The licensing information for your template, specifying how others can use and distribute it.\n"
 	rawMetadata += fmt.Sprintf("license: %s\n", license)
 	if len(authors) > 0 {
-		rawMetadata += "\n# The authors of the template repository.\n"
+		rawMetadata += "\n# A list of contributors or creators of the template, acknowledging their role in its development.\n"
 		rawMetadata += "authors:\n"
 		for _, author := range authors {
 			rawMetadata += fmt.Sprintf("  - %s\n", author)
 		}
 	}
 	// Example variables.
-	rawMetadata += "\n# Example variables. Delete this section and add your own variables.\n"
+	rawMetadata += "\n# A list of variables that users can customize during the cloning process.\n"
+	rawMetadata += "# Delete this section and add your own variables.\n"
 	rawMetadata += "variables:\n"
 	rawMetadata += "  - name: app_name\n"
 	rawMetadata += "    description: The name of the application.\n"
 	rawMetadata += "    default: my-app\n"
-	rawMetadata += "    example: my-app # Example is required so that the variable type can be identified.\n\n"
+	rawMetadata += "    example: my-app\n\n"
 	rawMetadata += "  - name: enable_https\n"
 	rawMetadata += "    description: Whether to enable HTTPS or not.\n"
-	rawMetadata += "    default: true # Remove default to make the variable required.\n"
 	rawMetadata += "    example: true\n"
 
 	// Get the current working directory.

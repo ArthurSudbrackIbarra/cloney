@@ -108,7 +108,14 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 		// User variables are compared against the example value of the template repository metadata file.
 		type1 := VariableType(variable.Example)
 		type2 := VariableType(userVariables[variable.Name])
-		if type1 != type2 {
+
+		// Special case, if the template variable is a 'decimal' and the user variable is an 'integer', it is valid.
+		if type1 == DECIMAL_VARIABLE_TYPE && type2 == INTEGER_VARIABLE_TYPE {
+			continue
+		}
+
+		// In other cases, if the types are different, return an error.
+		if !AreVariablesSameType(variable.Example, userVariables[variable.Name]) {
 			return nil, fmt.Errorf("variable '%s' is of type '%s' but must be of type '%s'", variable.Name, type2, type1)
 		}
 	}
@@ -120,11 +127,11 @@ func (m *CloneyMetadata) ShowGeneralInformation() {
 	table := tw.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
 	table.SetHeaderColor(
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
 	)
 	table.SetAlignment(tw.ALIGN_LEFT)
 	table.Append([]string{m.Name, m.Description, m.TemplateVersion, strings.Join(m.Authors, ", "), m.License})
@@ -140,11 +147,11 @@ func (m *CloneyMetadata) ShowVariables() {
 	table := tw.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Name", "Description", "Type", "Default", "YAML Example"})
 	table.SetHeaderColor(
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
-		tw.Colors{tw.Bold, tw.BgYellowColor, tw.FgBlackColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
+		tw.Colors{tw.Bold, tw.BgBlueColor},
 	)
 	table.SetAlignment(tw.ALIGN_LEFT)
 	table.SetAutoWrapText(false)

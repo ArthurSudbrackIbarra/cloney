@@ -21,7 +21,6 @@ const (
 
 // VariableType returns the type of a variable as a string.
 func VariableType(variable interface{}) string {
-	// Determine the variable type by checking the type of the example value.
 	variableType := reflect.TypeOf(variable).String()
 
 	// Check for common types and classify them.
@@ -158,4 +157,69 @@ func IndentStringStructure(input string) string {
 	}
 
 	return output
+}
+
+// AreVariablesSameType checks if two variables are of the same type.
+func AreVariablesSameType(variable1 interface{}, variable2 interface{}) bool {
+	type1 := reflect.TypeOf(variable1)
+	type2 := reflect.TypeOf(variable2)
+
+	// First check if the types are the same.
+	if type1 != type2 {
+		return false
+	}
+
+	// If the types are the same, check if they are slices.
+	if type1.Kind() == reflect.Slice {
+		if type1.Elem() != type2.Elem() {
+			return false
+		}
+
+		value1 := reflect.ValueOf(variable1)
+		value2 := reflect.ValueOf(variable2)
+
+		// If the slices are empty, return true.
+		if value1.Len() == 0 && value2.Len() == 0 {
+			return true
+		}
+
+		// Check if the elements at position 0 are of the same type.
+		element1 := value1.Index(0)
+		element2 := value2.Index(0)
+		return AreVariablesSameType(element1.Interface(), element2.Interface())
+	}
+
+	// If the types are maps, check if the keys are the same type and values are of the same type recursively.
+	if type1.Kind() == reflect.Map {
+		keyType1 := type1.Key()
+		keyType2 := type2.Key()
+		valueType1 := type1.Elem()
+		valueType2 := type2.Elem()
+
+		if keyType1 != keyType2 || valueType1 != valueType2 {
+			return false
+		}
+
+		mapValue1 := reflect.ValueOf(variable1)
+		mapValue2 := reflect.ValueOf(variable2)
+
+		// Check if the keys are the same in both maps.
+		for _, key := range mapValue1.MapKeys() {
+			if !mapValue2.MapIndex(key).IsValid() {
+				return false
+			}
+		}
+
+		// Check if the values are of the same type for each key.
+		for _, key := range mapValue1.MapKeys() {
+			if !AreVariablesSameType(mapValue1.MapIndex(key).Interface(), mapValue2.MapIndex(key).Interface()) {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	// If the types are not slices or maps, they are basic types (ints, floats, bools, strings).
+	return true
 }

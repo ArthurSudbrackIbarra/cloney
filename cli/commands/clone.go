@@ -82,6 +82,10 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Delete the repository metadata file.
 	os.Remove(metadataFilePath)
 
+	// Delete the .git directory.
+	gitDirPath := filepath.Join(clonePath, ".git")
+	os.RemoveAll(gitDirPath)
+
 	// Parse the metadata file.
 	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
 	if err != nil {
