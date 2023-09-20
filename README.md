@@ -22,7 +22,7 @@
 
   - [Template Variables](#template-variables)
 
-- [Providing Custom variables](#providing-custom-variables)
+- [Providing Custom Variables](#providing-custom-variables)
 
 - [Accessing Variables in Template Files](#accessing-variables-in-template-files)
 
