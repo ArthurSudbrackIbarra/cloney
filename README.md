@@ -1,4 +1,4 @@
-# Cloney: Streamlining Git Template Customization
+# Cloney
 
 <br>
 <p align="center">
@@ -228,7 +228,7 @@ The `cloney` CLI is used to interact with Cloney Template Repositories, allowing
    - To clone a Cloney Template Repository with custom variable values from a variables file (e.g., `my-vars.yaml`) in the same directory:
 
      ```bash
-     cloney clone -v my-vars.yaml
+     cloney clone https://github.com/username/template-repo.git -v my-vars.yaml
      ```
 
      If you don't specify a variables file using `-v`, Cloney will search for a file named `.cloney-vars.yaml` in the current directory by default.
@@ -236,7 +236,7 @@ The `cloney` CLI is used to interact with Cloney Template Repositories, allowing
      You can also specify variables using inline YAML:
 
      ```bash
-     cloney clone -v '{ app_name: "MyApp", enable_https: true }'
+     cloney clone https://github.com/username/template-repo.git -v '{ app_name: "MyApp", enable_https: true }'
      ```
 
 1. **Dry Run Command**
