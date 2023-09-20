@@ -47,7 +47,7 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "cloney-windows-amd64.zip,cloney-linux-amd64.zip,cloney-darwin-amd64.zip"
+          artifacts: "cloney-*.zip"
         env:
           # Use a personal access token to create the release.
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
