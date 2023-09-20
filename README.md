@@ -6,6 +6,41 @@
 </p>
 <br>
 
+## Table of Contents
+
+1. [Introduction](#introduction)
+
+   - [The Pain of Manual Adjustments](#the-pain-of-manual-adjustments)
+   - [Cloney Template Repositories](#cloney-template-repositories)
+   - [Custom Variables](#custom-variables)
+
+1. [What Makes a Cloney Template Repository?](#what-makes-a-cloney-template-repository)
+
+   - [Git Repository](#git-repository)
+   - [`.cloney.yaml` Metadata File](#cloney-yaml-metadata-file)
+
+1. [Cloney Example Template Repository](#cloney-example-template-repository)
+
+   - [Understanding the `.cloney.yaml` Metadata File](#understanding-the-cloney-yaml-metadata-file)
+
+1. [Customizing Variables](#customizing-variables)
+
+   - [Accessing Variables in Template Files](#accessing-variables-in-template-files)
+
+1. [Go Template Tutorials](#go-template-tutorials)
+
+   - [Official Go Documentation](#official-go-documentation)
+   - [Go Text Templates](#go-text-templates)
+   - [Sprig Functions](#sprig-functions)
+   - [Helm Template Functions](#helm-template-functions)
+
+1. [Cloney Command-Line Interface (CLI)](#cloney-command-line-interface-cli)
+   - [Cloney CLI Commands](#cloney-cli-commands)
+     - [Start Command](#start-command)
+     - [Info Command](#info-command)
+     - [Clone Command](#clone-command)
+     - [Dry Run Command](#dry-run-command)
+
 ## Introduction
 
 Have you ever used a template Git repository and found yourself in the tedious task of replacing values manually or making extensive adjustments to fit your specific needs? If you have, you're not alone. Traditional Git templates often leave you with the burden of customizing every detail, which can be time-consuming and error-prone. This is where Cloney comes into play, revolutionizing the way you work with Git repositories.
@@ -14,11 +49,7 @@ Have you ever used a template Git repository and found yourself in the tedious t
 
 Imagine you've stumbled upon a fantastic template Git repository on GitHub that promises to kickstart your project. Excited, you fork the repository only to realize that it's not quite ready for your unique requirements. You need to replace placeholder values, tweak configurations, and adapt the code to match your project's specifications.
 
-This process can be both frustrating and error-prone. Manually searching and replacing values throughout the codebase can lead to mistakes and inconsistencies. What if you could automate this entire customization process and have a template repository that adapts itself to your needs effortlessly? This is precisely what Cloney is designed to do.
-
-### Cloney: Redefining Git Templates
-
-Cloney is not just another Git template manager; it's a unique tool that redefines how you work with template repositories. With Cloney, you can say goodbye to manual adjustments and hello to dynamic template creation and management.
+This process can be both frustrating and error-prone. Manually searching and replacing values throughout the codebase can lead to mistakes and inconsistencies. What if you could automate this entire customization process and have a template repository that adapts itself to your needs effortlessly? This is precisely what Cloney is designed to do, with it, you can say goodbye to manual adjustments and hello to dynamic template creation and management.
 
 ### Cloney Template Repositories
 
@@ -37,6 +68,16 @@ A Cloney Template Repository consists of the following components:
 - **`.cloney.yaml` Metadata File**: This special YAML file serves as the template repository's control center and is located in the root of the repository. It stores essential details about the repository, such as variable definitions, descriptions, and other crucial information that Cloney relies on to generate dynamic templates.
 
 By adding the `.cloney.yaml` file to your repository's root, you effectively transform your standard repository into a Cloney Template Repository. This simple addition unlocks the power of dynamic template creation and customization, allowing users to tailor the project to their specific needs with ease.
+
+## Cloney Example Template Repository
+
+Visit the [Cloney Example Template Repository](https://github.com/ArthurSudbrackIbarra/cloney-test) to see Cloney templates in action. Here, you can:
+
+- Explore its structure.
+- Check out its `.cloney.yaml` metadata file.
+- Customize variables to see Cloney in action.
+
+Discover the simplicity of project setup and customization by exploring this example repository.
 
 ## Understanding the `.cloney.yaml` Metadata File
 

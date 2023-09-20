@@ -2,7 +2,6 @@ package templates
 
 import (
 	"bytes"
-	"fmt"
 	"text/template"
 )
 
@@ -22,24 +21,6 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 			return "", err
 		}
 		return buf.String(), nil
-	}
-
-	// 'required' function from Helm. Adapted from:
-	// https://github.com/helm/helm/blob/8648ccf5d35d682dcd5f7a9c2082f0aaf071e817/pkg/engine/engine.go#L157
-	//
-	// The required function allows you to declare a particular values entry
-	// as required for template rendering. If the value is empty, the template
-	// rendering will fail with a user submitted error message.
-	funcMap["required"] = func(warn string, val interface{}) (interface{}, error) {
-		if val == nil {
-			// Convert nil to "" in case required is piped into other functions
-			return "", fmt.Errorf(warn)
-		} else if _, ok := val.(string); ok {
-			if val == "" {
-				return val, fmt.Errorf(warn)
-			}
-		}
-		return val, nil
 	}
 
 	// Implement your own custom functions here...
