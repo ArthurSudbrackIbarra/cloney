@@ -185,11 +185,13 @@ To help you make the most of Cloney's dynamic variables and the Go template synt
 
   - [Explore Sprig Functions](https://masterminds.github.io/sprig/)
 
+- **Helm Template Functions**: Helm is a widely-used package manager for Kubernetes, utilizing Go templates and introducing custom functions. Cloney integrates with Helm's `include` function, enabling its use within your templates.
+
+  - [Explore Helm's Include Function](https://helm.sh/docs/howto/charts_tips_and_tricks/#:~:text=The%20include%20function%20allows%20you,results%20to%20other%20template%20functions.)
+
 ## Cloney Command-Line Interface (CLI)
 
 The Cloney Command-Line Interface (CLI) is the tool you use to interact with Cloney Template Repositories. It offers a set of straightforward commands that enable you to manage, customize, and work with Cloney templates.
-
-Thank you for the clarification. Here's the updated information for the `cloney clone` command:
 
 ### Cloney CLI Commands
 
