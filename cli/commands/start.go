@@ -96,12 +96,6 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	rawMetadata += "    description: Whether to enable HTTPS or not.\n"
 	rawMetadata += "    example: true\n"
 
-	// Get the current working directory.
-	currentDir, err := steps.GetCurrentWorkingDirectory()
-	if err != nil {
-		return err
-	}
-
 	// Suppress prints for common-steps functions.
 	steps.SetSuppressPrints(true)
 
@@ -119,7 +113,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		// If the output flag is not set, use the name of the template repository as the name of the directory.
 		output = name
 	}
-	clonePath := steps.CalculateClonePath(repository, currentDir, output)
+	clonePath, _ := steps.CalculatePath(output, repository.GetName())
 
 	// Clone the repository.
 	err = steps.CloneRepository(repository, clonePath)

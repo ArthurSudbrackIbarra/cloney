@@ -24,6 +24,9 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	tag, _ := cmd.Flags().GetString("tag")
 	token, _ := cmd.Flags().GetString("token")
 
+	// Variable to store errors.
+	var err error
+
 	// Suppress prints for this command.
 	steps.SetSuppressPrints(true)
 
@@ -54,14 +57,11 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	} else {
 		// If the argument is not a git repository URL, assume it is a local path.
 
-		// Get the current working directory.
-		currentDir, err := steps.GetCurrentWorkingDirectory()
-		if err != nil {
-			return err
-		}
+		// Calculate the directory path.
+		repositorySource, _ := steps.CalculatePath(repositorySource, "")
 
 		// Get the metadata file content.
-		metadataFilePath := filepath.Join(currentDir, repositorySource, config.GetAppConfig().MetadataFileName)
+		metadataFilePath := filepath.Join(repositorySource, config.GetAppConfig().MetadataFileName)
 		metadataContent, err = steps.ReadRepositoryMetadata(metadataFilePath)
 		if err != nil {
 			return err

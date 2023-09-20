@@ -83,13 +83,21 @@ func AuthenticateToRepository(repository *git.GitRepository, gitToken string) {
 	}
 }
 
-// CalculateClonePath calculates the clone path.
-func CalculateClonePath(repository *git.GitRepository, currentDir, output string) string {
-	repositoryName := repository.GetName()
-	if output == "" {
-		return filepath.Join(currentDir, repositoryName)
+// CalculatePath calculates the path.
+func CalculatePath(path string, defaultName string) (string, error) {
+	if path == "" {
+		return defaultName, nil
 	}
-	return filepath.Join(currentDir, output)
+
+	if filepath.IsAbs(path) {
+		return path, nil
+	}
+
+	currentDir, err := GetCurrentWorkingDirectory()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(currentDir, path), nil
 }
 
 // CloneRepository clones the repository.

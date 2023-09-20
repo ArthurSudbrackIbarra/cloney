@@ -62,7 +62,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	steps.AuthenticateToRepository(repository, token)
 
 	// Calculate the clone path.
-	clonePath := steps.CalculateClonePath(repository, currentDir, output)
+	clonePath, _ := steps.CalculatePath(output, repository.GetName())
 
 	// Clone the repository.
 	err = steps.CloneRepository(repository, clonePath)

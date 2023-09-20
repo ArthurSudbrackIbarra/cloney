@@ -36,8 +36,8 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Calculate the directory paths.
-	targetPath := filepath.Join(currentDir, path)
-	outputPath := filepath.Join(currentDir, output)
+	targetPath, _ := steps.CalculatePath(path, "")
+	outputPath, _ := steps.CalculatePath(output, "")
 
 	// Read the repository metadata file.
 	metadataFilePath := filepath.Join(targetPath, appConfig.MetadataFileName)
@@ -72,6 +72,7 @@ func dryrunCmdRun(cmd *cobra.Command, args []string) error {
 			appConfig.DefaultUserVariablesFileName,
 			filepath.Base(filepath.Join(currentDir, variables)),
 		},
+
 		// Ignore '.git' directory when filling the template variables.
 		IgnoreDirectories: []string{".git"},
 	}
