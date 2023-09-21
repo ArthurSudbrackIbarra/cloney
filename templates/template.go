@@ -47,7 +47,7 @@ type TemplateFillOptions struct {
 }
 
 // FillDirectory processes all files in a directory with variables from the TemplateFiller.
-// If TerminalMode is enabled, the filled template content is printed to the terminal instead of being saved to files.
+// If PrintMode is enabled, the filled template content is printed to Stdout instead of being saved to files.
 func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions utils.IgnorePathOptions) error {
 	// If PrintMode is enabled, but Stdout is not defined, use os.Stdout.
 	if templateOptions.PrintMode && templateOptions.Stdout == nil {
@@ -85,7 +85,7 @@ func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, igno
 			return fmt.Errorf("error executing template: %w", err)
 		}
 
-		// If TerminalMode is enabled, print the result to the terminal instead of writing it to the file.
+		// If PrintMode is enabled, print the result to Stdout and continue to the next file.
 		if templateOptions.PrintMode {
 			templateOptions.Stdout.Write(
 				[]byte(fmt.Sprintf("\n----- File: %s\n%s\n", filePath, resultBuffer.String())),
