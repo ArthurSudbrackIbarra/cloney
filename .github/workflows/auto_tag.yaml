@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  tag:
     runs-on: ubuntu-22.04
 
     # Give permissions to modify repository contents.

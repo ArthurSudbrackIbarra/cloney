@@ -1,0 +1,28 @@
+name: Run Automated Tests
+
+# Trigger when a PR is created against the main branch and when a commit is pushed to the main branch.
+on:
+  pull_request:
+    types:
+      - opened
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      # Check out the repository.
+      - uses: actions/checkout@v3
+
+      # Set up Go.
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      # Run the tests.
+      - name: Run Tests
+        run: go test ./... -v 

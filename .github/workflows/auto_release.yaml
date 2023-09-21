@@ -7,7 +7,7 @@ on:
       - "*"
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-22.04
 
     # Give permissions to modify repository contents.
