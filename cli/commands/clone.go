@@ -129,27 +129,25 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// cloneCmd represents the 'clone' command.
-// This command is used to clone a template repository.
-var cloneCmd = &cobra.Command{
-	Use:   "clone [repository_url]",
-	Short: "Clones a template repository.",
-	Long: fmt.Sprintf(`Clones a template repository.
+// CreateCloneCommand creates the 'clone' command and its respective flags.
+func CreateCloneCommand() *cobra.Command {
+	// cloneCmd represents the 'clone' command.
+	// This command is used to clone a template repository.
+	cloneCmd := &cobra.Command{
+		Use:   "clone [repository_url]",
+		Short: "Clones a template repository.",
+		Long: fmt.Sprintf(`Clones a template repository.
 
 The 'cloney clone' command will search for a file named '%s' in your current directory by default.
 You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
-	Example: strings.Join([]string{
-		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git",
-		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v variables.yaml",
-		"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{ app_name: my-app }'",
-	}, "\n"),
-	Aliases: []string{"cl"},
-	RunE:    cloneCmdRun,
-}
-
-// InitializeClone initializes the 'clone' command.
-func InitializeClone(rootCmd *cobra.Command) {
-	appConfig := config.GetAppConfig()
+		Example: strings.Join([]string{
+			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git",
+			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v variables.yaml",
+			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{ app_name: my-app }'",
+		}, "\n"),
+		Aliases: []string{"cl"},
+		RunE:    cloneCmdRun,
+	}
 
 	// Define command-line flags for the 'clone' command.
 	cloneCmd.Flags().StringP("output", "o", "", "Path to clone the repository to")
@@ -158,6 +156,5 @@ func InitializeClone(rootCmd *cobra.Command) {
 	cloneCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
 	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private Git repository")
 
-	// Add the 'clone' command to the root command.
-	rootCmd.AddCommand(cloneCmd)
+	return cloneCmd
 }

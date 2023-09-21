@@ -80,34 +80,33 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// infoCmd represents the info command.
-// This command is used to print information about a Cloney template repository.
-var infoCmd = &cobra.Command{
-	Use:   "info [local_path OR repository_url]",
-	Short: "Prints information about a Cloney template repository",
-	Long: `Prints information about a Cloney template repository.
+// CreateInfoCommand creates the 'info' command and its respective flags.
+func CreateInfoCommand() *cobra.Command {
+	// infoCmd represents the info command.
+	// This command is used to print information about a Cloney template repository.
+	infoCmd := &cobra.Command{
+		Use:   "info [local_path OR repository_url]",
+		Short: "Prints information about a Cloney template repository",
+		Long: `Prints information about a Cloney template repository.
 
 cloney info will give you information about a Cloney template repository, such as its name, description, and variables.
 
 It can get information from a local template repository, or from a remote template repository.
 By default, it will get information from the current directory, assuming it is a template repository.
 `,
-	Example: strings.Join([]string{
-		utils.CommandExampleWithExplanation("  cloney info", "Info about the current directory as a template repository"),
-		utils.CommandExampleWithExplanation("  cloney info ./my-template", "Info about a local template repository in the given path"),
-		utils.CommandExampleWithExplanation("  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git", "Info about a remote template repository"),
-	}, "\n"),
-	Aliases: []string{"more"},
-	RunE:    infoCmdRun,
-}
+		Example: strings.Join([]string{
+			utils.CommandExampleWithExplanation("  cloney info", "Info about the current directory as a template repository"),
+			utils.CommandExampleWithExplanation("  cloney info ./my-template", "Info about a local template repository in the given path"),
+			utils.CommandExampleWithExplanation("  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git", "Info about a remote template repository"),
+		}, "\n"),
+		Aliases: []string{"more"},
+		RunE:    infoCmdRun,
+	}
 
-// InitializeInfo initializes the info command.
-func InitializeInfo(rootCmd *cobra.Command) {
 	// Define command-line flags for the 'info' command.
 	infoCmd.Flags().StringP("branch", "b", "main", "Git branch, if referencing a git repository")
 	infoCmd.Flags().StringP("tag", "t", "", "Git tag, if referencing a git repository")
 	infoCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
 
-	// Add the 'info' command to the root command.
-	rootCmd.AddCommand(infoCmd)
+	return infoCmd
 }

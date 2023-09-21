@@ -28,12 +28,19 @@ var rootCmd = &cobra.Command{
 
 // Initialize initializes the CLI.
 func Initialize() {
+	// Create subcommands.
+	cloneCmd := commands.CreateCloneCommand()
+	dryRunCmd := commands.CreateDryRunCommand()
+	infoCmd := commands.CreateInfoCommand()
+	startCmd := commands.CreateStartCommand()
+	versionCmd := commands.CreateVersionCommand()
+
 	// Add subcommands.
-	commands.InitializeVersion(rootCmd)
-	commands.InitializeInfo(rootCmd)
-	commands.InitializeClone(rootCmd)
-	commands.InitializeDryrun(rootCmd)
-	commands.InitializeStart(rootCmd)
+	rootCmd.AddCommand(cloneCmd)
+	rootCmd.AddCommand(dryRunCmd)
+	rootCmd.AddCommand(infoCmd)
+	rootCmd.AddCommand(startCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	// CLI formatting, colors, bold, italic...
 	cc.Init(&cc.Config{

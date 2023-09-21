@@ -64,6 +64,17 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			utils.ErrorMessage("Error reading user input", err)
 		}
+	} else {
+		// If the non-interactive flag is set, use the default values.
+		if name == "" {
+			name = appConfig.DefaultCloneyProjectName
+		}
+		if description == "" {
+			description = appConfig.DefaultMetadataDescriptionValue
+		}
+		if license == "" {
+			license = appConfig.DefaultMetadataLicenseValue
+		}
 	}
 
 	// Build the raw YAML metadata string.
@@ -90,8 +101,8 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	rawMetadata += "variables:\n"
 	rawMetadata += "  - name: app_name\n"
 	rawMetadata += "    description: The name of the application.\n"
-	rawMetadata += "    default: my-app\n"
-	rawMetadata += "    example: my-app\n\n"
+	rawMetadata += "    default: My App\n"
+	rawMetadata += "    example: My App\n\n"
 	rawMetadata += "  - name: enable_https\n"
 	rawMetadata += "    description: Whether to enable HTTPS or not.\n"
 	rawMetadata += "    example: true\n"
@@ -138,20 +149,30 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// startCmd represents the start command.
-// This command is used to create a new cloney template repository.
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Creates a new cloney template repository",
-	Long: `Creates a new cloney template repository.
-
-cloney start will create a directory with the necessary files to start a new cloney template repository.`,
-	Example: "  cloney start",
-	RunE:    startCmdRun,
+// ResetStartCommandFlags resets the flags of the 'start' command.
+func ResetStartCommandFlags(startCmd *cobra.Command) {
+	startCmd.Flags().Set("output", "")
+	startCmd.Flags().Set("name", "")
+	startCmd.Flags().Set("description", "")
+	startCmd.Flags().Set("authors", "")
+	startCmd.Flags().Set("license", "")
+	startCmd.Flags().Set("non-interactive", "false")
 }
 
-// InitializeStart initializes the start command.
-func InitializeStart(rootCmd *cobra.Command) {
+// CreateStartCommand creates the 'start' command and its respective flags.
+func CreateStartCommand() *cobra.Command {
+	// startCmd represents the start command.
+	// This command is used to create a new cloney template repository.
+	startCmd := &cobra.Command{
+		Use:   "start",
+		Short: "Creates a new cloney template repository",
+		Long: `Creates a new cloney template repository.
+
+cloney start will create a directory with the necessary files to start a new cloney template repository.`,
+		Example: "  cloney start",
+		RunE:    startCmdRun,
+	}
+
 	// Define command-line flags for the 'start' command.
 	startCmd.Flags().StringP("output", "o", "", "Where to save the template repository")
 	startCmd.Flags().StringP("name", "n", "", "The name of the template repository")
@@ -160,6 +181,5 @@ func InitializeStart(rootCmd *cobra.Command) {
 	startCmd.Flags().StringP("license", "l", "", "The license of the template repository")
 	startCmd.Flags().BoolP("non-interactive", "y", false, "Skip the questions and use the default values and/or flags")
 
-	// Add the 'start' command to the root command.
-	rootCmd.AddCommand(startCmd)
+	return startCmd
 }

@@ -16,16 +16,15 @@ func versionCmdRun(cmd *cobra.Command, args []string) {
 	fmt.Printf("Cloney version %s %s %s\n", appConfig.AppVersion, runtime.GOOS, runtime.GOARCH)
 }
 
-// versionCmd represents the version command.
-// This command is used to print the version of the application.
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Prints the current version of Cloney",
-	Run:   versionCmdRun,
-}
+// CreateVersionCommand creates the 'version' command.
+func CreateVersionCommand() *cobra.Command {
+	// versionCmd represents the version command.
+	// This command is used to print the version of the application.
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Prints the current version of Cloney",
+		Run:   versionCmdRun,
+	}
 
-// InitializeVersion initializes the version command.
-func InitializeVersion(rootCmd *cobra.Command) {
-	// Add the version command to the root command.
-	rootCmd.AddCommand(versionCmd)
+	return versionCmd
 }

@@ -1,113 +1,192 @@
 package commands
 
-// import (
-// 	"fmt"
-// 	"os"
-// 	"path/filepath"
-// 	"testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
 
-// 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
-// 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
+)
 
-// 	"github.com/stretchr/testify/assert"
-// )
+// Create a new instance of the command.
+var cmd = CreateStartCommand()
 
-// // TestStartCommandNonInteractive tests the startCmdRun function with the --non-interactive flag.
-// // This test case validates that if the user uses the --non-interactive flag, the Cloney project
-// // must be created in the default path and the metadata file must be filled with the default values.
-// func TestStartCommandNonInteractive(t *testing.T) {
-// 	// Call the startCmdRun function with the test parameters.
-// 	startCmd.Flags().Set("non-interactive", "true")
-// 	err := startCmdRun(startCmd, []string{})
+// TestMetadataProperties is a struct to store the metadata properties.
+type TestMetadataProperties struct {
+	Name            string
+	Description     string
+	License         string
+	TemplateVersion string
+	ManifestVersion string
+}
 
-// 	// No error should be returned.
-// 	if err != nil {
-// 		t.Errorf("Expected no error, got %v", err)
-// 	}
+// AssertMetadataMainFieldsAreOK asserts that the metadata file contains the main fields
+// and that the fields have the given values.
+func AssertMetadataMainFieldsAreOK(assert *assert.Assertions, metadataProperties TestMetadataProperties, parsedMetadata map[string]interface{}) {
+	assert.Equal(metadataProperties.Name, parsedMetadata["name"])
+	assert.Equal(metadataProperties.Description, parsedMetadata["description"])
+	assert.Equal(metadataProperties.License, parsedMetadata["license"])
+	assert.Equal(metadataProperties.TemplateVersion, parsedMetadata["template_version"])
+	assert.Equal(metadataProperties.ManifestVersion, parsedMetadata["manifest_version"])
+}
 
-// 	// Check if the Cloney project was created in the default path.
-// 	projectPath, err := steps.CalculatePath(
-// 		appConfig.DefaultCloneyProjectName,
-// 		"",
-// 	)
-// 	if err != nil {
-// 		t.Errorf("Project should have been created, got %v", err)
-// 	}
+// assertVariablesAreOK asserts that the metadata file contains the example variables
+// and that the variables have the correct values.
+func AssertMetadataVariablesAreOK(assert *assert.Assertions, parsedMetadata map[string]interface{}) {
+	// Assert that the metadata file contains the variables.
+	assert.Contains(parsedMetadata, "variables")
 
-// 	// Read the repository metadata file.
-// 	metadataFilePath := filepath.Join(projectPath, appConfig.MetadataFileName)
-// 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
-// 	if err != nil {
-// 		t.Errorf("Metadata file should have been created, got %v", err)
-// 	}
+	// Assert that the metadata file has 2 example variables: app_name and enable_https.
+	assert.Equal("app_name", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["name"])
+	assert.Equal("The name of the application.", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["description"])
+	assert.Equal("My App", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["default"])
+	assert.Equal("My App", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["example"])
 
-// 	// Check if the metadata file contains the expected content.
-// 	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
-// 	if err != nil {
-// 		t.Errorf("Metadata file should be able to be parsed, got %v", err)
-// 	}
-// 	assert.Equal(t, appConfig.DefaultCloneyProjectName, cloneyMetadata.Name)
-// 	assert.Equal(t, appConfig.DefaultMetadataDescriptionValue, cloneyMetadata.Description)
-// 	assert.Equal(t, appConfig.DefaultMetadataLicenseValue, cloneyMetadata.License)
-// 	assert.Equal(t, appConfig.MetadataManifestVersion, cloneyMetadata.ManifestVersion)
-// 	assert.Equal(t, appConfig.DefaultMetadataTemplateVersionValue, cloneyMetadata.TemplateVersion)
+	assert.Equal("enable_https", parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["name"])
+	assert.Equal("Whether to enable HTTPS or not.", parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["description"])
+	assert.Equal(true, parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["example"])
+}
 
-// 	// Delete the Cloney project after the test.
-// 	os.RemoveAll(projectPath)
-// }
+// TestCreateCloneyProjectWithDefaultValues tests the creation of a new cloney project with default values,
+// using the --non-interactive flag to force the use of default values.
+func TestCreateCloneyProjectWithDefaultValues(t *testing.T) {
+	// Create a new testing.T instance to use with assert functions.
+	assert := assert.New(t)
 
-// // TestStartCommandWhenProjectFlagsAreUsed tests the startCmdRun function when the user use flags to set the project properties,
-// // like --name, --description, --license...
-// // Check if the metadata file contains the expected content, which is the same as the flags.
-// func TestStartCommandWhenProjectFlagsAreUsed(t *testing.T) {
-// 	// Create a new Cobra command for testing.
-// 	cmd := &cobra.Command{
-// 		Use: "test",
-// 	}
+	// Simulate CLI arguments with flags and values.
+	// Add the --non-interactive flag to force the use of default values.
+	cmd.SetArgs([]string{"--non-interactive"})
 
-// 	// Call the startCmdRun function with the test parameters.
-// 	cmd.Flags().Set("name", "name")
-// 	cmd.Flags().Set("description", "description")
-// 	cmd.Flags().Set("license", "license")
-// 	cmd.Flags().Set("authors", "authors_1, authors_2")
-// 	cmd.Flags().Set("non-interactive", "true")
-// 	err := startCmdRun(cmd, []string{})
+	// Execute the command.
+	err := cmd.Execute()
 
-// 	if err != nil {
-// 		t.Errorf("Expected no error, got %v", err)
-// 	}
+	// Assert that the command did not return an error.
+	assert.Nil(err)
 
-// 	// Check if the Cloney project was created in the default path.
-// 	projectPath, err := steps.CalculatePath(
-// 		appConfig.DefaultCloneyProjectName,
-// 		"",
-// 	)
-// 	if err != nil {
-// 		t.Errorf("Project should have been created, got %v", err)
-// 	}
+	// Assert that the command created the template repository directory.
+	assert.DirExists(appConfig.DefaultCloneyProjectName)
 
-// 	// Read the repository metadata file.
-// 	metadataFilePath := filepath.Join(projectPath, appConfig.MetadataFileName)
-// 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
-// 	if err != nil {
-// 		t.Errorf("Metadata file should have been created, got %v", err)
-// 	}
+	// Assert that the command created the metadata file.
+	metadataFilePath := filepath.Join(appConfig.DefaultCloneyProjectName, appConfig.MetadataFileName)
+	assert.FileExists(metadataFilePath)
 
-// 	fmt.Println(metadataContent)
+	// Assert the metadata file contains the default values.
+	metadataBytes, _ := os.ReadFile(metadataFilePath)
+	var parsedMetadata map[string]interface{}
+	err = yaml.Unmarshal(metadataBytes, &parsedMetadata)
 
-// 	// Check if the metadata file contains the expected content.
-// 	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
-// 	if err != nil {
-// 		t.Errorf("Metadata file should be able to be parsed, got %v", err)
-// 	}
-// 	assert.Equal(t, "name", cloneyMetadata.Name)
-// 	assert.Equal(t, "description", cloneyMetadata.Description)
-// 	assert.Equal(t, "license", cloneyMetadata.License)
-// 	assert.Equal(t, appConfig.MetadataManifestVersion, cloneyMetadata.ManifestVersion)
-// 	for i, author := range cloneyMetadata.Authors {
-// 		assert.Equal(t, fmt.Sprintf("authors_%d", i+1), author)
-// 	}
+	assert.Nil(err)
+	AssertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
+		Name:            appConfig.DefaultCloneyProjectName,
+		Description:     appConfig.DefaultMetadataDescriptionValue,
+		License:         appConfig.DefaultMetadataLicenseValue,
+		TemplateVersion: appConfig.DefaultMetadataTemplateVersionValue,
+		ManifestVersion: appConfig.MetadataManifestVersion,
+	}, parsedMetadata)
+	AssertMetadataVariablesAreOK(assert, parsedMetadata)
 
-// 	// Delete the Cloney project after the test.
-// 	os.RemoveAll(projectPath)
-// }
+	// Delete the created directory after the test.
+	os.RemoveAll(appConfig.DefaultCloneyProjectName)
+
+	// Reset the command flags.
+	ResetStartCommandFlags(cmd)
+}
+
+// TestCreateCloneyProjectWithFlags tests the creation of a new cloney project with flags and values.
+func TestCreateCloneyProjectWithFlags(t *testing.T) {
+	// Test the creation of a new cloney project using the project property flags, like --name, --description, etc.
+	t.Run("TestCreateCloneyProjectWithProjectPropertiesFlags", func(t *testing.T) {
+		// Create a new testing.T instance to use with assert functions.
+		assert := assert.New(t)
+
+		// Simulate CLI arguments with flags and values.
+		cmd.SetArgs([]string{
+			"--name", "mock-name",
+			"--description", "mock-description",
+			"--license", "mock-license",
+			"--non-interactive",
+		})
+
+		// Execute the command.
+		err := cmd.Execute()
+
+		// Assert that the command did not return an error.
+		assert.Nil(err)
+
+		// Assert that the command created the template repository directory.
+		assert.DirExists("mock-name")
+
+		// Assert that the command created the metadata file.
+		metadataFilePath := filepath.Join("mock-name", appConfig.MetadataFileName)
+		assert.FileExists(metadataFilePath)
+
+		// Assert the metadata file contains the default values.
+		metadataBytes, _ := os.ReadFile(metadataFilePath)
+		var metadataParsed map[string]interface{}
+		err = yaml.Unmarshal(metadataBytes, &metadataParsed)
+
+		assert.Nil(err)
+
+		AssertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
+			Name:            "mock-name",
+			Description:     "mock-description",
+			License:         "mock-license",
+			TemplateVersion: appConfig.DefaultMetadataTemplateVersionValue,
+			ManifestVersion: appConfig.MetadataManifestVersion,
+		}, metadataParsed)
+		AssertMetadataVariablesAreOK(assert, metadataParsed)
+
+		// Delete the created directory after the test.
+		os.RemoveAll("mock-name")
+
+		// Reset the command flags.
+		ResetStartCommandFlags(cmd)
+	})
+
+	// Test the creation of a new cloney project using the --output flag.
+	t.Run("TestCreateCloneyProjectWithOutputFlag", func(t *testing.T) {
+		// Create a new testing.T instance to use with assert functions.
+		assert := assert.New(t)
+
+		// Simulate CLI arguments with flags and values.
+		cmd.SetArgs([]string{
+			"--output", "mock-output",
+			"--non-interactive",
+		})
+
+		// Execute the command.
+		err := cmd.Execute()
+
+		// Assert that the command did not return an error.
+		assert.Nil(err)
+
+		// Assert that the command created the template repository directory.
+		assert.DirExists("mock-output")
+
+		// Assert that the command created the metadata file.
+		metadataFilePath := filepath.Join("mock-output", appConfig.MetadataFileName)
+		assert.FileExists(metadataFilePath)
+
+		// Assert the metadata file contains the default values.
+		metadataBytes, _ := os.ReadFile(metadataFilePath)
+		var metadataParsed map[string]interface{}
+		err = yaml.Unmarshal(metadataBytes, &metadataParsed)
+
+		assert.Nil(err)
+		AssertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
+			Name:            appConfig.DefaultCloneyProjectName,
+			Description:     appConfig.DefaultMetadataDescriptionValue,
+			License:         appConfig.DefaultMetadataLicenseValue,
+			TemplateVersion: appConfig.DefaultMetadataTemplateVersionValue,
+			ManifestVersion: appConfig.MetadataManifestVersion,
+		}, metadataParsed)
+		AssertMetadataVariablesAreOK(assert, metadataParsed)
+
+		// Delete the created directory after the test.
+		os.RemoveAll("mock-output")
+
+		// Reset the command flags.
+		ResetStartCommandFlags(cmd)
+	})
+}

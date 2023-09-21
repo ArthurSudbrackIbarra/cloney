@@ -8,7 +8,7 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/utils"
 	"github.com/go-playground/validator/v10"
 	tw "github.com/olekukonko/tablewriter"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
