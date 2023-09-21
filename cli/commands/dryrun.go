@@ -62,7 +62,8 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	templateOptions := templates.TemplateFillOptions{
 		SourceDirectoryPath: targetPath,
 		TargetDirectoryPath: &outputPath,
-		TerminalMode:        outputInTerminal,
+		PrintMode:           outputInTerminal,
+		Stdout:              cmd.OutOrStdout(),
 	}
 	ignoreOptions := utils.IgnorePathOptions{
 		// Ignore specific files when filling the template variables.
@@ -85,7 +86,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	if !outputInTerminal {
-		fmt.Println("\nDone!")
+		cmd.Println("\nDone!")
 	}
 
 	return nil

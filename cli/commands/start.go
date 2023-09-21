@@ -31,8 +31,8 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	appConfig := config.GetAppConfig()
 	if !nonInteractive {
 		scanner := bufio.NewScanner(os.Stdin)
-		fmt.Println("Please answer the following questions to create the template repository.")
-		fmt.Print("Press enter to use the default values.\n\n")
+		cmd.Println("Please answer the following questions to create the template repository.")
+		cmd.Print("Press enter to use the default values.\n\n")
 
 		if name == "" {
 			name = steps.InputWithDefaultValue(
@@ -115,7 +115,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		appConfig.CloneyExampleRepositoryURL, "main", "",
 	)
 	if err != nil {
-		fmt.Println("Error when cloning the example Cloney repository from GitHub.")
+		cmd.Println("Error when cloning the example Cloney repository from GitHub.")
 		return err
 	}
 
@@ -144,7 +144,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println("\nDone!")
+	cmd.Println("\nDone!")
 
 	return nil
 }

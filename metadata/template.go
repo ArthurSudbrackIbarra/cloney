@@ -2,7 +2,7 @@ package metadata
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/utils"
@@ -123,8 +123,8 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 }
 
 // ShowGeneralInformation prints the general information of the Cloney template repository.
-func (m *CloneyMetadata) ShowGeneralInformation() {
-	table := tw.NewWriter(os.Stdout)
+func (m *CloneyMetadata) ShowGeneralInformation(writer io.Writer) {
+	table := tw.NewWriter(writer)
 	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
 	table.SetHeaderColor(
 		tw.Colors{tw.Bold, tw.BgBlueColor},
@@ -139,12 +139,12 @@ func (m *CloneyMetadata) ShowGeneralInformation() {
 }
 
 // ShowVariables prints the variables of the Cloney template repository.
-func (m *CloneyMetadata) ShowVariables() {
+func (m *CloneyMetadata) ShowVariables(writer io.Writer) {
 	if len(m.Variables) == 0 {
-		fmt.Println("This template repository has no variables.")
+		writer.Write([]byte("This template repository has no variables.\n"))
 		return
 	}
-	table := tw.NewWriter(os.Stdout)
+	table := tw.NewWriter(writer)
 	table.SetHeader([]string{"Name", "Description", "Type", "Default", "YAML Example"})
 	table.SetHeaderColor(
 		tw.Colors{tw.Bold, tw.BgBlueColor},
@@ -165,9 +165,10 @@ func (m *CloneyMetadata) ShowVariables() {
 }
 
 // Show prints the Cloney template repository metadata in a pretty way.
-func (m *CloneyMetadata) Show() {
-	fmt.Println("General information about this template repository:")
-	m.ShowGeneralInformation()
-	fmt.Print("\nVariables of this template repository:\n")
-	m.ShowVariables()
+func (m *CloneyMetadata) Show(writer io.Writer) {
+	writer.Write([]byte("General information about this template repository:\n"))
+	m.ShowGeneralInformation(writer)
+
+	writer.Write([]byte("\nVariables of this template repository:\n"))
+	m.ShowVariables(writer)
 }

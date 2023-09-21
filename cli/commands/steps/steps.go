@@ -175,7 +175,7 @@ func FillTemplateVariables(
 		utils.ErrorMessage("Error filling template variables", err)
 		return err
 	}
-	if !suppressPrints && !templateOptions.TerminalMode {
+	if !suppressPrints && !templateOptions.PrintMode {
 		utils.OKMessage("The template variables were filled")
 	}
 

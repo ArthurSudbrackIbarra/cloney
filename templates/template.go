@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -38,13 +39,21 @@ type TemplateFillOptions struct {
 	// If nil, the files will be saved in the same directory as the template files.
 	TargetDirectoryPath *string
 
-	// TerminalMode, if true, causes the filled template files to be printed to the terminal instead of being saved to files.
-	TerminalMode bool
+	// PrintMode, if true, causes the filled template files to be printed to a stdout instead of being saved to files.
+	PrintMode bool
+
+	// Stdout is the writer where the filled template files will be printed if PrintMode is enabled.
+	Stdout io.Writer
 }
 
 // FillDirectory processes all files in a directory with variables from the TemplateFiller.
 // If TerminalMode is enabled, the filled template content is printed to the terminal instead of being saved to files.
 func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions utils.IgnorePathOptions) error {
+	// If PrintMode is enabled, but Stdout is not defined, use os.Stdout.
+	if templateOptions.PrintMode && templateOptions.Stdout == nil {
+		templateOptions.Stdout = os.Stdout
+	}
+
 	// Get a list of all files in the specified directory.
 	filePaths, err := utils.GetAllFilePaths(templateOptions.SourceDirectoryPath, ignoreOptions)
 	if err != nil {
@@ -77,8 +86,10 @@ func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, igno
 		}
 
 		// If TerminalMode is enabled, print the result to the terminal instead of writing it to the file.
-		if templateOptions.TerminalMode {
-			fmt.Printf("\n----- File: %s\n%s\n", filePath, resultBuffer.String())
+		if templateOptions.PrintMode {
+			templateOptions.Stdout.Write(
+				[]byte(fmt.Sprintf("\n----- File: %s\n%s\n", filePath, resultBuffer.String())),
+			)
 			continue
 		}
 

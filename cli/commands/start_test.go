@@ -10,7 +10,7 @@ import (
 )
 
 // Create a new instance of the command.
-var cmd = CreateStartCommand()
+var testStartCmd = CreateStartCommand()
 
 // TestMetadataProperties is a struct to store the metadata properties.
 type TestMetadataProperties struct {
@@ -56,10 +56,10 @@ func TestCreateCloneyProjectWithDefaultValues(t *testing.T) {
 
 	// Simulate CLI arguments with flags and values.
 	// Add the --non-interactive flag to force the use of default values.
-	cmd.SetArgs([]string{"--non-interactive"})
+	testStartCmd.SetArgs([]string{"--non-interactive"})
 
 	// Execute the command.
-	err := cmd.Execute()
+	err := testStartCmd.Execute()
 
 	// Assert that the command did not return an error.
 	assert.Nil(err)
@@ -90,7 +90,7 @@ func TestCreateCloneyProjectWithDefaultValues(t *testing.T) {
 	os.RemoveAll(appConfig.DefaultCloneyProjectName)
 
 	// Reset the command flags.
-	ResetStartCommandFlags(cmd)
+	ResetStartCommandFlags(testStartCmd)
 }
 
 // TestCreateCloneyProjectWithFlags tests the creation of a new cloney project with flags and values.
@@ -101,7 +101,7 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		assert := assert.New(t)
 
 		// Simulate CLI arguments with flags and values.
-		cmd.SetArgs([]string{
+		testStartCmd.SetArgs([]string{
 			"--name", "mock-name",
 			"--description", "mock-description",
 			"--license", "mock-license",
@@ -109,7 +109,7 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		})
 
 		// Execute the command.
-		err := cmd.Execute()
+		err := testStartCmd.Execute()
 
 		// Assert that the command did not return an error.
 		assert.Nil(err)
@@ -141,7 +141,7 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		os.RemoveAll("mock-name")
 
 		// Reset the command flags.
-		ResetStartCommandFlags(cmd)
+		ResetStartCommandFlags(testStartCmd)
 	})
 
 	// Test the creation of a new cloney project using the --output flag.
@@ -150,13 +150,13 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		assert := assert.New(t)
 
 		// Simulate CLI arguments with flags and values.
-		cmd.SetArgs([]string{
+		testStartCmd.SetArgs([]string{
 			"--output", "mock-output",
 			"--non-interactive",
 		})
 
 		// Execute the command.
-		err := cmd.Execute()
+		err := testStartCmd.Execute()
 
 		// Assert that the command did not return an error.
 		assert.Nil(err)
@@ -187,6 +187,6 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		os.RemoveAll("mock-output")
 
 		// Reset the command flags.
-		ResetStartCommandFlags(cmd)
+		ResetStartCommandFlags(testStartCmd)
 	})
 }
