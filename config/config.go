@@ -36,6 +36,9 @@ type AppConfig struct {
 	// DefaultMetadataLicenseValue is the default value for the license field in the metadata file when creating a new template repository.
 	DefaultMetadataLicenseValue string
 
+	// DefaultMetadataTemplateVersionValue is the default value for the template version field in the metadata file when creating a new template repository.
+	DefaultMetadataTemplateVersionValue string
+
 	// CloneyExampleRepositoryURL is the URL of the Cloney example repository used when creating a new template repository.
 	CloneyExampleRepositoryURL string
 
@@ -59,8 +62,9 @@ var globalConfig = &AppConfig{
 	DefaultDryRunDirectoryName:   "cloney-dry-run-results",
 	DefaultCloneyProjectName:     "cloney-template",
 
-	DefaultMetadataDescriptionValue: "A Cloney template repository",
-	DefaultMetadataLicenseValue:     "MIT",
+	DefaultMetadataDescriptionValue:     "A Cloney template repository",
+	DefaultMetadataLicenseValue:         "MIT",
+	DefaultMetadataTemplateVersionValue: "0.0.0",
 
 	CloneyExampleRepositoryURL: "https://github.com/ArthurSudbrackIbarra/cloney-test.git",
 }
@@ -94,8 +98,9 @@ func GetAppConfig() *AppConfig {
 		DefaultDryRunDirectoryName:   globalConfig.DefaultDryRunDirectoryName,
 		DefaultCloneyProjectName:     globalConfig.DefaultCloneyProjectName,
 
-		DefaultMetadataDescriptionValue: globalConfig.DefaultMetadataDescriptionValue,
-		DefaultMetadataLicenseValue:     globalConfig.DefaultMetadataLicenseValue,
+		DefaultMetadataDescriptionValue:     globalConfig.DefaultMetadataDescriptionValue,
+		DefaultMetadataLicenseValue:         globalConfig.DefaultMetadataLicenseValue,
+		DefaultMetadataTemplateVersionValue: globalConfig.DefaultMetadataTemplateVersionValue,
 
 		CloneyExampleRepositoryURL: globalConfig.CloneyExampleRepositoryURL,
 
