@@ -1,8 +1,8 @@
 package metadata
 
 import (
+	"bytes"
 	"fmt"
-	"io"
 	"strings"
 
 	basicoperations "github.com/ArthurSudbrackIbarra/cloney/basic-operations"
@@ -123,9 +123,10 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 	return userVariables, nil
 }
 
-// ShowGeneralInformation prints the general information of the Cloney template repository.
-func (m *CloneyMetadata) ShowGeneralInformation(writer io.Writer) {
-	table := tw.NewWriter(writer)
+// GetGeneralInfo returns the general information of the Cloney template repository as a string.
+func (m *CloneyMetadata) GetGeneralInfo() string {
+	var buffer bytes.Buffer
+	table := tw.NewWriter(&buffer)
 	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
 	table.SetHeaderColor(
 		tw.Colors{tw.Bold, tw.BgBlueColor},
@@ -137,15 +138,16 @@ func (m *CloneyMetadata) ShowGeneralInformation(writer io.Writer) {
 	table.SetAlignment(tw.ALIGN_LEFT)
 	table.Append([]string{m.Name, m.Description, m.TemplateVersion, strings.Join(m.Authors, ", "), m.License})
 	table.Render()
+	return buffer.String()
 }
 
-// ShowVariables prints the variables of the Cloney template repository.
-func (m *CloneyMetadata) ShowVariables(writer io.Writer) {
+// GetVariables returns the variables of the Cloney template repository as a string.
+func (m *CloneyMetadata) GetVariables() string {
 	if len(m.Variables) == 0 {
-		writer.Write([]byte("This template repository has no variables.\n"))
-		return
+		return "This template repository has no variables.\n"
 	}
-	table := tw.NewWriter(writer)
+	var buffer bytes.Buffer
+	table := tw.NewWriter(&buffer)
 	table.SetHeader([]string{"Name", "Description", "Type", "Default", "YAML Example"})
 	table.SetHeaderColor(
 		tw.Colors{tw.Bold, tw.BgBlueColor},
@@ -163,13 +165,16 @@ func (m *CloneyMetadata) ShowVariables(writer io.Writer) {
 		)
 	}
 	table.Render()
+	return buffer.String()
 }
 
-// Show prints the Cloney template repository metadata in a pretty way.
-func (m *CloneyMetadata) Show(writer io.Writer) {
-	writer.Write([]byte("General information about this template repository:\n"))
-	m.ShowGeneralInformation(writer)
+// String returns the string representation of the CloneyMetadata struct.
+func (m *CloneyMetadata) String() string {
+	result := "General information about this template repository:\n"
+	result += m.GetGeneralInfo()
 
-	writer.Write([]byte("\nVariables of this template repository:\n"))
-	m.ShowVariables(writer)
+	result += "\nVariables of this template repository:\n"
+	result += m.GetVariables()
+
+	return result
 }

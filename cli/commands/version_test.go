@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Create a new instance of the command.
+// testVersionCmd represents a command instance used for testing.
 var testVersionCmd = CreateVersionCommand()
 
 // TestVersionCommandOutput tests the output of the version command.

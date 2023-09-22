@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Create a new instance of the command.
+// testStartCmd represents a command instance used for testing.
 var testStartCmd = CreateStartCommand()
 
 // TestMetadataProperties is a struct to store the metadata properties.
@@ -21,9 +21,9 @@ type TestMetadataProperties struct {
 	ManifestVersion string
 }
 
-// AssertMetadataMainFieldsAreOK asserts that the metadata file contains the main fields
+// assertMetadataMainFieldsAreOK asserts that the metadata file contains the main fields
 // and that the fields have the given values.
-func AssertMetadataMainFieldsAreOK(assert *assert.Assertions, metadataProperties TestMetadataProperties, parsedMetadata map[string]interface{}) {
+func assertMetadataMainFieldsAreOK(assert *assert.Assertions, metadataProperties TestMetadataProperties, parsedMetadata map[string]interface{}) {
 	assert.Equal(metadataProperties.Name, parsedMetadata["name"])
 	assert.Equal(metadataProperties.Description, parsedMetadata["description"])
 	assert.Equal(metadataProperties.License, parsedMetadata["license"])
@@ -33,7 +33,7 @@ func AssertMetadataMainFieldsAreOK(assert *assert.Assertions, metadataProperties
 
 // assertVariablesAreOK asserts that the metadata file contains the example variables
 // and that the variables have the correct values.
-func AssertMetadataVariablesAreOK(assert *assert.Assertions, parsedMetadata map[string]interface{}) {
+func assertMetadataVariablesAreOK(assert *assert.Assertions, parsedMetadata map[string]interface{}) {
 	// Assert that the metadata file contains the variables.
 	assert.Contains(parsedMetadata, "variables")
 
@@ -77,14 +77,14 @@ func TestCreateCloneyProjectWithDefaultValues(t *testing.T) {
 	err = yaml.Unmarshal(metadataBytes, &parsedMetadata)
 
 	assert.Nil(err)
-	AssertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
+	assertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
 		Name:            appConfig.DefaultCloneyProjectName,
 		Description:     appConfig.DefaultMetadataDescriptionValue,
 		License:         appConfig.DefaultMetadataLicenseValue,
 		TemplateVersion: appConfig.DefaultMetadataTemplateVersionValue,
 		ManifestVersion: appConfig.MetadataManifestVersion,
 	}, parsedMetadata)
-	AssertMetadataVariablesAreOK(assert, parsedMetadata)
+	assertMetadataVariablesAreOK(assert, parsedMetadata)
 
 	// Delete the created directory after the test.
 	os.RemoveAll(appConfig.DefaultCloneyProjectName)
@@ -128,14 +128,14 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 
 		assert.Nil(err)
 
-		AssertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
+		assertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
 			Name:            "mock-name",
 			Description:     "mock-description",
 			License:         "mock-license",
 			TemplateVersion: appConfig.DefaultMetadataTemplateVersionValue,
 			ManifestVersion: appConfig.MetadataManifestVersion,
 		}, metadataParsed)
-		AssertMetadataVariablesAreOK(assert, metadataParsed)
+		assertMetadataVariablesAreOK(assert, metadataParsed)
 
 		// Delete the created directory after the test.
 		os.RemoveAll("mock-name")
@@ -174,14 +174,14 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		err = yaml.Unmarshal(metadataBytes, &metadataParsed)
 
 		assert.Nil(err)
-		AssertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
+		assertMetadataMainFieldsAreOK(assert, TestMetadataProperties{
 			Name:            appConfig.DefaultCloneyProjectName,
 			Description:     appConfig.DefaultMetadataDescriptionValue,
 			License:         appConfig.DefaultMetadataLicenseValue,
 			TemplateVersion: appConfig.DefaultMetadataTemplateVersionValue,
 			ManifestVersion: appConfig.MetadataManifestVersion,
 		}, metadataParsed)
-		AssertMetadataVariablesAreOK(assert, metadataParsed)
+		assertMetadataVariablesAreOK(assert, metadataParsed)
 
 		// Delete the created directory after the test.
 		os.RemoveAll("mock-output")
