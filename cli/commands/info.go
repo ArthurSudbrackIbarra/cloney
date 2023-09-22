@@ -97,9 +97,9 @@ It can get information from a local template repository, or from a remote templa
 By default, it will get information from the current directory, assuming it is a template repository.
 `,
 		Example: strings.Join([]string{
-			terminal.CommandExampleWithExplanation("  cloney info", "Info about the current directory as a template repository"),
-			terminal.CommandExampleWithExplanation("  cloney info ./my-template", "Info about a local template repository in the given path"),
-			terminal.CommandExampleWithExplanation("  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git", "Info about a remote template repository"),
+			"  info",
+			"  info ./path/to/my/template",
+			"  info https://github.com/username/repository.git",
 		}, "\n"),
 		Aliases:          []string{"more"},
 		PersistentPreRun: persistentPreRun,

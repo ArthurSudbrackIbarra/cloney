@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
@@ -98,17 +99,22 @@ func CreateDryRunCommand() *cobra.Command {
 	// It is used to run a template repository in dryrun mode.
 	// It is used to check what the output will be with the given variables.
 	dryRunCmd := &cobra.Command{
-		Use:   "dryrun",
+		Use:   "dry-run",
 		Short: "Run a template repository in dryrun mode",
 		Long: fmt.Sprintf(`Run a template repository in dryrun mode.
 
-The 'cloney dryrun' command is for debugging purposes.
+The 'cloney dry-run' command is for debugging purposes.
 With this command, you can check the output your template repository will generate with the given variables.
 
 By default, 'cloney dryrun' searches for a file named '%s' in your current directory.
 You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
-		Example:          " cloney dryrun",
-		Aliases:          []string{"dry-run", "dr"},
+		Example: strings.Join([]string{
+			"  dry-run",
+			"  dry-run ./path/to/my/template",
+			"  dry-run ./path/to/my/template -v variables.yaml",
+			"  dry-run ./path/to/my/template -v '{ var1: value, var2: value }'",
+		}, "\n"),
+		Aliases:          []string{"dryrun", "dr"},
 		PersistentPreRun: persistentPreRun,
 		RunE:             dryRunCmdRun,
 	}

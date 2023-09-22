@@ -42,14 +42,13 @@ func Initialize() {
 	rootCmd.AddCommand(startCmd)
 	rootCmd.AddCommand(versionCmd)
 
-	// CLI formatting, colors, bold, italic...
+	// Stylings.
 	cc.Init(&cc.Config{
 		RootCmd:         rootCmd,
-		Headings:        cc.HiCyan + cc.Bold + cc.Underline,
-		Commands:        cc.HiYellow + cc.Bold,
-		Example:         cc.Italic,
-		ExecName:        cc.Bold,
-		Flags:           cc.Bold,
+		Headings:        cc.Bold,
+		Commands:        cc.HiBlue + cc.Bold + cc.Italic,
+		ExecName:        cc.HiYellow,
+		Flags:           cc.HiRed + cc.Bold + cc.Italic,
 		NoExtraNewlines: true,
 	})
 

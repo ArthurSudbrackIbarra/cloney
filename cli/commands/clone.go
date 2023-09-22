@@ -135,9 +135,9 @@ func CreateCloneCommand() *cobra.Command {
 The 'cloney clone' command will search for a file named '%s' in your current directory by default.
 You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 		Example: strings.Join([]string{
-			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git",
-			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v variables.yaml",
-			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{ app_name: my-app }'",
+			"  clone https://github.com/username/repository.git",
+			"  clone https://github.com/username/repository.git -v variables.yaml",
+			"  clone https://github.com/username/repository.git -v '{ var1: value, var2: value }'",
 		}, "\n"),
 		Aliases:          []string{"cl"},
 		PersistentPreRun: persistentPreRun,

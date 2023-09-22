@@ -54,12 +54,6 @@ func ErrorMessage(message string, err error) {
 	}
 }
 
-// CommandExampleWithExplanation returns a formatted string with a command example and explanation,
-// using a yellow "=>" separator.
-func CommandExampleWithExplanation(example, explanation string) string {
-	return fmt.Sprintf("%s %s %s", example, Yellow("=>"), explanation)
-}
-
 // InputWithDefaultValue prompts the user for input via terminal and returns the input value or the default value.
 func InputWithDefaultValue(scanner *bufio.Scanner, message, defaultValue string) string {
 	if cmd != nil {
