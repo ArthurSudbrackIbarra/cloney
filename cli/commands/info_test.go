@@ -90,4 +90,7 @@ func TestInfoCommandWhenCurrentDirectoryIsACloneyProject(t *testing.T) {
 
 	// Delete the dummy Cloney metadata file after the test.
 	os.Remove(appConfig.MetadataFileName)
+
+	// Reset the command flags.
+	ResetInfoCommandFlags(testInfoCommand)
 }

@@ -82,6 +82,13 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// ResetInfoCommandFlags resets the flags of the 'info' command.
+func ResetInfoCommandFlags(cmd *cobra.Command) {
+	cmd.Flags().Set("branch", "main")
+	cmd.Flags().Set("tag", "")
+	cmd.Flags().Set("token", "")
+}
+
 // CreateInfoCommand creates the 'info' command and its respective flags.
 func CreateInfoCommand() *cobra.Command {
 	// infoCmd represents the info command.
