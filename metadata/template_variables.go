@@ -108,7 +108,9 @@ func MapVariableType(mapVar interface{}) string {
 	}
 
 	// Convert to a Go map.
-	map_ := mapVar.(map[interface{}]interface{})
+	// mapVar can either be a map[string]interface{} or a map[interface{}]interface{}.
+	// TODO: So we need to check which one it is.
+	map_ := mapVar.(map[string]interface{})
 
 	if len(map_) == 0 {
 		return MAP_VARIABLE_TYPE

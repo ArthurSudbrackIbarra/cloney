@@ -82,21 +82,19 @@ func AuthenticateToRepository(repository *git.GitRepository, gitToken string) {
 }
 
 // CalculatePath calculates the absolute path for a given relative or absolute path string.
-// If the provided 'path' is empty, it returns the 'defaultName' as the result.
-// If 'path' is an absolute path, it returns 'path' itself.
-// If 'path' is a relative path, it joins it with the current working directory to create an absolute path.
+// If the path is already absolute, it is returned as-is.
+// If the path is empty, the defaultName is appended to the current working directory.
+// Otherwise, the path is appended to the current working directory.
 func CalculatePath(path string, defaultName string) (string, error) {
-	if path == "" {
-		return defaultName, nil
-	}
-
 	if filepath.IsAbs(path) {
 		return path, nil
 	}
-
 	currentDir, err := GetCurrentWorkingDirectory()
 	if err != nil {
 		return "", err
+	}
+	if path == "" {
+		return filepath.Join(currentDir, defaultName), nil
 	}
 	return filepath.Join(currentDir, path), nil
 }
