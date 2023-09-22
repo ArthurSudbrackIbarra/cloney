@@ -7,16 +7,10 @@ import (
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
-	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
-	"github.com/ArthurSudbrackIbarra/cloney/utils"
 
 	"github.com/spf13/cobra"
 )
-
-// appConfig stores the application configuration.
-// This configuration is retrieved once and shared across all commands.
-var appConfig = config.GetAppConfig()
 
 // cloneCmdRun is the function that runs when the 'clone' command is called.
 func cloneCmdRun(cmd *cobra.Command, args []string) error {
@@ -107,7 +101,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	templateOptions := templates.TemplateFillOptions{
 		SourceDirectoryPath: clonePath,
 	}
-	ignoreOptions := utils.IgnorePathOptions{
+	ignoreOptions := templates.IgnorePathOptions{
 		// Ignore specific files when filling the template variables.
 		IgnoreFiles: []string{
 			appConfig.MetadataFileName,
@@ -145,8 +139,9 @@ You can specify a different file using the '--variables' flag or pass the variab
 			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v variables.yaml",
 			"  cloney clone https://github.com/ArthurSudbrackIbarra/example-cloney-template.git -v '{ app_name: my-app }'",
 		}, "\n"),
-		Aliases: []string{"cl"},
-		RunE:    cloneCmdRun,
+		Aliases:          []string{"cl"},
+		PersistentPreRun: persistentPreRun,
+		RunE:             cloneCmdRun,
 	}
 
 	// Define command-line flags for the 'clone' command.

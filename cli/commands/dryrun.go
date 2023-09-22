@@ -7,7 +7,7 @@ import (
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
-	"github.com/ArthurSudbrackIbarra/cloney/utils"
+
 	"github.com/spf13/cobra"
 )
 
@@ -65,7 +65,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		PrintMode:           outputInTerminal,
 		Stdout:              cmd.OutOrStdout(),
 	}
-	ignoreOptions := utils.IgnorePathOptions{
+	ignoreOptions := templates.IgnorePathOptions{
 		// Ignore specific files when filling the template variables.
 		IgnoreFiles: []string{
 			appConfig.MetadataFileName,
@@ -107,9 +107,10 @@ With this command, you can check the output your template repository will genera
 
 By default, 'cloney dryrun' searches for a file named '%s' in your current directory.
 You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
-		Example: " cloney dryrun",
-		Aliases: []string{"dry-run", "dr"},
-		RunE:    dryRunCmdRun,
+		Example:          " cloney dryrun",
+		Aliases:          []string{"dry-run", "dr"},
+		PersistentPreRun: persistentPreRun,
+		RunE:             dryRunCmdRun,
 	}
 
 	// Define command-line flags for the 'dryrun' command.

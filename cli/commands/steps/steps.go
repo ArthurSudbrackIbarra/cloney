@@ -1,21 +1,19 @@
 package steps
 
 import (
-	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/ArthurSudbrackIbarra/cloney/git"
 	"github.com/ArthurSudbrackIbarra/cloney/metadata"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
-	"github.com/ArthurSudbrackIbarra/cloney/utils"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 )
 
 // This file defines common steps used by multiple commands.
 
-// Global variables
-// suppressPrints is a flag to determine if the functions in this package should print to the terminal.
+// Global variables:
+// suppressPrints is a flag to determine if the functions in this package should print to the messages.
 var suppressPrints bool
 
 // SetSuppressPrints sets the suppressPrints flag.
@@ -27,7 +25,7 @@ func SetSuppressPrints(value bool) {
 func GetCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		utils.ErrorMessage("Could not get user's current directory", err)
+		terminal.ErrorMessage("Could not get user's current directory", err)
 		return "", err
 	}
 
@@ -45,7 +43,7 @@ func GetUserVariablesMap(currentDir, variables string) (map[string]interface{}, 
 		// In case of error, assume 'variables' is a file path.
 		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variables)
 		if err != nil {
-			utils.ErrorMessage("Error parsing template variables", err)
+			terminal.ErrorMessage("Error parsing template variables", err)
 			return nil, err
 		}
 	}
@@ -65,11 +63,11 @@ func CreateAndValidateRepository(repositoryURL, branch, tag string) (*git.GitRep
 	// Validate the repository.
 	err := repository.Validate()
 	if err != nil {
-		utils.ErrorMessage("Error validating repository", err)
+		terminal.ErrorMessage("Error validating repository", err)
 		return nil, err
 	}
 	if !suppressPrints {
-		utils.OKMessage("The template repository reference is valid")
+		terminal.OKMessage("The template repository reference is valid")
 	}
 
 	return repository, nil
@@ -107,11 +105,11 @@ func CalculatePath(path string, defaultName string) (string, error) {
 func CloneRepository(repository *git.GitRepository, clonePath string) error {
 	err := repository.Clone(clonePath)
 	if err != nil {
-		utils.ErrorMessage("Could not clone repository", err)
+		terminal.ErrorMessage("Could not clone repository", err)
 		return err
 	}
 	if !suppressPrints {
-		utils.OKMessage("The template repository was cloned")
+		terminal.OKMessage("The template repository was cloned")
 	}
 
 	return nil
@@ -121,11 +119,11 @@ func CloneRepository(repository *git.GitRepository, clonePath string) error {
 func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 	metadataBytes, err := os.ReadFile(metadataFilePath)
 	if err != nil {
-		utils.ErrorMessage("Could not find the template repository metadata file", err)
+		terminal.ErrorMessage("Could not find the template repository metadata file", err)
 		return "", err
 	}
 	if !suppressPrints {
-		utils.OKMessage("The template repository metadata file was found")
+		terminal.OKMessage("The template repository metadata file was found")
 	}
 
 	return string(metadataBytes), nil
@@ -136,11 +134,11 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 	// Create the metadata struct from raw YAML data.
 	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent, supportedManifestVersions)
 	if err != nil {
-		utils.ErrorMessage("Could not parse the template repository template metadata", err)
+		terminal.ErrorMessage("Could not parse the template repository template metadata", err)
 		return nil, err
 	}
 	if !suppressPrints {
-		utils.OKMessage("The template repository metadata file is valid")
+		terminal.OKMessage("The template repository metadata file is valid")
 	}
 
 	return cloneyMetadata, nil
@@ -153,11 +151,11 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 	var err error
 	_, err = cloneyMetadata.MatchUserVariables(variablesMap)
 	if err != nil {
-		utils.ErrorMessage("Error validating your template variables", err)
+		terminal.ErrorMessage("Error validating your template variables", err)
 		return err
 	}
 	if !suppressPrints {
-		utils.OKMessage("Your variables are valid and match the template repository variables")
+		terminal.OKMessage("Your variables are valid and match the template repository variables")
 	}
 
 	return nil
@@ -166,29 +164,18 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 // FillTemplateVariables fills the template variables in the cloned directory.
 func FillTemplateVariables(
 	templateOptions templates.TemplateFillOptions,
-	ignoreOptions utils.IgnorePathOptions,
+	ignoreOptions templates.IgnorePathOptions,
 	variablesMap map[string]interface{},
 ) error {
 	filler := templates.NewTemplateFiller(variablesMap)
 	err := filler.FillDirectory(templateOptions, ignoreOptions)
 	if err != nil {
-		utils.ErrorMessage("Error filling template variables", err)
+		terminal.ErrorMessage("Error filling template variables", err)
 		return err
 	}
 	if !suppressPrints && !templateOptions.PrintMode {
-		utils.OKMessage("The template variables were filled")
+		terminal.OKMessage("The template variables were filled")
 	}
 
 	return nil
-}
-
-// InputWithDefaultValue asks the user for input and returns the value or the default value.
-func InputWithDefaultValue(scanner *bufio.Scanner, message, defaultValue string) string {
-	fmt.Printf("%s [%s]: ", message, utils.Blue(defaultValue))
-	scanner.Scan()
-	input := scanner.Text()
-	if input == "" {
-		return defaultValue
-	}
-	return input
 }

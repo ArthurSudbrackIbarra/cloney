@@ -8,7 +8,7 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/git"
-	"github.com/ArthurSudbrackIbarra/cloney/utils"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/spf13/cobra"
 )
@@ -51,7 +51,9 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 		// Get the metadata file content.
 		metadataContent, err = repository.GetFileContent(appConfig.MetadataFileName)
 		if err != nil {
-			utils.ErrorMessage(fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err)
+			terminal.ErrorMessage(
+				fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err,
+			)
 			return err
 		}
 	} else {
@@ -95,12 +97,13 @@ It can get information from a local template repository, or from a remote templa
 By default, it will get information from the current directory, assuming it is a template repository.
 `,
 		Example: strings.Join([]string{
-			utils.CommandExampleWithExplanation("  cloney info", "Info about the current directory as a template repository"),
-			utils.CommandExampleWithExplanation("  cloney info ./my-template", "Info about a local template repository in the given path"),
-			utils.CommandExampleWithExplanation("  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git", "Info about a remote template repository"),
+			terminal.CommandExampleWithExplanation("  cloney info", "Info about the current directory as a template repository"),
+			terminal.CommandExampleWithExplanation("  cloney info ./my-template", "Info about a local template repository in the given path"),
+			terminal.CommandExampleWithExplanation("  cloney info https://github.com/ArthurSudbrackIbarra/cloney.git", "Info about a remote template repository"),
 		}, "\n"),
-		Aliases: []string{"more"},
-		RunE:    infoCmdRun,
+		Aliases:          []string{"more"},
+		PersistentPreRun: persistentPreRun,
+		RunE:             infoCmdRun,
 	}
 
 	// Define command-line flags for the 'info' command.

@@ -9,7 +9,8 @@ import (
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/config"
-	"github.com/ArthurSudbrackIbarra/cloney/utils"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+
 	"github.com/spf13/cobra"
 )
 
@@ -35,25 +36,25 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		cmd.Print("Press enter to use the default values.\n\n")
 
 		if name == "" {
-			name = steps.InputWithDefaultValue(
+			name = terminal.InputWithDefaultValue(
 				scanner, "What is the name of the template repository", appConfig.DefaultCloneyProjectName,
 			)
 		}
 
 		if description == "" {
-			description = steps.InputWithDefaultValue(
+			description = terminal.InputWithDefaultValue(
 				scanner, "What is the description of the template repository", appConfig.DefaultMetadataDescriptionValue,
 			)
 		}
 
 		if license == "" {
-			license = steps.InputWithDefaultValue(
+			license = terminal.InputWithDefaultValue(
 				scanner, "What is the license of the template repository", appConfig.DefaultMetadataLicenseValue,
 			)
 		}
 
 		if len(authors) == 0 {
-			authorsStr = steps.InputWithDefaultValue(scanner, "What are the authors of the template repository (separated by commas)", "")
+			authorsStr = terminal.InputWithDefaultValue(scanner, "What are the authors of the template repository (separated by commas)", "")
 			if authorsStr != "" {
 				for _, author := range strings.Split(authorsStr, ",") {
 					authors = append(authors, strings.TrimSpace(author))
@@ -62,7 +63,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		}
 
 		if err != nil {
-			utils.ErrorMessage("Error reading user input", err)
+			terminal.ErrorMessage("Error reading user input", err)
 		}
 	} else {
 		// If the non-interactive flag is set, use the default values.
@@ -140,7 +141,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
 	err = os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
 	if err != nil {
-		utils.ErrorMessage("Error creating the repository metadata file", err)
+		terminal.ErrorMessage("Error creating the repository metadata file", err)
 		return err
 	}
 
@@ -169,8 +170,9 @@ func CreateStartCommand() *cobra.Command {
 		Long: `Creates a new cloney template repository.
 
 cloney start will create a directory with the necessary files to start a new cloney template repository.`,
-		Example: "  cloney start",
-		RunE:    startCmdRun,
+		Example:          "  cloney start",
+		PersistentPreRun: persistentPreRun,
+		RunE:             startCmdRun,
 	}
 
 	// Define command-line flags for the 'start' command.

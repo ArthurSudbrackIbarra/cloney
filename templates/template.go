@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ArthurSudbrackIbarra/cloney/utils"
 	"github.com/Masterminds/sprig/v3"
 )
 
@@ -48,14 +47,14 @@ type TemplateFillOptions struct {
 
 // FillDirectory processes all files in a directory with variables from the TemplateFiller.
 // If PrintMode is enabled, the filled template content is printed to Stdout instead of being saved to files.
-func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions utils.IgnorePathOptions) error {
+func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions IgnorePathOptions) error {
 	// If PrintMode is enabled, but Stdout is not defined, use os.Stdout.
 	if templateOptions.PrintMode && templateOptions.Stdout == nil {
 		templateOptions.Stdout = os.Stdout
 	}
 
 	// Get a list of all files in the specified directory.
-	filePaths, err := utils.GetAllFilePaths(templateOptions.SourceDirectoryPath, ignoreOptions)
+	filePaths, err := GetAllFilePaths(templateOptions.SourceDirectoryPath, ignoreOptions)
 	if err != nil {
 		return fmt.Errorf("error obtaining file paths in directory %s: %w", templateOptions.SourceDirectoryPath, err)
 	}
