@@ -1,12 +1,10 @@
 package commands
 
 import (
-	"bytes"
 	"os"
-	"strings"
+	"path/filepath"
 	"testing"
 
-	tw "github.com/olekukonko/tablewriter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,68 +27,143 @@ variables:
     description: This is a test variable.
     default: test
     example: test
+  - name: test_complex_variable
+    description: This is a test complex variable.
+    example:
+      abc:
+        - 1
+        - 2
+      def:
+        enableThis: true
+  - name: test_complex_variable_2
+    description: This is a test complex variable.
+    example:
+      - port: 8080
+        protocol: http
+        security:
+          - type: basic
+            username: admin
+            password: admin
 `
 	// Write the metadata content to a file in the specified directory.
-	err := os.WriteFile(appConfig.MetadataFileName, []byte(rawMetadata), os.ModePerm)
+	metadataFilePath := filepath.Join(directory, appConfig.MetadataFileName)
+	err := os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
 	assert.NoError(err)
 }
 
-// createDummyGeneralInfoTable creates a dummy general Cloney project table in the provided buffer with mocked data.
-func createDummyGeneralInfoTable(buffer bytes.Buffer) {
-	table := tw.NewWriter(&buffer)
-
-	// Set table headers with formatting.
-	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
-	table.SetHeaderColor(
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-	)
-	table.SetAlignment(tw.ALIGN_LEFT)
-
-	// Append row with dummy data.
-	table.Append([]string{"TestProject", "This is a test project.", "0.0.0", "John Doe", "MIT"})
-
-	// Render the table.
-	table.Render()
-}
-
-// TestInfoCommandWhenCurrentDirectoryIsACloneyProject tests the output of the info command
+// TestInfoCommandWhenCurrentDirectoryIsACloneyProject tests the "info" command
 // when the current directory is a Cloney project. It should not return an error.
 func TestInfoCommandWhenCurrentDirectoryIsACloneyProject(t *testing.T) {
 	// Create a new testing.T instance to use with assert functions.
 	assert := assert.New(t)
 
-	// Create a dummy Cloney metadata file in the current directory.
-	// This simulates a Cloney project.
+	// Create a dummy Cloney metadata file in the current directory to simulate a Cloney project.
 	createDummyCloneyMetadataFile(assert, ".")
 
-	// Redirect stdout to a buffer.
-	var buffer bytes.Buffer
-	testVersionCmd.SetOut(&buffer)
-
-	// Execute the command.
+	// Execute the "info" command.
 	err := testInfoCommand.Execute()
 
-	// Assert that the command did not return an error.
+	// Assert that the "info" command did not return an error.
 	assert.Nil(err)
-
-	// Get the command output.
-	cmdOutput := buffer.String()
-
-	// Assert that the command printed the correct output.
-	// To verify this, we create a table with the same data as the command output
-	// and compare the two tables. The command output should contain the table output.
-	buffer.Reset()
-	createDummyGeneralInfoTable(buffer)
-	mainTableOutput := buffer.String()
-	assert.True(strings.Contains(mainTableOutput, cmdOutput))
 
 	// Delete the dummy Cloney metadata file after the test.
 	os.Remove(appConfig.MetadataFileName)
+}
+
+// TestInfoCommandWhenCurrentDirectoryIsNotACloneyProject tests the "info" command
+// when the current directory is not a Cloney project. It should return an error.
+func TestInfoCommandWhenCurrentDirectoryIsNotACloneyProject(t *testing.T) {
+	// Create a new testing.T instance to use with assert functions.
+	assert := assert.New(t)
+
+	// Execute the "info" command.
+	err := testInfoCommand.Execute()
+
+	// Assert that the "info" command returned an error.
+	assert.NotNil(err)
+}
+
+// TestInfoCommandPointingToLocalCloneyProject tests the output of the "info" command
+// when the user specifies a local Cloney project directory.
+// It should not return an error.
+func TestInfoCommandPointingToLocalCloneyProject(t *testing.T) {
+	// Create a new testing.T instance to use with assert functions.
+	assert := assert.New(t)
+
+	// Create a directory to simulate a Cloney project.
+	err := os.Mkdir("test-project", os.ModePerm)
+	assert.NoError(err)
+
+	// Create a dummy Cloney metadata file in the test project directory.
+	createDummyCloneyMetadataFile(assert, "test-project")
+
+	// Simulate CLI arguments with flags and values to specify the project directory.
+	testInfoCommand.SetArgs([]string{"./test-project"})
+
+	// Execute the "info" command.
+	err = testInfoCommand.Execute()
+
+	// Assert that the "info" command did not return an error.
+	assert.Nil(err)
+
+	// Delete the created directory after the test.
+	os.RemoveAll("test-project")
+}
+
+// TestInfoCommandPointingToRemoteCloneyProject tests the "info" command
+// when the user specifies a valid remote Cloney project URL.
+// It should not return an error.
+func TestInfoCommandPointingToRemoteCloneyProject(t *testing.T) {
+	// Create a new testing.T instance to use with assert functions.
+	assert := assert.New(t)
+
+	// Simulate CLI arguments with flags and values to specify the remote project URL.
+	testInfoCommand.SetArgs([]string{appConfig.CloneyExampleRepositoryURL})
+
+	// Execute the "info" command.
+	err := testInfoCommand.Execute()
+
+	// Assert that the "info" command did not return an error.
+	assert.Nil(err)
+}
+
+// TestInfoCommandPointingToPrivateRemoteCloneyProject tests the "info" command
+// when the user specifies a valid remote Cloney project URL that requires authentication.
+// It should not return an error.
+func TestInfoCommandPointingToPrivateRemoteCloneyProject(t *testing.T) {
+	// Create a new testing.T instance to use with assert functions.
+	assert := assert.New(t)
+
+	// Simulate CLI arguments with flags and values to specify the remote project URL.
+	// Pointing to a private repository using a personal access token.
+	testInfoCommand.SetArgs([]string{
+		"https://github.com/ArthurSudbrackIbarra/private-cloney.git",
+		"--token", os.Getenv("PERSONAL_ACCESS_TOKEN"),
+	})
+
+	// Execute the "info" command.
+	err := testInfoCommand.Execute()
+
+	// Assert that the "info" command did not return an error.
+	assert.Nil(err)
 
 	// Reset the command flags.
 	ResetInfoCommandFlags(testInfoCommand)
+}
+
+// TestInfoCommandPointingToInvalidRemoteCloneyProject tests the "info" command
+// when the user specifies an invalid remote Cloney project URL.
+// It should return an error.
+func TestInfoCommandPointingToInvalidRemoteCloneyProject(t *testing.T) {
+	// Create a new testing.T instance to use with assert functions.
+	assert := assert.New(t)
+
+	// Simulate CLI arguments with flags and values to specify an invalid remote project URL.
+	testInfoCommand.SetArgs([]string{"https://github.com/ArthurSudbrackIbarra/cloney.git"})
+
+	// Execute the "info" command.
+	err := testInfoCommand.Execute()
+
+	// Assert that the "info" command returned an error.
+	assert.NotNil(err)
 }

@@ -11,6 +11,10 @@ on:
     branches:
       - main
 
+# Environment variables required when running the tests.
+env:
+  PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
 jobs:
   test:
     runs-on: ubuntu-22.04

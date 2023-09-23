@@ -12,7 +12,7 @@ import (
 // testStartCmd represents a command instance used for testing.
 var testStartCmd = CreateStartCommand()
 
-// TestMetadataProperties is a struct to store the metadata properties.
+// TestMetadataProperties is a struct to store metadata properties for testing.
 type TestMetadataProperties struct {
 	Name            string
 	Description     string
@@ -21,8 +21,8 @@ type TestMetadataProperties struct {
 	ManifestVersion string
 }
 
-// assertMetadataMainFieldsAreOK asserts that the metadata file contains the main fields
-// and that the fields have the given values.
+// assertMetadataMainFieldsAreOK asserts that the metadata file contains main fields
+// with the expected values.
 func assertMetadataMainFieldsAreOK(assert *assert.Assertions, metadataProperties TestMetadataProperties, parsedMetadata map[string]interface{}) {
 	assert.Equal(metadataProperties.Name, parsedMetadata["name"])
 	assert.Equal(metadataProperties.Description, parsedMetadata["description"])
@@ -31,13 +31,13 @@ func assertMetadataMainFieldsAreOK(assert *assert.Assertions, metadataProperties
 	assert.Equal(metadataProperties.ManifestVersion, parsedMetadata["manifest_version"])
 }
 
-// assertVariablesAreOK asserts that the metadata file contains the example variables
-// and that the variables have the correct values.
+// assertMetadataVariablesAreOK asserts that the metadata file contains example variables
+// with the correct values.
 func assertMetadataVariablesAreOK(assert *assert.Assertions, parsedMetadata map[string]interface{}) {
-	// Assert that the metadata file contains the variables.
+	// Assert that the metadata file contains the "variables" section.
 	assert.Contains(parsedMetadata, "variables")
 
-	// Assert that the metadata file has 2 example variables: app_name and enable_https.
+	// Assert that the metadata file has two example variables: "app_name" and "enable_https".
 	assert.Equal("app_name", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["name"])
 	assert.Equal("The name of the application.", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["description"])
 	assert.Equal("My App", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["default"])
@@ -48,8 +48,8 @@ func assertMetadataVariablesAreOK(assert *assert.Assertions, parsedMetadata map[
 	assert.Equal(true, parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["example"])
 }
 
-// TestCreateCloneyProjectWithDefaultValues tests the creation of a new cloney project with default values,
-// using the --non-interactive flag to force the use of default values.
+// TestCreateCloneyProjectWithDefaultValues tests creating a new Cloney project with default values,
+// using the --non-interactive flag to force the use of defaults.
 func TestCreateCloneyProjectWithDefaultValues(t *testing.T) {
 	// Create a new testing.T instance to use with assert functions.
 	assert := assert.New(t)
@@ -93,9 +93,9 @@ func TestCreateCloneyProjectWithDefaultValues(t *testing.T) {
 	ResetStartCommandFlags(testStartCmd)
 }
 
-// TestCreateCloneyProjectWithFlags tests the creation of a new cloney project with flags and values.
+// TestCreateCloneyProjectWithFlags tests creating a new Cloney project with flags and values.
 func TestCreateCloneyProjectWithFlags(t *testing.T) {
-	// Test the creation of a new cloney project using the project property flags, like --name, --description, etc.
+	// Test creating a new Cloney project using project property flags, like --name, --description, etc.
 	t.Run("TestCreateCloneyProjectWithProjectPropertiesFlags", func(t *testing.T) {
 		// Create a new testing.T instance to use with assert functions.
 		assert := assert.New(t)
@@ -144,7 +144,7 @@ func TestCreateCloneyProjectWithFlags(t *testing.T) {
 		ResetStartCommandFlags(testStartCmd)
 	})
 
-	// Test the creation of a new cloney project using the --output flag.
+	// Test creating a new Cloney project using the --output flag.
 	t.Run("TestCreateCloneyProjectWithOutputFlag", func(t *testing.T) {
 		// Create a new testing.T instance to use with assert functions.
 		assert := assert.New(t)
