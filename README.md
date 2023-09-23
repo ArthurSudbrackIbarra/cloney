@@ -202,6 +202,8 @@ Here's an example of what the generated HTML could look like:
 <p>HTTPS is enabled.</p>
 ```
 
+**PS**: It's important to mention that, although this example uses HTML, you can use Cloney variables in any type of file. This includes YAML, JSON, Markdown, and even source code files.
+
 ## Dynamically Generating Files
 
 Cloney, allows you to not only replace placeholders with variable values but also generate files and directories dynamically. This feature is particularly useful for creating multiple files based on a template and data. Let's dive into the process using a practical example.
