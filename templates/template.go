@@ -48,8 +48,6 @@ func injectCustomToFileFuncPaths(filePath string, fileContent string, outputInTe
 			fileDir := filepath.Dir(filePath)
 			newLine := strings.ReplaceAll(line, "toFile", fmt.Sprintf("toFile \"%s\"", fileDir))
 
-			fmt.Println(newLine)
-
 			// If on Windows, replace backslashes with forward slashes.
 			if os.PathSeparator == '\\' {
 				newLine = strings.ReplaceAll(newLine, "\\", "/")
