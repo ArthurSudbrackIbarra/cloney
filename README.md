@@ -8,29 +8,29 @@
 
 ## Table of Contents
 
-- [Introduction](#introduction)
+- 🧬 [Introduction](#introduction)
 
   - [The Pain of Manual Adjustments](#the-pain-of-manual-adjustments)
   - [Cloney Template Repositories](#cloney-template-repositories)
   - [Custom Variables](#custom-variables)
 
-- [What Makes a Cloney Template Repository?](#what-makes-a-cloney-template-repository)
+- 🧬 [What Makes a Cloney Template Repository?](#what-makes-a-cloney-template-repository)
 
-- [Cloney Example Template Repository](#cloney-example-template-repository)
+- 🧬 [Cloney Example Template Repository](#cloney-example-template-repository)
 
-- [Understanding the `.cloney.yaml` Metadata File](#understanding-the-cloneyyaml-metadata-file)
+- 🧬 [Understanding the `.cloney.yaml` Metadata File](#understanding-the-cloneyyaml-metadata-file)
 
   - [Template Variables](#template-variables)
 
-- [Providing Custom Variables](#providing-custom-variables)
+- 🧬 [Providing Custom Variables](#providing-custom-variables)
 
-- [Accessing Variables in Template Files](#accessing-variables-in-template-files)
+- 🧬 [Accessing Variables in Template Files](#accessing-variables-in-template-files)
 
-- [Dynamically Generating Files](#dynamically-generating-files)
+- 🧬 [Dynamically Generating Files](#dynamically-generating-files)
 
-- [Go Template Tutorials](#go-template-tutorials)
+- 🧬 [Go Template Tutorials](#go-template-tutorials)
 
-- [Cloney Command-Line Interface (CLI)](#cloney-command-line-interface-cli)
+- 🧬 [Cloney Command-Line Interface (CLI)](#cloney-command-line-interface-cli)
   - [Cloney CLI Commands](#cloney-cli-commands)
 
 ## Introduction
@@ -45,7 +45,7 @@ This process can be both frustrating and error-prone. Manually searching and rep
 
 ### Cloney Template Repositories
 
-Cloney Template Repositories are the foundation of Cloney's innovative approach. These repositories are enriched with a special `.cloney.yaml` metadata file that contains vital information about the template repository.
+Cloney Template Repositories are the foundation of Cloney's innovative approach. These repositories are enriched with a special `.cloney.yaml` metadata file that contains information about the template repository.
 
 ### Custom Variables
 
