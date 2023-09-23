@@ -3,11 +3,13 @@ package templates
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"text/template"
 
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 	"github.com/Masterminds/sprig/v3"
 )
 
@@ -24,55 +26,83 @@ func NewTemplateFiller(variablesMap map[string]interface{}) *TemplateFiller {
 	}
 }
 
-// AddVariable adds a new variable to the TemplateFiller instance.
-func (t *TemplateFiller) AddVariable(name string, value interface{}) {
-	t.Variables[name] = value
-}
+// replaceCustomToFileFuncPaths replaces the paths of the "toFile" custom function in the template content.
+// This function is necessary because the paths must be relative to the directory of the file being processed.
+// The "toFile" function is defined in templates/custom_funcs.go.
+// If 'outputInTerminal' is set to true, an error is returned as "toFile" is not supported in terminal output mode.
+func replaceCustomToFileFuncPaths(filePath string, fileContent string, outputInTerminal bool) (string, error) {
+	// Define a regular expression to match the "toFile" function and extract the path parameter.
+	regex := regexp.MustCompile(`{{-?\s*toFile\s+"([^"]*)"`)
 
-// TemplateFillOptions is a struct used to configure the FillDirectory function.
-type TemplateFillOptions struct {
-	// SourceDirectoryPath is the path to the directory containing the template files.
-	SourceDirectoryPath string
+	// Split the template content into lines for processing.
+	fileLines := strings.Split(fileContent, "\n")
 
-	// TargetDirectoryPath is the path to the directory where the filled template files will be saved.
-	// If nil, the files will be saved in the same directory as the template files.
-	TargetDirectoryPath *string
+	// Iterate over each line in the template content.
+	for index, line := range fileLines {
+		if strings.Contains(line, "toFile") {
+			// If 'outputInTerminal' is true, return an error as "toFile" is not supported in terminal output mode.
+			if outputInTerminal {
+				return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
+			}
+			// Extract the path parameter from the "toFile" function.
+			matches := regex.FindStringSubmatch(line)
+			if len(matches) != 2 {
+				return "", fmt.Errorf("error parsing 'toFile' function path: %s", line)
+			}
+			pathParam := matches[1]
 
-	// PrintMode, if true, causes the filled template files to be printed to a stdout instead of being saved to files.
-	PrintMode bool
+			// Check if the path is absolute, and if so, raise an error.
+			if filepath.IsAbs(pathParam) {
+				return "", fmt.Errorf("'toFile' function path must be relative: %s", pathParam)
+			}
 
-	// Stdout is the writer where the filled template files will be printed if PrintMode is enabled.
-	Stdout io.Writer
-}
+			// Calculate the new path of the file based on the template's location.
+			newPath := filepath.Join(filepath.Dir(filePath), pathParam)
+			newLine := strings.ReplaceAll(line, pathParam, newPath)
 
-// FillDirectory processes all files in a directory with variables from the TemplateFiller.
-// If PrintMode is enabled, the filled template content is printed to Stdout instead of being saved to files.
-func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, ignoreOptions IgnorePathOptions) error {
-	// If PrintMode is enabled, but Stdout is not defined, use os.Stdout.
-	if templateOptions.PrintMode && templateOptions.Stdout == nil {
-		templateOptions.Stdout = os.Stdout
+			// If on Windows, replace backslashes with forward slashes.
+			if os.PathSeparator == '\\' {
+				newLine = strings.ReplaceAll(newLine, "\\", "/")
+			}
+
+			// Replace the line in the file content.
+			fileLines[index] = newLine
+		}
 	}
 
-	// Get a list of all files in the specified directory.
-	filePaths, err := GetAllFilePaths(templateOptions.SourceDirectoryPath, ignoreOptions)
+	// Reconstruct the modified file content.
+	newContent := strings.Join(fileLines, "\n")
+	return newContent, nil
+}
+
+// FillDirectory processes template files in a source directory, replacing placeholders with variables.
+func (t *TemplateFiller) FillDirectory(src string, ignoreOptions IgnorePathOptions, outputInTerminal bool) error {
+	// Get a list of all files in the specified directory, considering ignore options.
+	filePaths, err := GetAllFilePaths(src, ignoreOptions)
 	if err != nil {
-		return fmt.Errorf("error obtaining file paths in directory %s: %w", templateOptions.SourceDirectoryPath, err)
+		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
 	}
 
 	// Iterate over each file in the directory, applying the template to each file.
 	for _, filePath := range filePaths {
 		// Read the content of the file.
-		fileContent, err := os.ReadFile(filePath)
+		fileBytes, err := os.ReadFile(filePath)
 		if err != nil {
 			return fmt.Errorf("error reading file %s: %w", filePath, err)
 		}
 
-		// Create the template and add custom functions.
+		// Replace the paths of the "toFile" custom function in the template.
+		fileContent, err := replaceCustomToFileFuncPaths(filePath, string(fileBytes), outputInTerminal)
+		if err != nil {
+			return err
+		}
+
+		// Create a template and add custom functions.
 		tmpl := template.New("cloneyTemplate")
 		tmpl.Funcs(sprig.TxtFuncMap()).Funcs(CustomTxtFuncMap(tmpl))
 
 		// Parse the template.
-		tmpl, err = tmpl.Parse(string(fileContent))
+		tmpl, err = tmpl.Parse(fileContent)
 		if err != nil {
 			return fmt.Errorf("error parsing template: %w", err)
 		}
@@ -84,42 +114,80 @@ func (t *TemplateFiller) FillDirectory(templateOptions TemplateFillOptions, igno
 			return fmt.Errorf("error executing template: %w", err)
 		}
 
-		// If PrintMode is enabled, print the result to Stdout and continue to the next file.
-		if templateOptions.PrintMode {
-			templateOptions.Stdout.Write(
-				[]byte(fmt.Sprintf("\n----- File: %s\n%s\n", filePath, resultBuffer.String())),
-			)
-			continue
-		}
-
-		// Write the resulting content back to the file, overwriting the original file if TargetDirectoryPath is not defined.
-		if templateOptions.TargetDirectoryPath == nil {
+		// If the 'outputInTerminal' parameter is set, output the result to the terminal.
+		if outputInTerminal {
+			terminal.Message(fmt.Sprintf("\n----- File: %s\n%s\n", filePath, resultBuffer.String()))
+		} else {
+			// Write the result to the same file.
 			err = os.WriteFile(filePath, resultBuffer.Bytes(), os.ModePerm)
 			if err != nil {
 				return fmt.Errorf("error writing file %s: %w", filePath, err)
 			}
-		} else {
-			// Calculate the path of the file relative to the source directory to preserve the directory structure.
-			relativeFilePath, err := filepath.Rel(templateOptions.SourceDirectoryPath, filePath)
-			if err != nil {
-				return fmt.Errorf("error calculating relative file path: %w", err)
-			}
+		}
+	}
 
-			// Calculate the path of the file in the target directory.
-			targetFilePath := filepath.Join(*templateOptions.TargetDirectoryPath, relativeFilePath)
+	return nil
+}
 
-			// If necessary, create the directory where the file will be saved.
-			directory := filepath.Dir(targetFilePath)
-			err = os.MkdirAll(directory, os.ModePerm)
-			if err != nil {
-				return fmt.Errorf("error creating directory %s: %w", directory, err)
-			}
+// CreateFilledDirectory processes template files in a source directory and saves the filled files in a destination directory.
+func (t *TemplateFiller) CreateFilledDirectory(src string, dest string, ignoreOptions IgnorePathOptions) error {
+	// Get a list of all files in the specified directory, considering ignore options.
+	filePaths, err := GetAllFilePaths(src, ignoreOptions)
+	if err != nil {
+		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
+	}
 
-			// Write the resulting content to the file.
-			err = os.WriteFile(targetFilePath, resultBuffer.Bytes(), os.ModePerm)
-			if err != nil {
-				return fmt.Errorf("error writing file %s: %w", targetFilePath, err)
-			}
+	// Iterate over each file in the directory, applying the template to each file.
+	for _, filePath := range filePaths {
+		// Read the content of the file.
+		fileBytes, err := os.ReadFile(filePath)
+		if err != nil {
+			return fmt.Errorf("error reading file %s: %w", filePath, err)
+		}
+
+		// Calculate the path of the file relative to the source directory to preserve the directory structure.
+		relativeFilePath, err := filepath.Rel(src, filePath)
+		if err != nil {
+			return fmt.Errorf("error calculating relative file path: %w", err)
+		}
+
+		// Calculate the path of the file in the target directory.
+		targetFilePath := filepath.Join(dest, relativeFilePath)
+
+		// If necessary, create the directory where the file will be saved.
+		directory := filepath.Dir(targetFilePath)
+		err = os.MkdirAll(directory, os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("error creating directory %s: %w", directory, err)
+		}
+
+		// Replace the paths of the "toFile" custom function in the template.
+		fileContent, err := replaceCustomToFileFuncPaths(targetFilePath, string(fileBytes), false)
+		if err != nil {
+			return err
+		}
+
+		// Create a template and add custom functions.
+		tmpl := template.New("cloneyTemplate")
+		tmpl.Funcs(sprig.TxtFuncMap()).Funcs(CustomTxtFuncMap(tmpl))
+
+		// Parse the template.
+		tmpl, err = tmpl.Parse(fileContent)
+		if err != nil {
+			return fmt.Errorf("error parsing template: %w", err)
+		}
+
+		// Execute the template, replacing placeholders with variables.
+		var resultBuffer bytes.Buffer
+		err = tmpl.Execute(&resultBuffer, t.Variables)
+		if err != nil {
+			return fmt.Errorf("error executing template: %w", err)
+		}
+
+		// Write the resulting content to the file in the target directory.
+		err = os.WriteFile(targetFilePath, resultBuffer.Bytes(), os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("error writing file %s: %w", targetFilePath, err)
 		}
 	}
 

@@ -36,11 +36,11 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Calculate the directory paths.
-	targetPath, _ := steps.CalculatePath(path, "")
+	sourcePath, _ := steps.CalculatePath(path, "")
 	outputPath, _ := steps.CalculatePath(output, "")
 
 	// Read the repository metadata file.
-	metadataFilePath := filepath.Join(targetPath, appConfig.MetadataFileName)
+	metadataFilePath := filepath.Join(sourcePath, appConfig.MetadataFileName)
 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
 	if err != nil {
 		return err
@@ -59,13 +59,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Fill the template variables.
-	templateOptions := templates.TemplateFillOptions{
-		SourceDirectoryPath: targetPath,
-		TargetDirectoryPath: &outputPath,
-		PrintMode:           outputInTerminal,
-		Stdout:              cmd.OutOrStdout(),
-	}
+	// Define options for ignoring specific files and directories when filling template variables.
 	ignoreOptions := templates.IgnorePathOptions{
 		// Ignore specific files when filling the template variables.
 		IgnoreFiles: []string{
@@ -74,18 +68,28 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 			filepath.Base(filepath.Join(currentDir, variables)),
 		},
 
-		// Ignore '.git' directory when filling the template variables.
+		// Ignore the '.git' directory when filling the template variables.
 		IgnoreDirectories: []string{".git"},
 	}
-	err = steps.FillTemplateVariables(templateOptions, ignoreOptions, variablesMap)
+
+	// Check if the output should be displayed in the terminal.
+	if outputInTerminal {
+		// Fill the template variables and display the output in the terminal instead of creating the files.
+		err = steps.FillDirectory(sourcePath, ignoreOptions, true, variablesMap)
+	} else {
+		// Create a new directory to save the filled template files.
+		err = steps.CreateFilledDirectory(sourcePath, outputPath, ignoreOptions, variablesMap)
+	}
+
 	if err != nil {
-		// If it was not possible to fill the template variables, delete the created directory.
+		// If it was not possible to fill the template variables, delete the created directory (if not a dry run).
 		if !outputInTerminal {
 			os.RemoveAll(outputPath)
 		}
 		return err
 	}
 
+	// Display a completion message if not in terminal output mode.
 	if !outputInTerminal {
 		cmd.Println("\nDone!")
 	}

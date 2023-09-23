@@ -97,10 +97,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Fill the template variables in the cloned directory.
-	templateOptions := templates.TemplateFillOptions{
-		SourceDirectoryPath: clonePath,
-	}
+	// Define options for ignoring specific files and directories when filling template variables.
 	ignoreOptions := templates.IgnorePathOptions{
 		// Ignore specific files when filling the template variables.
 		IgnoreFiles: []string{
@@ -108,10 +105,13 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 			appConfig.DefaultUserVariablesFileName,
 			filepath.Base(filepath.Join(currentDir, variables)),
 		},
+
 		// Ignore '.git' directories when filling the template variables.
 		IgnoreDirectories: []string{".git"},
 	}
-	err = steps.FillTemplateVariables(templateOptions, ignoreOptions, variablesMap)
+
+	// Set the 'outputInTerminal' parameter to 'false' because we intend to actually fill the template variables.
+	err = steps.FillDirectory(clonePath, ignoreOptions, false, variablesMap)
 	if err != nil {
 		// If it was not possible to fill the template variables, delete the cloned repository.
 		os.RemoveAll(clonePath)

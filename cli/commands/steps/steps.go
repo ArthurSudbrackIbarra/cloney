@@ -159,20 +159,53 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 	return nil
 }
 
-// FillTemplateVariables fills the template variables in the cloned directory.
-func FillTemplateVariables(
-	templateOptions templates.TemplateFillOptions,
+// FillDirectory fills template variables in files within the source directory.
+func FillDirectory(
+	src string,
 	ignoreOptions templates.IgnorePathOptions,
-	variablesMap map[string]interface{},
-) error {
+	outputInTerminal bool,
+	variablesMap map[string]interface{}) error {
+	// Create a new template filler with the provided variables.
 	filler := templates.NewTemplateFiller(variablesMap)
-	err := filler.FillDirectory(templateOptions, ignoreOptions)
+
+	// Fill the template variables in the source directory.
+	err := filler.FillDirectory(src, ignoreOptions, outputInTerminal)
 	if err != nil {
-		terminal.ErrorMessage("Error filling template variables", err)
+		if outputInTerminal {
+			terminal.ErrorMessage("Failed to print results to the terminal", err)
+		} else {
+			terminal.ErrorMessage("Failed to fill the template variables", err)
+		}
 		return err
 	}
-	if !suppressPrints && !templateOptions.PrintMode {
-		terminal.OKMessage("The template variables were filled")
+
+	// Display a success message if not outputting the results to the terminal.
+	if !suppressPrints && !outputInTerminal {
+		terminal.OKMessage("Template variables successfully filled")
+	}
+
+	return nil
+}
+
+// CreateFilledDirectory takes a source directory with template files and saves the result in a destination directory.
+func CreateFilledDirectory(
+	src string,
+	dest string,
+	ignoreOptions templates.IgnorePathOptions,
+	variablesMap map[string]interface{}) error {
+	// Create a new template filler with the provided variables.
+	filler := templates.NewTemplateFiller(variablesMap)
+
+	// Fill the template variables and save the result in the destination directory.
+	err := filler.CreateFilledDirectory(src, dest, ignoreOptions)
+	if err != nil {
+		terminal.ErrorMessage("Failed to fill the template variables", err)
+		return err
+	}
+
+	// Display a success message.
+	if !suppressPrints {
+		terminal.OKMessage("Template variables successfully filled")
 	}
 
 	return nil
