@@ -25,27 +25,29 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 		return buf.String(), nil
 	}
 
-	// toFile saves the result of executing a named template with data to a file at the specified path.
-	// It accepts a 'path' for the file to be saved, a 'name' of the template to execute, and 'data' to
-	// be provided as input to the template execution.
-	//
-	// The 'path' can be either a relative or an absolute file path. If the directory for the file does
-	// not exist, it will be created automatically.
-	funcMap["toFile"] = func(path, name string, data interface{}) (string, error) {
+	// "toFile" function is a custom function provided by Cloney, which allows users to dynamically
+	// create files from a template. This function has a hidden parameter 'fileDir', representing
+	// the directory of the file currently being processed. This parameter is utilized to determine
+	// the absolute path where the generated file will be saved, relative to the file being processed.
+	// During template execution, 'fileDir' is automatically injected into the function.
+	funcMap["toFile"] = func(fileDir, relativePath, name string, data interface{}) (string, error) {
 		// Execute the template.
 		buf := bytes.NewBuffer(nil)
 		if err := tmpl.ExecuteTemplate(buf, name, data); err != nil {
 			return "", err
 		}
 
+		// Calculate the absolute path of the file.
+		absPath := filepath.Join(fileDir, relativePath)
+
 		// If needed, create the directory where the file will be saved.
-		directory := filepath.Dir(path)
+		directory := filepath.Dir(absPath)
 		if err := os.MkdirAll(directory, os.ModePerm); err != nil {
 			return "", err
 		}
 
 		// Create the file.
-		err := os.WriteFile(path, buf.Bytes(), os.ModePerm)
+		err := os.WriteFile(absPath, buf.Bytes(), os.ModePerm)
 		if err != nil {
 			return "", err
 		}

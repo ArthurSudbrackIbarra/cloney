@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/template"
 
@@ -26,14 +25,13 @@ func NewTemplateFiller(variablesMap map[string]interface{}) *TemplateFiller {
 	}
 }
 
-// replaceCustomToFileFuncPaths replaces the paths of the "toFile" custom function in the template content.
-// This function is necessary because the paths must be relative to the directory of the file being processed.
-// The "toFile" function is defined in templates/custom_funcs.go.
-// If 'outputInTerminal' is set to true, an error is returned as "toFile" is not supported in terminal output mode.
-func replaceCustomToFileFuncPaths(filePath string, fileContent string, outputInTerminal bool) (string, error) {
-	// Define a regular expression to match the "toFile" function and extract the path parameter.
-	regex := regexp.MustCompile(`{{-?\s*toFile\s+"([^"]*)"`)
-
+// injectCustomToFileFuncPaths takes a file path, its content, and a flag indicating whether the output
+// is intended for the terminal. It returns a modified version of the file content with the first hidden
+// parameter of the 'toFile' function injected. This hidden parameter represents the directory of the file
+// being processed and is used to calculate the absolute path of files created relative to it.
+// If 'outputInTerminal' is true, an error is returned because the 'toFile' function is not supported in
+// terminal output mode; it should be used with 'cloney dry-run -o <output_directory>' instead.
+func injectCustomToFileFuncPaths(filePath string, fileContent string, outputInTerminal bool) (string, error) {
 	// Split the template content into lines for processing.
 	fileLines := strings.Split(fileContent, "\n")
 
@@ -44,21 +42,13 @@ func replaceCustomToFileFuncPaths(filePath string, fileContent string, outputInT
 			if outputInTerminal {
 				return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
 			}
-			// Extract the path parameter from the "toFile" function.
-			matches := regex.FindStringSubmatch(line)
-			if len(matches) != 2 {
-				return "", fmt.Errorf("error parsing 'toFile' function path: %s", line)
-			}
-			pathParam := matches[1]
 
-			// Check if the path is absolute, and if so, raise an error.
-			if filepath.IsAbs(pathParam) {
-				return "", fmt.Errorf("'toFile' function path must be relative: %s", pathParam)
-			}
+			// Inject the "hidden" first parameter 'fileDir' of the 'toFile' function into the template.
+			// This parameter is the directory of the file being processed.
+			fileDir := filepath.Dir(filePath)
+			newLine := strings.ReplaceAll(line, "toFile", fmt.Sprintf("toFile \"%s\"", fileDir))
 
-			// Calculate the new path of the file based on the template's location.
-			newPath := filepath.Join(filepath.Dir(filePath), pathParam)
-			newLine := strings.ReplaceAll(line, pathParam, newPath)
+			fmt.Println(newLine)
 
 			// If on Windows, replace backslashes with forward slashes.
 			if os.PathSeparator == '\\' {
@@ -91,8 +81,8 @@ func (t *TemplateFiller) FillDirectory(src string, ignoreOptions IgnorePathOptio
 			return fmt.Errorf("error reading file %s: %w", filePath, err)
 		}
 
-		// Replace the paths of the "toFile" custom function in the template.
-		fileContent, err := replaceCustomToFileFuncPaths(filePath, string(fileBytes), outputInTerminal)
+		// Get a new version of the file content with the first hidden parameter of the 'toFile' function injected.
+		fileContent, err := injectCustomToFileFuncPaths(filePath, string(fileBytes), outputInTerminal)
 		if err != nil {
 			return err
 		}
@@ -161,8 +151,8 @@ func (t *TemplateFiller) CreateFilledDirectory(src string, dest string, ignoreOp
 			return fmt.Errorf("error creating directory %s: %w", directory, err)
 		}
 
-		// Replace the paths of the "toFile" custom function in the template.
-		fileContent, err := replaceCustomToFileFuncPaths(targetFilePath, string(fileBytes), false)
+		// Get a new version of the file content with the first hidden parameter of the 'toFile' function injected.
+		fileContent, err := injectCustomToFileFuncPaths(targetFilePath, string(fileBytes), false)
 		if err != nil {
 			return err
 		}
