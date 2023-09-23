@@ -26,7 +26,9 @@
 
 - [Accessing Variables in Template Files](#accessing-variables-in-template-files)
 
-  - [Go Template Tutorials](#go-template-tutorials)
+- [Dynamically Generating Files](#dynamically-generating-files)
+
+- [Go Template Tutorials](#go-template-tutorials)
 
 - [Cloney Command-Line Interface (CLI)](#cloney-command-line-interface-cli)
   - [Cloney CLI Commands](#cloney-cli-commands)
@@ -200,7 +202,118 @@ Here's an example of what the generated HTML could look like:
 <p>HTTPS is enabled.</p>
 ```
 
-### Go Template Tutorials
+## Dynamically Generating Files
+
+Cloney, allows you to not only replace placeholders with variable values but also generate files and directories dynamically. This feature is particularly useful for creating multiple files based on a template and data. Let's dive into the process using a practical example.
+
+### Example Scenario
+
+Suppose you have a YAML file containing currency information like this:
+
+```yaml
+currencies:
+  - name: USD
+    symbol: $
+    description: "United States Dollar"
+  - name: EUR
+    symbol: €
+    description: "Euro"
+  - name: GBP
+    symbol: £
+    description: "British Pound"
+```
+
+Your goal is to create a home page that lists all the currencies and links to a dedicated page for each currency.
+
+### Creating the `home.html` Template
+
+You can start by creating a `home.html` file that dynamically generates the content for each currency and generates links to their respective pages.
+
+```html
+<!-- File: home.html -->
+
+{{- define "currency-file-content" -}}
+<!-- File: {{ .name }}.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Currency: {{ .name }}</title>
+</head>
+<body>
+    <h1>Currency: {{ .name }}</h1>
+    <p>Symbol: {{ .symbol }}</p>
+    <p>Description: {{ .description }}</p>
+</body>
+</html>
+{{- end -}}
+
+<p>Check out the different currencies:</p>
+
+<ul>
+{{- range .currencies }}
+{{- $fileName := printf "%s.html" .name }}
+{{- toFile $fileName "currency-file-content" . }}
+  <li>
+    <a href="{{ $fileName }}">{{ .name }}</a>
+  </li>
+{{- end }}
+</ul>
+```
+
+Let's break down what's happening within this template:
+
+1. `{{- define "currency-file-content" -}} ... {{- end -}}`: This defines a template named `currency-file-content` that will be used to generate the content of each currency's page.
+
+2. `{{- range .currencies }} ... {{- end }}`: This iterates through the list of currencies provided in your YAML data.
+
+3. `{{- $fileName := printf "%s.html" .name }}`: This creates a variable named `fileName` to store the name of the file to be generated. The file name will be constructed using the currency's name with the `.html` extension.
+
+4. `{{- toFile $fileName "currency-file-content" . }}`: This generates a file named `fileName` using the `currency-file-content` template and the current currency as the context. This is where the dynamic file generation happens.
+
+## Generated Output
+
+When Cloney processes this template, it generates several files. The `home.html` file will have the following content:
+
+```html
+<!-- File: home.html -->
+
+
+<p>Check out the different currencies:</p>
+<ul>
+  <li>
+    <a href="USD.html">USD</a>
+  </li>
+  <li>
+    <a href="EUR.html">EUR</a>
+  </li>
+  <li>
+    <a href="GBP.html">GBP</a>
+  </li>
+</ul>
+```
+
+Additionally, Cloney generates three other files, namely `USD.html`, `EUR.html`, and `GBP.html`, each containing content specific to the respective currency:
+
+```html
+<!-- File: USD.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Currency: USD</title>
+</head>
+<body>
+    <h1>Currency: USD</h1>
+    <p>Symbol: $</p>
+    <p>Description: United States Dollar</p>
+</body>
+</html>
+```
+
+## Go Template Tutorials
 
 To help you make the most of Cloney's dynamic variables and the Go template syntax, we recommend exploring tutorials and documentation on Go templates. Go templates are a widely used tool for generating text and are well-documented within the Go programming language. You can find these resources at:
 

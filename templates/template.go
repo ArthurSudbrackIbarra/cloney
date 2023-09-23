@@ -27,7 +27,7 @@ func NewTemplateFiller(variablesMap map[string]interface{}) *TemplateFiller {
 
 // injectCustomToFileFuncPaths takes a file path, its content, and a flag indicating whether the output
 // is intended for the terminal. It returns a modified version of the file content with the first hidden
-// parameter of the 'toFile' function injected. This hidden parameter represents the directory of the file
+// parameter of the 'toFile' functions injected. This hidden parameter represents the directory of the file
 // being processed and is used to calculate the absolute path of files created relative to it.
 // If 'outputInTerminal' is true, an error is returned because the 'toFile' function is not supported in
 // terminal output mode; it should be used with 'cloney dry-run -o <output_directory>' instead.
