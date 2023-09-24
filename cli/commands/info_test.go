@@ -11,8 +11,8 @@ import (
 // testInfoCommand represents a command instance used for testing.
 var testInfoCommand = CreateInfoCommand()
 
-// createDummyCloneyMetadataFile creates a dummy Cloney metadata file in the specified directory.
-func createDummyCloneyMetadataFile(assert *assert.Assertions, directory string) {
+// CreateDummyCloneyMetadataFile creates a dummy Cloney metadata file in the specified directory.
+func CreateDummyCloneyMetadataFile(assert *assert.Assertions, directory string) {
 	// Define the raw Cloney metadata content.
 	rawMetadata := `
 manifest_version: v1
@@ -46,8 +46,10 @@ variables:
             password: admin
 `
 	// Write the metadata content to a file in the specified directory.
+	err := os.MkdirAll(directory, os.ModePerm)
+	assert.NoError(err)
 	metadataFilePath := filepath.Join(directory, appConfig.MetadataFileName)
-	err := os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
+	err = os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
 	assert.NoError(err)
 }
 
@@ -58,7 +60,7 @@ func TestInfoCommandWhenCurrentDirectoryIsACloneyProject(t *testing.T) {
 	assert := assert.New(t)
 
 	// Create a dummy Cloney metadata file in the current directory to simulate a Cloney project.
-	createDummyCloneyMetadataFile(assert, ".")
+	CreateDummyCloneyMetadataFile(assert, ".")
 
 	// Execute the "info" command.
 	err := testInfoCommand.Execute()
@@ -95,7 +97,7 @@ func TestInfoCommandPointingToLocalCloneyProject(t *testing.T) {
 	assert.NoError(err)
 
 	// Create a dummy Cloney metadata file in the test project directory.
-	createDummyCloneyMetadataFile(assert, "test-project")
+	CreateDummyCloneyMetadataFile(assert, "test-project")
 
 	// Simulate CLI arguments with flags and values to specify the project directory.
 	testInfoCommand.SetArgs([]string{"./test-project"})

@@ -66,7 +66,7 @@ var globalConfig = &AppConfig{
 	DefaultMetadataLicenseValue:         "MIT",
 	DefaultMetadataTemplateVersionValue: "0.0.0",
 
-	CloneyExampleRepositoryURL: "https://github.com/ArthurSudbrackIbarra/cloney-test.git",
+	CloneyExampleRepositoryURL: "https://github.com/ArthurSudbrackIbarra/cloney-example.git",
 }
 
 // LoadConfig loads the global application configuration.
