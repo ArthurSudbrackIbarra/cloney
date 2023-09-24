@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"text/template"
 )
 
@@ -53,6 +54,12 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 		}
 
 		return "", nil
+	}
+
+	// "os" function is a custom function provided by Cloney, which returns the user's operating system.
+	// This function has no parameters. It is useful for generating OS-specific parts.
+	funcMap["os"] = func() (string, error) {
+		return runtime.GOOS, nil
 	}
 
 	// Implement your own custom functions here...
