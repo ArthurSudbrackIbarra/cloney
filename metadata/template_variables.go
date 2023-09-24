@@ -180,8 +180,8 @@ func AreVariablesSameType(variable1 interface{}, variable2 interface{}) bool {
 		value1 := reflect.ValueOf(variable1)
 		value2 := reflect.ValueOf(variable2)
 
-		// If the slices are empty, return true.
-		if value1.Len() == 0 && value2.Len() == 0 {
+		// If one of the slices is empty, return true.
+		if value1.Len() == 0 || value2.Len() == 0 {
 			return true
 		}
 

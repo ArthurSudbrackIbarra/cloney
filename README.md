@@ -213,6 +213,8 @@ Cloney, allows you to not only replace placeholders with variable values but als
 Suppose you have a YAML file containing currency information like this:
 
 ```yaml
+app_name: MyApp
+
 currencies:
   - name: USD
     symbol: $
@@ -274,13 +276,12 @@ Let's break down what's happening within this template:
 
 4. `{{- toFile $fileName "currency-file-content" . }}`: This generates a file named `fileName` using the `currency-file-content` template and the current currency as the context. This is where the dynamic file generation happens.
 
-## Generated Output
+### Generated Output
 
 When Cloney processes this template, it generates several files. The `home.html` file will have the following content:
 
 ```html
 <!-- File: home.html -->
-
 
 <p>Check out the different currencies:</p>
 <ul>
@@ -314,6 +315,38 @@ Additionally, Cloney generates three other files, namely `USD.html`, `EUR.html`,
 </body>
 </html>
 ```
+
+## Known Limitations and Workarounds
+
+While Cloney's dynamic file generation is a powerful feature, there are certain limitations and workarounds to consider when working with it.
+
+### Limitation: Accessing Root-Level Variables
+
+In the example provided, accessing root-level variables like `app_name` from within the `currency-file-content` template can be challenging. This is because the context within the template is limited to the data passed to it, and it does not have direct access to variables defined outside the template.
+
+### Workaround: Using a Dictionary
+
+To access root-level variables within a dynamically generated template, you can use a dictionary to store both the root-level variables and the parameters needed for the `currency-file-content` template. Here's how to do it:
+
+```html
+{{- $dict := dict "root" $ "param" . -}}
+{{- toFile $fileName "currency-file-content" $dict -}}
+```
+
+In this code, a dictionary named `$dict` is created, which contains two key-value pairs: `"root"` and `"param"`. `"root"` is assigned the value of the root-level context (`$`), and `"param"` is assigned the value of the current currency data (`.`).
+
+### Accessing Variables in the Template
+
+With the dictionary approach, you can now access root-level variables and parameters in the `currency-file-content` template as follows:
+
+```html
+{{- define "currency-file-content" -}}
+<p>The app name is: {{ .root.app_name }}</p>
+<p>The currency name is: {{ .param.name }}</p>
+{{- end -}}
+```
+
+By using this workaround, you can access both root-level and local variables within your dynamically generated files.
 
 ## Go Template Tutorials
 
