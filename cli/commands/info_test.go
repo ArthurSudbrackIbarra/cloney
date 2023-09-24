@@ -19,31 +19,22 @@ manifest_version: v1
 name: TestProject
 description: This is a test project.
 license: MIT
-template_version: "0.0.0"
+template_version: 0.0.0
 authors:
   - John Doe
 variables:
-  - name: test_variable
-    description: This is a test variable.
-    default: test
-    example: test
-  - name: test_complex_variable
-    description: This is a test complex variable.
+  - name: app_name
+    description: The name of the application.
+    example: My Bank App
+  - name: dark_mode
+    description: Whether or not to enable dark mode.
+    example: false
+  - name: currencies
+    description: A list of currencies
     example:
-      abc:
-        - 1
-        - 2
-      def:
-        enableThis: true
-  - name: test_complex_variable_2
-    description: This is a test complex variable.
-    example:
-      - port: 8080
-        protocol: http
-        security:
-          - type: basic
-            username: admin
-            password: admin
+      - name: USD
+        symbol: abc
+        description: United States Dollar	
 `
 	// Write the metadata content to a file in the specified directory.
 	err := os.MkdirAll(directory, os.ModePerm)

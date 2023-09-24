@@ -73,7 +73,7 @@ func TestDryRunCommandWhenCurrentDirectoryIsACloneyProject(t *testing.T) {
 	CreateDummyTxtFile(assert, ".")
 
 	// Run the "dryrun" command.
-	err := testDryRunCommand.RunE(testDryRunCommand, []string{})
+	err := testDryRunCommand.Execute()
 
 	// Assert that the "dryrun" command did not return an error.
 	assert.Nil(err)
