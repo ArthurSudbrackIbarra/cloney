@@ -142,6 +142,26 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 	return cloneyMetadata, nil
 }
 
+// DeleteIgnoredPaths removes files and directories from the specified 'directory' if their
+// paths match any of the patterns listed in 'cloneyMetadata.Configuration.IgnorePaths'.
+// It iterates through the ignore paths and deletes them recursively.
+//
+// Parameters:
+//   - cloneyMetadata: The metadata containing the configuration of the template repository.
+//   - directory: The base directory from which to start removing files and directories.
+func DeleteIgnoredPaths(cloneyMetadata *metadata.CloneyMetadata, directory string) {
+	for _, ignorePath := range cloneyMetadata.Configuration.IgnorePaths {
+		// Construct the full path to the item to be removed.
+		path := filepath.Join(directory, ignorePath)
+
+		// Remove the specified path, including its contents if it's a directory.
+		err := os.RemoveAll(path)
+		if err != nil {
+			terminal.WarningMessage("Ignore path '" + ignorePath + "' not found, skipping...")
+		}
+	}
+}
+
 // MatchUserVariables matches the user variables with the template variables.
 func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap map[string]interface{}) error {
 	// Validate if the user variables match the template variables.
@@ -162,14 +182,14 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 // FillDirectory fills template variables in files within the source directory.
 func FillDirectory(
 	src string,
-	ignoreOptions templates.IgnorePathOptions,
+	ignorePaths []string,
 	outputInTerminal bool,
 	variablesMap map[string]interface{}) error {
 	// Create a new template filler with the provided variables.
 	filler := templates.NewTemplateFiller(variablesMap)
 
 	// Fill the template variables in the source directory.
-	err := filler.FillDirectory(src, ignoreOptions, outputInTerminal)
+	err := filler.FillDirectory(src, ignorePaths, outputInTerminal)
 	if err != nil {
 		if outputInTerminal {
 			terminal.ErrorMessage("Failed to print results to the terminal", err)
@@ -179,7 +199,6 @@ func FillDirectory(
 		return err
 	}
 
-	// Display a success message if not outputting the results to the terminal.
 	if !suppressPrints && !outputInTerminal {
 		terminal.OKMessage("Template variables successfully filled")
 	}
@@ -191,19 +210,18 @@ func FillDirectory(
 func CreateFilledDirectory(
 	src string,
 	dest string,
-	ignoreOptions templates.IgnorePathOptions,
+	ignorePaths []string,
 	variablesMap map[string]interface{}) error {
 	// Create a new template filler with the provided variables.
 	filler := templates.NewTemplateFiller(variablesMap)
 
 	// Fill the template variables and save the result in the destination directory.
-	err := filler.CreateFilledDirectory(src, dest, ignoreOptions)
+	err := filler.CreateFilledDirectory(src, dest, ignorePaths)
 	if err != nil {
 		terminal.ErrorMessage("Failed to fill the template variables", err)
 		return err
 	}
 
-	// Display a success message.
 	if !suppressPrints {
 		terminal.OKMessage("Template variables successfully filled")
 	}

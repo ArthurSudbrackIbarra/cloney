@@ -6,11 +6,18 @@ import (
 	"strings"
 
 	basicoperations "github.com/ArthurSudbrackIbarra/cloney/basic-operations"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/go-playground/validator/v10"
 	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v3"
 )
+
+// CloneyMetadataConfiguration represents the configuration of a Cloney template repository.
+type CloneyMetadataConfiguration struct {
+	// IgnorePaths is the list of paths to ignore when cloning the template repository.
+	IgnorePaths []string `yaml:"ignore_paths"`
+}
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
 type CloneyMetadataVariable struct {
@@ -47,6 +54,9 @@ type CloneyMetadata struct {
 	// License is the license of the template repository.
 	License string `yaml:"license"`
 
+	// Configuration is the configuration of the template repository.
+	Configuration CloneyMetadataConfiguration `yaml:"configuration"`
+
 	// Variables is the list of variables of the template repository.
 	Variables []CloneyMetadataVariable `yaml:"variables"`
 }
@@ -82,6 +92,16 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 		err = validate.Struct(variable)
 		if err != nil {
 			return nil, fmt.Errorf("invalid metadata file structure: %w", err)
+		}
+
+		// If the variable has a default value, check if it is of the same type as the example value.
+		if variable.Default != nil && !AreVariablesSameType(variable.Example, variable.Default) {
+			return nil, fmt.Errorf(
+				"variable '%s' has a default value of type '%s' but its example value is of type '%s'",
+				variable.Name,
+				VariableType(variable.Default),
+				VariableType(variable.Example),
+			)
 		}
 	}
 
@@ -160,8 +180,15 @@ func (m *CloneyMetadata) GetVariables() string {
 	table.SetAutoWrapText(false)
 	table.SetRowLine(true)
 	for _, variable := range m.Variables {
+		// Paint the variable name yellow if it is required.
+		variableName := ""
+		if variable.Default == nil {
+			variableName = terminal.Yellow(variable.Name)
+		} else {
+			variableName = variable.Name
+		}
 		table.Append(
-			[]string{variable.Name, variable.Description, VariableType(variable.Example), VariableValue(variable.Default), VariableValue(variable.Example)},
+			[]string{variableName, variable.Description, VariableType(variable.Example), VariableValue(variable.Default), VariableValue(variable.Example)},
 		)
 	}
 	table.Render()
@@ -170,10 +197,11 @@ func (m *CloneyMetadata) GetVariables() string {
 
 // String returns the string representation of the CloneyMetadata struct.
 func (m *CloneyMetadata) String() string {
-	result := "General information about this template repository:\n"
+	result := "General information about this template repository:\n\n"
 	result += m.GetGeneralInfo()
 
-	result += "\nVariables of this template repository:\n"
+	result += "\nVariables of this template repository.\n"
+	result += "Variables painted in yellow are required:\n\n"
 	result += m.GetVariables()
 
 	return result

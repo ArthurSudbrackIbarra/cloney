@@ -64,9 +64,9 @@ func injectCustomToFileFuncPaths(filePath string, fileContent string, outputInTe
 }
 
 // FillDirectory processes template files in a source directory, replacing placeholders with variables.
-func (t *TemplateFiller) FillDirectory(src string, ignoreOptions IgnorePathOptions, outputInTerminal bool) error {
+func (t *TemplateFiller) FillDirectory(src string, ignorePaths []string, outputInTerminal bool) error {
 	// Get a list of all files in the specified directory, considering ignore options.
-	filePaths, err := GetAllFilePaths(src, ignoreOptions)
+	filePaths, err := GetAllFilePaths(src, ignorePaths)
 	if err != nil {
 		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
 	}
@@ -118,9 +118,9 @@ func (t *TemplateFiller) FillDirectory(src string, ignoreOptions IgnorePathOptio
 }
 
 // CreateFilledDirectory processes template files in a source directory and saves the filled files in a destination directory.
-func (t *TemplateFiller) CreateFilledDirectory(src string, dest string, ignoreOptions IgnorePathOptions) error {
+func (t *TemplateFiller) CreateFilledDirectory(src string, dest string, ignorePaths []string) error {
 	// Get a list of all files in the specified directory, considering ignore options.
-	filePaths, err := GetAllFilePaths(src, ignoreOptions)
+	filePaths, err := GetAllFilePaths(src, ignorePaths)
 	if err != nil {
 		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
 	}

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
-	"github.com/ArthurSudbrackIbarra/cloney/templates"
 
 	"github.com/spf13/cobra"
 )
@@ -60,25 +59,26 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Define options for ignoring specific files and directories when filling template variables.
-	ignoreOptions := templates.IgnorePathOptions{
-		// Ignore specific files when filling the template variables.
-		IgnoreFiles: []string{
-			appConfig.MetadataFileName,
-			appConfig.DefaultUserVariablesFileName,
-			filepath.Base(filepath.Join(currentDir, variables)),
-		},
+	ignorePaths := []string{
+		// Ignore specific Cloney files.
+		appConfig.MetadataFileName,
+		appConfig.DefaultUserVariablesFileName,
+		filepath.Base(filepath.Join(currentDir, variables)),
 
-		// Ignore the '.git' directory when filling the template variables.
-		IgnoreDirectories: []string{".git"},
+		// Ignore the '.git' directory.
+		".git",
+	}
+	for _, ignorePath := range cloneyMetadata.Configuration.IgnorePaths {
+		ignorePaths = append(ignorePaths, ignorePath)
 	}
 
 	// Check if the output should be displayed in the terminal.
 	if outputInTerminal {
 		// Fill the template variables and display the output in the terminal instead of creating the files.
-		err = steps.FillDirectory(sourcePath, ignoreOptions, true, variablesMap)
+		err = steps.FillDirectory(sourcePath, ignorePaths, true, variablesMap)
 	} else {
 		// Create a new directory to save the filled template files.
-		err = steps.CreateFilledDirectory(sourcePath, outputPath, ignoreOptions, variablesMap)
+		err = steps.CreateFilledDirectory(sourcePath, outputPath, ignorePaths, variablesMap)
 	}
 
 	if err != nil {

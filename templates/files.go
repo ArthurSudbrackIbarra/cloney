@@ -4,22 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	basicoperations "github.com/ArthurSudbrackIbarra/cloney/basic-operations"
+	"strings"
 )
-
-// IgnorePathOptions is a struct used to configure the GetAllFilePaths function.
-type IgnorePathOptions struct {
-	// IgnoreFiles is a list of file names to be ignored.
-	IgnoreFiles []string
-
-	// IgnoreDirectories is a list of directory names to be ignored.
-	IgnoreDirectories []string
-}
 
 // GetAllFilePaths returns a list of all file paths within a directory and its subdirectories,
 // with options to specify directories and files to ignore.
-func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]string, error) {
+func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, error) {
 	var filePaths []string
 
 	// Walk the directory and its subdirectories.
@@ -27,14 +17,27 @@ func GetAllFilePaths(directoryPath string, ignoreOptions IgnorePathOptions) ([]s
 		if err != nil {
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
+
+		// Check if the path should be ignored.
+		var ignore bool
+		for _, ignorePath := range ignorePaths {
+			absPath, _ := filepath.Abs(path)
+			absDirPath, _ := filepath.Abs(directoryPath)
+			absIgnorePath := filepath.Join(absDirPath, ignorePath)
+			if strings.HasPrefix(absPath, absIgnorePath) {
+				ignore = true
+				break
+			}
+		}
+
 		if info.IsDir() {
 			// Check if the directory should be ignored.
-			if basicoperations.ListContainsString(ignoreOptions.IgnoreDirectories, info.Name()) {
+			if ignore {
 				return filepath.SkipDir
 			}
 		} else {
 			// Check if the file should be ignored.
-			if basicoperations.ListContainsString(ignoreOptions.IgnoreFiles, info.Name()) {
+			if ignore {
 				return nil
 			}
 			// Add the file path to the list.

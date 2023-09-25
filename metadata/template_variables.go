@@ -109,24 +109,43 @@ func MapVariableType(mapVar interface{}) string {
 
 	// Convert to a Go map.
 	// mapVar can either be a map[string]interface{} or a map[interface{}]interface{}.
-	// TODO: So we need to check which one it is.
-	map_ := mapVar.(map[string]interface{})
+	// So we need to check which one it is.
+	mapStr, okStr := mapVar.(map[string]interface{})
+	mapInterface, _ := mapVar.(map[interface{}]interface{})
 
-	if len(map_) == 0 {
-		return MAP_VARIABLE_TYPE
-	}
-
-	// Iterate over the map values and get their types.
 	variableTypes := ""
-	for key, value := range map_ {
-		valueType := VariableType(value)
-
-		// If any value has an unknown type, return "unknown" for the map.
-		if valueType == UNKNOWN_VARIABLE_TYPE {
-			return UNKNOWN_VARIABLE_TYPE
+	if okStr {
+		if len(mapStr) == 0 {
+			return MAP_VARIABLE_TYPE
 		}
 
-		variableTypes += fmt.Sprintf("%s: %s\n", key, valueType)
+		// Iterate over the map values and get their types.
+		for key, value := range mapStr {
+			valueType := VariableType(value)
+
+			// If any value has an unknown type, return "unknown" for the map.
+			if valueType == UNKNOWN_VARIABLE_TYPE {
+				return UNKNOWN_VARIABLE_TYPE
+			}
+
+			variableTypes += fmt.Sprintf("%s: %s\n", key, valueType)
+		}
+	} else {
+		if len(mapInterface) == 0 {
+			return MAP_VARIABLE_TYPE
+		}
+
+		// Iterate over the map values and get their types.
+		for key, value := range mapInterface {
+			valueType := VariableType(value)
+
+			// If any value has an unknown type, return "unknown" for the map.
+			if valueType == UNKNOWN_VARIABLE_TYPE {
+				return UNKNOWN_VARIABLE_TYPE
+			}
+
+			variableTypes += fmt.Sprintf("%s: %s\n", key, valueType)
+		}
 	}
 
 	// Return the map type indented.
