@@ -150,15 +150,9 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 //   - cloneyMetadata: The metadata containing the configuration of the template repository.
 //   - directory: The base directory from which to start removing files and directories.
 func DeleteIgnoredPaths(cloneyMetadata *metadata.CloneyMetadata, directory string) {
-	for _, ignorePath := range cloneyMetadata.Configuration.IgnorePaths {
-		// Construct the full path to the item to be removed.
-		path := filepath.Join(directory, ignorePath)
-
-		// Remove the specified path, including its contents if it's a directory.
-		err := os.RemoveAll(path)
-		if err != nil {
-			terminal.WarningMessage("Ignore path '" + ignorePath + "' not found, skipping...")
-		}
+	err := templates.DeleteIgnoredFiles(directory, cloneyMetadata.Configuration.IgnorePaths)
+	if err != nil {
+		terminal.ErrorMessage("Failed to delete ignored files", err)
 	}
 }
 

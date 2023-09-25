@@ -87,6 +87,11 @@ authors:
 license: MIT
 template_version: "1.1.0"
 
+configuration:
+  ignore_paths:
+    - development/*.html
+    - images/*.jpg
+
 variables:
   - name: app_name
     description: The name of your application.
@@ -118,6 +123,12 @@ variables:
 - **Template Version**: The version number of your template, allowing users to identify different releases.
 
 - **Variables**: A list of variables that users can customize during the cloning process.
+
+### Template Configuration
+
+The `.cloney.yaml` metadata file also allows you to configure some aspects of your template. These configurations are optional and can be omitted if you don't require them.
+
+- **Ignore Paths**: A list of paths to ignore when cloning the template. This is useful for excluding files that are not relevant to the template's customization process.
 
 ### Template Variables
 
