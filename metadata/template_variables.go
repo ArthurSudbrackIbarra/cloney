@@ -181,9 +181,16 @@ func IndentStringStructure(input string) string {
 }
 
 // AreVariablesSameType checks if two variables are of the same type.
-func AreVariablesSameType(variable1 interface{}, variable2 interface{}) bool {
-	type1 := reflect.TypeOf(variable1)
-	type2 := reflect.TypeOf(variable2)
+func AreVariablesSameType(expected interface{}, actual interface{}) bool {
+	type1 := reflect.TypeOf(expected)
+	type2 := reflect.TypeOf(actual)
+
+	// Special case, if 'expected' is a float and 'actual' is an int, return true.
+	// This is because integers are a subset of decimals.
+	if strings.HasPrefix(type1.Kind().String(), "float") &&
+		strings.HasPrefix(type2.Kind().String(), "int") {
+		return true
+	}
 
 	// First check if the types are the same.
 	if type1 != type2 {
@@ -196,8 +203,8 @@ func AreVariablesSameType(variable1 interface{}, variable2 interface{}) bool {
 			return false
 		}
 
-		value1 := reflect.ValueOf(variable1)
-		value2 := reflect.ValueOf(variable2)
+		value1 := reflect.ValueOf(expected)
+		value2 := reflect.ValueOf(actual)
 
 		// If one of the slices is empty, return true.
 		if value1.Len() == 0 || value2.Len() == 0 {
@@ -221,8 +228,8 @@ func AreVariablesSameType(variable1 interface{}, variable2 interface{}) bool {
 			return false
 		}
 
-		mapValue1 := reflect.ValueOf(variable1)
-		mapValue2 := reflect.ValueOf(variable2)
+		mapValue1 := reflect.ValueOf(expected)
+		mapValue2 := reflect.ValueOf(actual)
 
 		// Check if the keys are the same in both maps.
 		for _, key := range mapValue1.MapKeys() {

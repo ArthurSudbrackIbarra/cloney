@@ -131,6 +131,7 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 		type2 := VariableType(userVariables[variable.Name])
 
 		// Special case, if the template variable is a 'decimal' and the user variable is an 'integer', it is valid.
+		// This is because integers are a subset of decimals.
 		if type1 == DECIMAL_VARIABLE_TYPE && type2 == INTEGER_VARIABLE_TYPE {
 			continue
 		}
