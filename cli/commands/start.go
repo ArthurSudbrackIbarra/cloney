@@ -102,16 +102,17 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	rawMetadata += "    description: The name of the application.\n"
 	rawMetadata += "    default: My App\n"
 	rawMetadata += "    example: My App\n\n"
-	rawMetadata += "  - name: enable_https\n"
-	rawMetadata += "    description: Whether to enable HTTPS or not.\n"
+	rawMetadata += "  - name: enable_dark_mode\n"
+	rawMetadata += "    description: Whether to enable dark mode or not.\n"
 	rawMetadata += "    example: true\n"
 
 	// Suppress prints for common-steps functions.
 	steps.SetSuppressPrints(true)
 
 	// Create and validate a reference to the Cloney example repository.
+	// Reference the 'basic' branch, which contains a basic template repository.
 	repository, err := steps.CreateAndValidateRepository(
-		appConfig.CloneyExampleRepositoryURL, "main", "",
+		appConfig.CloneyExampleRepositoryURL, "basic", "",
 	)
 	if err != nil {
 		cmd.Println("Error when cloning the example Cloney repository from GitHub.")
@@ -164,8 +165,8 @@ func CreateStartCommand() *cobra.Command {
 	// This command is used to create a new cloney template repository.
 	startCmd := &cobra.Command{
 		Use:   "start",
-		Short: "Creates a new cloney template repository",
-		Long: `Creates a new cloney template repository.
+		Short: "Start a new Cloney template repository",
+		Long: `Start a new Cloney template repository.
 
 The 'cloney start' command will create a directory with the necessary files to start a new cloney template repository.`,
 		Example:          "  cloney start",

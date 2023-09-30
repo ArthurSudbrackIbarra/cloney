@@ -50,8 +50,8 @@ func ResetValidateCommandFlags(cmd *cobra.Command) {
 func CreateValidateCommand() *cobra.Command {
 	validateCmd := &cobra.Command{
 		Use:   "validate",
-		Short: "Validates your template",
-		Long: `Validates your template.
+		Short: "Validate your Cloney template repository",
+		Long: `Validate your Cloney template repository.
 
 The 'cloney validate' command validates if your Cloney template repository is valid.
 It checks if the repository has a metadata file, and if it has the required fields in it.

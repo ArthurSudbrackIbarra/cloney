@@ -18,7 +18,7 @@ func CreateVersionCommand() *cobra.Command {
 	// This command is used to print the version of the application.
 	versionCmd := &cobra.Command{
 		Use:              "version",
-		Short:            "Prints the current version of Cloney",
+		Short:            "Get the current version of Cloney",
 		PersistentPreRun: persistentPreRun,
 		Run:              versionCmdRun,
 	}

@@ -94,8 +94,8 @@ func CreateInfoCommand() *cobra.Command {
 	// This command is used to print information about a Cloney template repository.
 	infoCmd := &cobra.Command{
 		Use:   "info [local_path OR repository_url]",
-		Short: "Prints information about a Cloney template repository",
-		Long: `Prints information about a Cloney template repository.
+		Short: "Get information about a Cloney template repository",
+		Long: `Get information about a Cloney template repository.
 
 The 'cloney info' command will give you information about a Cloney template repository, such as its name, description, and variables.
 

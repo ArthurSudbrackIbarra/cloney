@@ -121,8 +121,8 @@ func CreateCloneCommand() *cobra.Command {
 	// This command is used to clone a template repository.
 	cloneCmd := &cobra.Command{
 		Use:   "clone [repository_url]",
-		Short: "Clones a template repository.",
-		Long: fmt.Sprintf(`Clones a template repository.
+		Short: "Clone a template repository.",
+		Long: fmt.Sprintf(`Clone a template repository.
 
 The 'cloney clone' command will search for a file named '%s' in your current directory by default.
 You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),

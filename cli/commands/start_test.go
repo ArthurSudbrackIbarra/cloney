@@ -37,14 +37,14 @@ func assertMetadataVariablesAreOK(assert *assert.Assertions, parsedMetadata map[
 	// Assert that the metadata file contains the "variables" section.
 	assert.Contains(parsedMetadata, "variables")
 
-	// Assert that the metadata file has two example variables: "app_name" and "enable_https".
+	// Assert that the metadata file has two example variables: "app_name" and "enable_dark_mode".
 	assert.Equal("app_name", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["name"])
 	assert.Equal("The name of the application.", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["description"])
 	assert.Equal("My App", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["default"])
 	assert.Equal("My App", parsedMetadata["variables"].([]interface{})[0].(map[string]interface{})["example"])
 
-	assert.Equal("enable_https", parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["name"])
-	assert.Equal("Whether to enable HTTPS or not.", parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["description"])
+	assert.Equal("enable_dark_mode", parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["name"])
+	assert.Equal("Whether to enable dark mode or not.", parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["description"])
 	assert.Equal(true, parsedMetadata["variables"].([]interface{})[1].(map[string]interface{})["example"])
 }
 
