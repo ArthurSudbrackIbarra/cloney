@@ -32,6 +32,11 @@ type CloneyMetadataVariable struct {
 
 	// Example is an example value of the variable.
 	Example interface{} `yaml:"example" validate:"required"`
+
+	// Validate specifies if the variable should be validated.
+	// It is a pointer to a bool because if the field is not defined in the YAML file,
+	// the default value should be true.
+	Validate *bool `yaml:"validate" default:"true"`
 }
 
 // CloneyMetadata represents the metadata file of a Cloney template repository.
@@ -156,6 +161,11 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 				// If the variable has a default value, add it to the user variables.
 				userVariables[variable.Name] = variable.Default
 			}
+		}
+
+		// If the user specified that the variable should not be validated, skip it.
+		if variable.Validate != nil && !*variable.Validate {
+			continue
 		}
 
 		// Check if the variables are of the same type.

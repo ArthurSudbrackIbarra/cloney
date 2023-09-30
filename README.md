@@ -142,6 +142,8 @@ Within the `.cloney.yaml` metadata file, Cloney allows you to define variables t
 
 - **Example Value**: Every variable must include an example value that demonstrates how it should be formatted and used. This example serves as a practical reference for users, helping them correctly configure variables within their customized templates.
 
+- **Validate (Optional)**: This parameter determines whether the variable's value should undergo validation when it is cloned. By default, this setting is enabled (`true`). Although not recommended, you have the option to disable validation by setting this field to `false`. Disabling validation can be particularly beneficial for variables with dynamic characteristics, such as variables that may assume various types or maps with dynamically changing keys.
+
 ## Providing Custom Variables
 
 When cloning a Cloney Template Repository, users can customize variables by providing values that align with the variable definitions in the `.cloney.yaml` metadata file. Here's an example of a `.cloney-vars.yaml` file that contains custom values for the variables:
