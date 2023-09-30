@@ -34,6 +34,7 @@ func Initialize() {
 	infoCmd := commands.CreateInfoCommand()
 	startCmd := commands.CreateStartCommand()
 	versionCmd := commands.CreateVersionCommand()
+	validateCmd := commands.CreateValidateCommand()
 
 	// Add subcommands.
 	rootCmd.AddCommand(cloneCmd)
@@ -41,6 +42,7 @@ func Initialize() {
 	rootCmd.AddCommand(infoCmd)
 	rootCmd.AddCommand(startCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(validateCmd)
 
 	// Stylings.
 	cc.Init(&cc.Config{

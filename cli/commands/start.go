@@ -8,13 +8,12 @@ import (
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
-	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/spf13/cobra"
 )
 
-// startCmdRun is the function that runs when the start command is called.
+// startCmdRun is the function that runs when the 'start' command is called.
 func startCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
 	output, _ := cmd.Flags().GetString("output")
@@ -29,7 +28,6 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	var err error
 
 	// If the non-interactive flag is not set, ask the user for the information.
-	appConfig := config.GetAppConfig()
 	if !nonInteractive {
 		scanner := bufio.NewScanner(os.Stdin)
 		cmd.Println("Please answer the following questions to create the template repository.")
@@ -169,7 +167,7 @@ func CreateStartCommand() *cobra.Command {
 		Short: "Creates a new cloney template repository",
 		Long: `Creates a new cloney template repository.
 
-cloney start will create a directory with the necessary files to start a new cloney template repository.`,
+The 'cloney start' command will create a directory with the necessary files to start a new cloney template repository.`,
 		Example:          "  cloney start",
 		PersistentPreRun: persistentPreRun,
 		RunE:             startCmdRun,

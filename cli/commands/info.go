@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// infoCmdRun is the function that runs when the info command is called.
+// infoCmdRun is the function that runs when the 'info' command is called.
 func infoCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
 	var repositorySource string
@@ -34,7 +34,6 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	var metadataContent string
 
 	// If the argument is a git repository URL, use it.
-	appConfig := config.GetAppConfig()
 	if git.MatchesGitRepositoryURL(repositorySource) {
 		// Create and validate the git repository.
 		repository, err := steps.CreateAndValidateRepository(repositorySource, branch, tag)
@@ -98,7 +97,7 @@ func CreateInfoCommand() *cobra.Command {
 		Short: "Prints information about a Cloney template repository",
 		Long: `Prints information about a Cloney template repository.
 
-cloney info will give you information about a Cloney template repository, such as its name, description, and variables.
+The 'cloney info' command will give you information about a Cloney template repository, such as its name, description, and variables.
 
 It can get information from a local template repository, or from a remote template repository.
 By default, it will get information from the current directory, assuming it is a template repository.

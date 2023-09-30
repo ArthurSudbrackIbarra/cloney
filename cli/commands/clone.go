@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/spf13/cobra"
 )
@@ -14,6 +15,8 @@ import (
 // cloneCmdRun is the function that runs when the 'clone' command is called.
 func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
+		cmd.Printf("[%s] %s\n\n", terminal.Red("Error"), "You must provide a repository URL")
+
 		// Display command help if no repository URL is provided.
 		cmd.Help()
 		return nil

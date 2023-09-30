@@ -43,8 +43,8 @@ func GetUserVariablesMap(currentDir, variables string) (map[string]interface{}, 
 		// In case of error, assume 'variables' is a file path.
 		variablesMap, err = metadata.NewCloneyUserVariablesFromFile(variables)
 		if err != nil {
-			terminal.ErrorMessage("Error parsing template variables", err)
-			return nil, err
+			// If it is not a file path, return an empty map.
+			return map[string]interface{}{}, nil
 		}
 	}
 

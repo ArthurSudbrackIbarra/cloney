@@ -71,6 +71,34 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 		return nil, err
 	}
 
+	// Validate metadata.
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	err = validate.Struct(metadata)
+	if err != nil {
+		// Custom error message for some validation errors.
+		validationErrors := err.(validator.ValidationErrors)
+		for _, validationError := range validationErrors {
+			// Convert field name to lowercase.
+			// If the field name is 'manifestversion', convert it to 'manifest_version'.
+			// If the field name is 'templateversion', convert it to 'template_version'.
+			var field string
+			field = strings.ToLower(validationError.Field())
+			if field == "manifestversion" {
+				field = "manifest_version"
+			} else if field == "templateversion" {
+				field = "template_version"
+			}
+
+			switch validationError.Tag() {
+			case "required":
+				return nil, fmt.Errorf("missing required field '%s' at root level", field)
+			case "semver":
+				return nil, fmt.Errorf("invalid semantic version '%s' for field %s", validationError.Value(), field)
+			}
+		}
+		return nil, fmt.Errorf("invalid metadata file structure: %w", err)
+	}
+
 	// Check if manifest version is supported.
 	if !basicoperations.ListContainsString(supportedManifestVersions, metadata.ManifestVersion) {
 		return nil, fmt.Errorf(
@@ -80,18 +108,23 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 		)
 	}
 
-	// Validate metadata.
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	err = validate.Struct(metadata)
-	if err != nil {
-		return nil, fmt.Errorf("invalid metadata file structure: %w", err)
-	}
-
 	// Validate variables separately because 'validator' package does not validate struct slices.
 	for _, variable := range metadata.Variables {
 		err = validate.Struct(variable)
 		if err != nil {
-			return nil, fmt.Errorf("invalid metadata file structure: %w", err)
+			// Custom error message for some validation errors.
+			validationErrors := err.(validator.ValidationErrors)
+			for _, validationError := range validationErrors {
+				switch validationError.Tag() {
+				case "required":
+					return nil, fmt.Errorf(
+						"missing required field '%s' for variable '%s'",
+						strings.ToLower(validationError.Field()),
+						variable.Name,
+					)
+				}
+			}
+			return nil, fmt.Errorf("invalid variable %s: %w", variable.Name, err)
 		}
 
 		// If the variable has a default value, check if it is of the same type as the example value.

@@ -57,7 +57,7 @@ Currencies:
 	assert.NoError(err)
 }
 
-// TestDryRunCommandWhenCurrentDirectoryIsACloneyProject tests the "dryrun" command
+// TestDryRunCommandWhenCurrentDirectoryIsACloneyProject tests the "dry-run" command
 // when the current directory is a Cloney project. It should not return an error.
 func TestDryRunCommandWhenCurrentDirectoryIsACloneyProject(t *testing.T) {
 	// Create a new testing.T instance to use with assert functions.

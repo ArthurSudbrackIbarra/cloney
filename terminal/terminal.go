@@ -36,21 +36,21 @@ func Message(message string) {
 // OKMessage prints a success message with a green "[OK]" prefix.
 func OKMessage(message string) {
 	if cmd != nil {
-		cmd.Print(fmt.Sprintf("%s %s\n", Green("[OK]"), message))
+		cmd.Print(fmt.Sprintf("[%s] %s\n", Green("OK"), message))
 	}
 }
 
 // WarningMessage prints a warning message with a yellow "[Warning]" prefix.
 func WarningMessage(message string) {
 	if cmd != nil {
-		cmd.Print(fmt.Sprintf("%s %s\n", Yellow("[Warning]"), message))
+		cmd.Print(fmt.Sprintf("[%s] %s\n", Yellow("Warning"), message))
 	}
 }
 
 // ErrorMessage prints an error message with a red "[Error]" prefix.
 func ErrorMessage(message string, err error) {
 	if cmd != nil {
-		cmd.Print(fmt.Sprintf("%s %s: %v\n", Red("[Error]"), message, err))
+		cmd.Print(fmt.Sprintf("[%s] %s: %v\n", Red("Error"), message, err))
 	}
 }
 

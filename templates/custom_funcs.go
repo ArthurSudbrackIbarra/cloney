@@ -62,6 +62,12 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 		return runtime.GOOS, nil
 	}
 
+	// "arch" function is a custom function provided by Cloney, which returns the user's operating system architecture.
+	// This function has no parameters. It is useful for generating OS-specific parts.
+	funcMap["arch"] = func() (string, error) {
+		return runtime.GOARCH, nil
+	}
+
 	// Implement your own custom functions here...
 
 	return funcMap

@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// dryRunCmdRun is the function that runs when the dryrun command is called.
+// dryRunCmdRun is the function that runs when the 'dry-run' command is called.
 func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
 	path, _ := cmd.Flags().GetString("path")
@@ -68,9 +68,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		// Ignore the '.git' directory.
 		".git",
 	}
-	for _, ignorePath := range cloneyMetadata.Configuration.IgnorePaths {
-		ignorePaths = append(ignorePaths, ignorePath)
-	}
+	ignorePaths = append(ignorePaths, cloneyMetadata.Configuration.IgnorePaths...)
 
 	// Check if the output should be displayed in the terminal.
 	if outputInTerminal {
@@ -104,13 +102,13 @@ func CreateDryRunCommand() *cobra.Command {
 	// It is used to check what the output will be with the given variables.
 	dryRunCmd := &cobra.Command{
 		Use:   "dry-run",
-		Short: "Run a template repository in dryrun mode",
-		Long: fmt.Sprintf(`Run a template repository in dryrun mode.
+		Short: "Run a template repository in dry-run mode",
+		Long: fmt.Sprintf(`Run a template repository in dry-run mode.
 
 The 'cloney dry-run' command is for debugging purposes.
 With this command, you can check the output your template repository will generate with the given variables.
 
-By default, 'cloney dryrun' searches for a file named '%s' in your current directory.
+By default, 'cloney dry-run' searches for a file named '%s' in your current directory.
 You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
 		Example: strings.Join([]string{
 			"  dry-run",
@@ -118,7 +116,7 @@ You can specify a different file using the '--variables' flag or pass the variab
 			"  dry-run ./path/to/my/template -v variables.yaml",
 			"  dry-run ./path/to/my/template -v '{ var1: value, var2: value }'",
 		}, "\n"),
-		Aliases:          []string{"dryrun", "dr"},
+		Aliases:          []string{"dryrun", "dr", "fill"},
 		PersistentPreRun: persistentPreRun,
 		RunE:             dryRunCmdRun,
 	}

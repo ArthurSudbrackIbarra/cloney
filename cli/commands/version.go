@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// versionCmdRun is the function that runs when the version command is called.
+// versionCmdRun is the function that runs when the 'version' command is called.
 func versionCmdRun(cmd *cobra.Command, args []string) {
 	// Print the current version of Cloney, the operating system and the architecture.
 	cmd.Printf("Cloney version %s %s %s\n", appConfig.AppVersion, runtime.GOOS, runtime.GOARCH)
