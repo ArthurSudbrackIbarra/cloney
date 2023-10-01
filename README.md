@@ -22,4 +22,3 @@ For comprehensive and detailed information about Cloney and how to make the most
 <p align="center">
   <img src="images/cloney-documentation.png">
 </p>
-<br>
