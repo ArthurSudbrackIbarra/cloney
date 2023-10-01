@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -45,8 +46,11 @@ func injectCustomToFileFuncPaths(filePath string, fileContent string, outputInTe
 
 			// Inject the "hidden" first parameter 'fileDir' of the 'toFile' function into the template.
 			// This parameter is the directory of the file being processed.
+			regex := regexp.MustCompile(`{{-? ?toFile`)
 			fileDir := filepath.Dir(filePath)
-			newLine := strings.ReplaceAll(line, "toFile", fmt.Sprintf("toFile \"%s\"", fileDir))
+			newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\"", fileDir))
+
+			fmt.Println(newLine)
 
 			// If on Windows, replace backslashes with forward slashes.
 			if os.PathSeparator == '\\' {

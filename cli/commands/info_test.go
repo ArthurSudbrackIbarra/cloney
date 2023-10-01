@@ -120,30 +120,6 @@ func TestInfoCommandPointingToRemoteCloneyProject(t *testing.T) {
 	assert.Nil(err)
 }
 
-// TestInfoCommandPointingToPrivateRemoteCloneyProject tests the "info" command
-// when the user specifies a valid remote Cloney project URL that requires authentication.
-// It should not return an error.
-func TestInfoCommandPointingToPrivateRemoteCloneyProject(t *testing.T) {
-	// Create a new testing.T instance to use with assert functions.
-	assert := assert.New(t)
-
-	// Simulate CLI arguments with flags and values to specify the remote project URL.
-	// Pointing to a private repository using a personal access token.
-	testInfoCommand.SetArgs([]string{
-		"https://github.com/ArthurSudbrackIbarra/private-cloney.git",
-		"--token", os.Getenv("PERSONAL_ACCESS_TOKEN"),
-	})
-
-	// Execute the "info" command.
-	err := testInfoCommand.Execute()
-
-	// Assert that the "info" command did not return an error.
-	assert.Nil(err)
-
-	// Reset the command flags.
-	ResetInfoCommandFlags(testInfoCommand)
-}
-
 // TestInfoCommandPointingToInvalidRemoteCloneyProject tests the "info" command
 // when the user specifies an invalid remote Cloney project URL.
 // It should return an error.

@@ -106,3 +106,5 @@ func TestDryRunCommandWhenCurrentDirectoryIsACloneyProject(t *testing.T) {
 	err = os.RemoveAll(appConfig.DefaultDryRunDirectoryName)
 	assert.NoError(err)
 }
+
+// TODO: Add remaining tests...
