@@ -1,0 +1,35 @@
+name: Automatic Tag
+
+# Trigger the workflow when a pull request is closed on the 'main' branch.
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-22.04
+
+    # Give permissions to modify repository contents.
+    permissions:
+      contents: write
+
+    steps:
+      # Check out the repository.
+      - uses: actions/checkout@v3
+        with:
+          # Check out the specific commit associated with the closed pull request.
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          # Fetch all commit history for tags to work correctly.
+          fetch-depth: "0"
+
+      # Use the GitHub Tag Action to create tags.
+      - name: Bump Version and Push Tag.
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          # Use a personal access token to push the tag.
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # Do not prepend the 'v' prefix to the tag.
+          WITH_V: false

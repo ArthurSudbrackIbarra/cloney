@@ -1,0 +1,53 @@
+name: Automatic Release
+
+# Trigger the workflow when a tag is pushed.
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-22.04
+
+    # Give permissions to modify repository contents.
+    permissions:
+      contents: write
+
+    steps:
+      # Check out the repository.
+      - uses: actions/checkout@v3
+
+      # Setup Go.
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      # Build the application for different platforms.
+      - name: Build Application
+        run: |
+          GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+          GOOS=windows GOARCH=arm64 go build -o cloney-windows-arm64/cloney.exe
+          GOOS=linux GOARCH=amd64 go build -o cloney-linux-amd64/cloney
+          GOOS=linux GOARCH=arm64 go build -o cloney-linux-arm64/cloney
+          GOOS=darwin GOARCH=amd64 go build -o cloney-darwin-amd64/cloney
+          GOOS=darwin GOARCH=arm64 go build -o cloney-darwin-arm64/cloney
+
+      # Zip the application for different platforms.
+      - name: Zip Application
+        run: |
+          zip -r cloney-windows-amd64.zip cloney-windows-amd64
+          zip -r cloney-windows-arm64.zip cloney-windows-arm64
+          zip -r cloney-linux-amd64.zip cloney-linux-amd64
+          zip -r cloney-linux-arm64.zip cloney-linux-arm64
+          zip -r cloney-darwin-amd64.zip cloney-darwin-amd64
+          zip -r cloney-darwin-arm64.zip cloney-darwin-arm64
+
+      # Use the release-action GitHub action to create a release.
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "cloney-*.zip"
+        env:
+          # Use a personal access token to create the release.
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

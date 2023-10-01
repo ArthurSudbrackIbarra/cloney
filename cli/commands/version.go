@@ -1,22 +1,27 @@
 package commands
 
 import (
-	"fmt"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
 
-// versionCmd represents the version command.
-// This command is used to print the version of the application.
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Prints the current version of Cloney.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Cloney v0.1.0")
-	},
+// versionCmdRun is the function that runs when the 'version' command is called.
+func versionCmdRun(cmd *cobra.Command, args []string) {
+	// Print the current version of Cloney, the operating system and the architecture.
+	cmd.Printf("Cloney version %s %s %s\n", appConfig.AppVersion, runtime.GOOS, runtime.GOARCH)
 }
 
-// InitializeVersion initializes the version command.
-func InitializeVersion(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(versionCmd)
+// CreateVersionCommand creates the 'version' command.
+func CreateVersionCommand() *cobra.Command {
+	// versionCmd represents the version command.
+	// This command is used to print the version of the application.
+	versionCmd := &cobra.Command{
+		Use:              "version",
+		Short:            "Get the current version of Cloney",
+		PersistentPreRun: persistentPreRun,
+		Run:              versionCmdRun,
+	}
+
+	return versionCmd
 }

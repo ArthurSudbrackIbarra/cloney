@@ -2,47 +2,146 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
-	git "github.com/ArthurSudbrackIbarra/cloney/git"
+	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
-	cobra "github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 )
 
-// cloneCmd represents the clone command.
-// This command is used to clone a template repository.
-var cloneCmd = &cobra.Command{
-	Use:   "clone [REPOSITORY_URL]",
-	Short: "Clones a template repository.",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cmd.Help()
-			return
-		}
+// cloneCmdRun is the function that runs when the 'clone' command is called.
+func cloneCmdRun(cmd *cobra.Command, args []string) error {
+	if len(args) < 1 {
+		cmd.Printf("[%s] %s\n\n", terminal.Red("Error"), "You must provide a repository URL")
 
-		repositoryURL := args[0]
-		branch, _ := cmd.Flags().GetString("branch")
-		path, _ := cmd.Flags().GetString("path")
+		// Display command help if no repository URL is provided.
+		cmd.Help()
+		return nil
+	}
 
-		// Clone repository.
-		fmt.Println("Cloning repository...")
-		repository := &git.GitRepository{
-			URL:    repositoryURL,
-			Branch: branch,
-		}
-		err := git.CloneRepository(repository, path)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+	// Get command-line arguments.
+	repositoryURL := args[0]
+	branch, _ := cmd.Flags().GetString("branch")
+	output, _ := cmd.Flags().GetString("output")
+	tag, _ := cmd.Flags().GetString("tag")
+	variables, _ := cmd.Flags().GetString("variables")
+	token, _ := cmd.Flags().GetString("token")
 
-	},
+	// Variable to store errors.
+	var err error
+
+	// Get the current working directory.
+	currentDir, err := steps.GetCurrentWorkingDirectory()
+	if err != nil {
+		return err
+	}
+
+	// Get the template variables provided by the user.
+	variablesMap, err := steps.GetUserVariablesMap(currentDir, variables)
+	if err != nil {
+		return err
+	}
+
+	// Create and validate the Git repository.
+	repository, err := steps.CreateAndValidateRepository(repositoryURL, branch, tag)
+	if err != nil {
+		return err
+	}
+
+	// If a token is provided, authenticate with it.
+	if token == "" {
+		token = appConfig.GitToken
+	}
+	steps.AuthenticateToRepository(repository, token)
+
+	// Calculate the clone path.
+	clonePath, _ := steps.CalculatePath(output, repository.GetName())
+
+	// Clone the repository.
+	err = steps.CloneRepository(repository, clonePath)
+	if err != nil {
+		return err
+	}
+
+	// Read the repository metadata file.
+	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
+	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
+	if err != nil {
+		// If it was not possible to read the metadata file, delete the cloned repository.
+		os.RemoveAll(clonePath)
+		return err
+	}
+
+	// Delete the repository metadata file.
+	os.Remove(metadataFilePath)
+
+	// Delete the .git directory.
+	gitDirPath := filepath.Join(clonePath, ".git")
+	os.RemoveAll(gitDirPath)
+
+	// Parse the metadata file.
+	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
+	if err != nil {
+		// If it was not possible to parse the metadata file, delete the cloned repository.
+		os.RemoveAll(clonePath)
+		return err
+	}
+
+	// Validate if the user variables match the template variables.
+	// Also, fill default values of the variables if they are not defined.
+	err = steps.MatchUserVariables(cloneyMetadata, variablesMap)
+	if err != nil {
+		// If the user variables do not match the template variables, delete the cloned repository.
+		os.RemoveAll(clonePath)
+		return err
+	}
+
+	// Delete the paths specified in the 'ignore_paths' field of the metadata file.
+	steps.DeleteIgnoredPaths(cloneyMetadata, clonePath)
+
+	// Set the 'outputInTerminal' parameter to 'false' because we intend to actually fill the template variables.
+	err = steps.FillDirectory(clonePath, []string{}, false, variablesMap)
+	if err != nil {
+		// If it was not possible to fill the template variables, delete the cloned repository.
+		os.RemoveAll(clonePath)
+		return err
+	}
+
+	cmd.Println("\nDone!")
+
+	return nil
 }
 
-// InitializeClone initializes the clone command.
-func InitializeClone(rootCmd *cobra.Command) {
-	// Flags.
-	cloneCmd.Flags().StringP("path", "p", "", "Path to clone the repository to.")
-	cloneCmd.Flags().StringP("branch", "b", "main", "Branch to clone.")
+// CreateCloneCommand creates the 'clone' command and its respective flags.
+func CreateCloneCommand() *cobra.Command {
+	// cloneCmd represents the 'clone' command.
+	// This command is used to clone a template repository.
+	cloneCmd := &cobra.Command{
+		Use:   "clone [repository_url]",
+		Short: "Clone a template repository",
+		Long: fmt.Sprintf(`Clone a template repository.
 
-	rootCmd.AddCommand(cloneCmd)
+The 'cloney clone' command will search for a file named '%s' in your current directory by default.
+You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
+		Example: strings.Join([]string{
+			"  clone https://github.com/username/repository.git",
+			"  clone https://github.com/username/repository.git -v variables.yaml",
+			"  clone https://github.com/username/repository.git -v '{ var1: value, var2: value }'",
+		}, "\n"),
+		Aliases:          []string{"cl"},
+		PersistentPreRun: persistentPreRun,
+		RunE:             cloneCmdRun,
+	}
+
+	// Define command-line flags for the 'clone' command.
+	cloneCmd.Flags().StringP("output", "o", "", "Path to clone the repository to")
+	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
+	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
+	cloneCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
+	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private Git repository")
+
+	return cloneCmd
 }
