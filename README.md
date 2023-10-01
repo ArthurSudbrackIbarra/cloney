@@ -18,4 +18,8 @@ This process can be both frustrating and error-prone. Manually searching and rep
 
 For comprehensive and detailed information about Cloney and how to make the most of its features, please visit the [Official Cloney Documentation](https://arthursudbrackibarra.github.io/cloney-documentation/). This documentation provides step-by-step guides, tutorials, and in-depth explanations to help you master Cloney and streamline the creation of dynamic Git template repositories.
 
-![Cloney Documentation](images/cloney-documentation.png)
+<br>
+<p align="center">
+  <img src="images/cloney-documentation.png">
+</p>
+<br>
