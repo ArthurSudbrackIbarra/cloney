@@ -44,8 +44,7 @@ func injectCustomToFileFuncPaths(templateDir, filePath, fileContent string, outp
 				return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
 			}
 
-			// Inject the "hidden" first parameter 'fileDir' of the 'toFile' function into the template.
-			// This parameter is the directory of the file being processed.
+			// Inject the "hidden" parameters.
 			regex := regexp.MustCompile(`{{-? ?toFile`)
 			fileDir := filepath.Dir(filePath)
 			newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\" \"%s\"", templateDir, fileDir))

@@ -47,14 +47,12 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 
 		// If on Windows, replace forward slashes with backslashes.
 		if os.PathSeparator == '\\' {
-			templateDir = strings.ReplaceAll(templateDir, "/", "\\")
-			fileDir = strings.ReplaceAll(fileDir, "/", "\\")
 			absPath = strings.ReplaceAll(absPath, "/", "\\")
 		}
 
 		// If the path is out of the scope of the template directory, return an error.
 		if !strings.HasPrefix(absPath, templateDir) {
-			return "", fmt.Errorf("Cannot create file outside the scope of the template directory: %s", absPath)
+			return "", fmt.Errorf("Cannot create file outside the scope of the template directory: %s", relativePath)
 		}
 
 		// If needed, create the directory where the file will be saved.
