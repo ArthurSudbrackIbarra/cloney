@@ -50,7 +50,7 @@ type AppConfig struct {
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
 	// Default values.
-	AppVersion: "0.1.0",
+	AppVersion: "0.1.1",
 
 	MetadataFileName:        ".cloney.yaml",
 	MetadataManifestVersion: "v1",
@@ -88,11 +88,9 @@ func GetAppConfig() *AppConfig {
 	return &AppConfig{
 		AppVersion: globalConfig.AppVersion,
 
-		MetadataFileName:        globalConfig.MetadataFileName,
-		MetadataManifestVersion: globalConfig.MetadataManifestVersion,
-		SupportedManifestVersions: []string{
-			globalConfig.SupportedManifestVersions[0],
-		},
+		MetadataFileName:          globalConfig.MetadataFileName,
+		MetadataManifestVersion:   globalConfig.MetadataManifestVersion,
+		SupportedManifestVersions: append([]string{}, globalConfig.SupportedManifestVersions...),
 
 		DefaultUserVariablesFileName: globalConfig.DefaultUserVariablesFileName,
 		DefaultDryRunDirectoryName:   globalConfig.DefaultDryRunDirectoryName,
