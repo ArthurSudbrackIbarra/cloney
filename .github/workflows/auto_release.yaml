@@ -36,12 +36,12 @@ jobs:
       # Zip the application for different platforms.
       - name: Zip Application
         run: |
-          zip -r cloney-windows-amd64.zip cloney-windows-amd64
-          zip -r cloney-windows-arm64.zip cloney-windows-arm64
-          zip -r cloney-linux-amd64.zip cloney-linux-amd64
-          zip -r cloney-linux-arm64.zip cloney-linux-arm64
-          zip -r cloney-darwin-amd64.zip cloney-darwin-amd64
-          zip -r cloney-darwin-arm64.zip cloney-darwin-arm64
+          zip -r cloney-windows-amd64.zip cloney-windows-amd64/cloney.exe
+          zip -r cloney-windows-arm64.zip cloney-windows-arm64/cloney.exe
+          zip -r cloney-linux-amd64.zip cloney-linux-amd64/cloney
+          zip -r cloney-linux-arm64.zip cloney-linux-arm64/cloney
+          zip -r cloney-darwin-amd64.zip cloney-darwin-amd64/cloney
+          zip -r cloney-darwin-arm64.zip cloney-darwin-arm64/cloney
 
       # Use the release-action GitHub action to create a release.
       - name: Create Release
