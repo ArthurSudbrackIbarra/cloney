@@ -14,7 +14,10 @@ import (
 // dryRunCmdRun is the function that runs when the 'dry-run' command is called.
 func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	// Get command-line arguments.
-	path, _ := cmd.Flags().GetString("path")
+	var repositorySource string
+	if len(args) >= 1 {
+		repositorySource = args[0]
+	}
 	output, _ := cmd.Flags().GetString("output")
 	outputInTerminal, _ := cmd.Flags().GetBool("output-in-terminal")
 	variables, _ := cmd.Flags().GetString("variables")
@@ -35,7 +38,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Calculate the directory paths.
-	sourcePath, _ := steps.CalculatePath(path, "")
+	sourcePath, _ := steps.CalculatePath(repositorySource, "")
 	outputPath, _ := steps.CalculatePath(output, "")
 
 	// Read the repository metadata file.
@@ -95,6 +98,13 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// ResetDryRunFlags resets the flags of the 'dry-run' command.
+func ResetDryRunFlags(dryRunCmd *cobra.Command) {
+	dryRunCmd.Flags().Set("output", appConfig.DefaultDryRunDirectoryName)
+	dryRunCmd.Flags().Set("output-in-terminal", "false")
+	dryRunCmd.Flags().Set("variables", appConfig.DefaultUserVariablesFileName)
+}
+
 // CreateDryRunCommand creates the 'dry-run' command and its respective flags.
 func CreateDryRunCommand() *cobra.Command {
 	// dryrunCmd represents the dryrun command.
@@ -122,7 +132,6 @@ You can specify a different file using the '--variables' flag or pass the variab
 	}
 
 	// Define command-line flags for the 'dryrun' command.
-	dryRunCmd.Flags().StringP("path", "p", "", "Path to your local template repository")
 	dryRunCmd.Flags().StringP("output", "o", appConfig.DefaultDryRunDirectoryName, "Path to output the filled template files")
 	dryRunCmd.Flags().BoolP("output-in-terminal", "i", false, "Output the filled template file contents in the terminal instead of creating the files")
 	dryRunCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")

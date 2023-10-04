@@ -169,7 +169,10 @@ func CreateStartCommand() *cobra.Command {
 		Long: `Start a new Cloney template repository.
 
 The 'cloney start' command will create a directory with the necessary files to start a new cloney template repository.`,
-		Example:          "  cloney start",
+		Example: strings.Join([]string{
+			"  cloney start",
+			"  cloney start -y",
+		}, "\n"),
 		PersistentPreRun: persistentPreRun,
 		RunE:             startCmdRun,
 	}
