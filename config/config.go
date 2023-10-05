@@ -44,7 +44,7 @@ type AppConfig struct {
 
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
-	AppVersion: "0.1.1",
+	AppVersion: "0.2.0",
 
 	MetadataFileName:        ".cloney.yaml",
 	MetadataManifestVersion: "v1",
