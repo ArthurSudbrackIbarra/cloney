@@ -2,9 +2,11 @@ package templates
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"text/template"
 )
 
@@ -27,11 +29,13 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 	}
 
 	// "toFile" function is a custom function provided by Cloney, which allows users to dynamically
-	// create files from a template. This function has a hidden parameter 'fileDir', representing
-	// the directory of the file currently being processed. This parameter is utilized to determine
-	// the absolute path where the generated file will be saved, relative to the file being processed.
-	// During template execution, 'fileDir' is automatically injected into the function.
-	funcMap["toFile"] = func(fileDir, relativePath, name string, data interface{}) (string, error) {
+	// create files from a template. This function has 2 hidden parameters 'templateDir' and 'fileDir',
+	// representing the directory of the template being processed and the directory of the file currently
+	// being processed, respectively. This parameter is utilized to determine the absolute path where the
+	// generated file will be saved, relative to the file being processed.
+	//
+	// During template execution, 'templateDir' and 'fileDir' are automatically injected into the function.
+	funcMap["toFile"] = func(templateDir, fileDir, relativePath, name string, data interface{}) (string, error) {
 		// Execute the template.
 		buf := bytes.NewBuffer(nil)
 		if err := tmpl.ExecuteTemplate(buf, name, data); err != nil {
@@ -40,6 +44,19 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 
 		// Calculate the absolute path of the file.
 		absPath := filepath.Join(fileDir, relativePath)
+
+		// If on Windows, replace forward slashes with backslashes.
+		if os.PathSeparator == '\\' {
+			absPath = strings.ReplaceAll(absPath, "/", "\\")
+		}
+
+		// If the path is out of the scope of the template directory, return an error.
+		if os.PathSeparator == '\\' {
+			absPath = strings.ReplaceAll(absPath, "\\", "/")
+		}
+		if !strings.HasPrefix(absPath, templateDir) {
+			return "", fmt.Errorf("cannot create file outside the scope of the template directory: %s", relativePath)
+		}
 
 		// If needed, create the directory where the file will be saved.
 		directory := filepath.Dir(absPath)

@@ -19,6 +19,7 @@ func CreateVersionCommand() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:              "version",
 		Short:            "Get the current version of Cloney",
+		Long:             "Get the current version of Cloney.",
 		PersistentPreRun: persistentPreRun,
 		Run:              versionCmdRun,
 	}

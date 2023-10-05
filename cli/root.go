@@ -18,7 +18,7 @@ func rootCmdRun(cmd *cobra.Command, args []string) {
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:          "cloney",
-	Short:        "Cloney is a tool to clone template git repositories.",
+	Short:        "Cloney is a tool to clone and create template git repositories.",
 	Run:          rootCmdRun,
 	SilenceUsage: true,
 
@@ -35,6 +35,7 @@ func Initialize() {
 	startCmd := commands.CreateStartCommand()
 	versionCmd := commands.CreateVersionCommand()
 	validateCmd := commands.CreateValidateCommand()
+	docsCmd := commands.CreateDocsCommand()
 
 	// Add subcommands.
 	rootCmd.AddCommand(cloneCmd)
@@ -43,6 +44,7 @@ func Initialize() {
 	rootCmd.AddCommand(startCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(validateCmd)
+	rootCmd.AddCommand(docsCmd)
 
 	// Stylings.
 	cc.Init(&cc.Config{

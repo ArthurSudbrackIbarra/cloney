@@ -75,7 +75,11 @@ func CreateAndValidateRepository(repositoryURL, branch, tag string) (*git.GitRep
 
 // AuthenticateToRepository authenticates to the repository if a token is provided.
 func AuthenticateToRepository(repository *git.GitRepository, gitToken string) {
-	// If a token is provided, authenticate with it.
+	// If the token is empty, try to get it from the environment variable.
+	if gitToken == "" {
+		gitToken = os.Getenv("CLONEY_GIT_TOKEN")
+	}
+	// Only if the token is not empty, authenticate to the repository.
 	if gitToken != "" {
 		repository.AuthenticateWithToken(gitToken)
 	}

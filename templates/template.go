@@ -27,12 +27,12 @@ func NewTemplateFiller(variablesMap map[string]interface{}) *TemplateFiller {
 }
 
 // injectCustomToFileFuncPaths takes a file path, its content, and a flag indicating whether the output
-// is intended for the terminal. It returns a modified version of the file content with the first hidden
-// parameter of the 'toFile' functions injected. This hidden parameter represents the directory of the file
-// being processed and is used to calculate the absolute path of files created relative to it.
+// is intended for the terminal. It returns a modified version of the file content with the two first hidden
+// parameter of the 'toFile' functions injected.
+//
 // If 'outputInTerminal' is true, an error is returned because the 'toFile' function is not supported in
 // terminal output mode; it should be used with 'cloney dry-run -o <output_directory>' instead.
-func injectCustomToFileFuncPaths(filePath string, fileContent string, outputInTerminal bool) (string, error) {
+func injectCustomToFileFuncPaths(templateDir, filePath, fileContent string, outputInTerminal bool) (string, error) {
 	// Split the template content into lines for processing.
 	fileLines := strings.Split(fileContent, "\n")
 
@@ -44,13 +44,10 @@ func injectCustomToFileFuncPaths(filePath string, fileContent string, outputInTe
 				return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
 			}
 
-			// Inject the "hidden" first parameter 'fileDir' of the 'toFile' function into the template.
-			// This parameter is the directory of the file being processed.
+			// Inject the "hidden" parameters.
 			regex := regexp.MustCompile(`{{-? ?toFile`)
 			fileDir := filepath.Dir(filePath)
-			newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\"", fileDir))
-
-			fmt.Println(newLine)
+			newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\" \"%s\"", templateDir, fileDir))
 
 			// If on Windows, replace backslashes with forward slashes.
 			if os.PathSeparator == '\\' {
@@ -84,7 +81,7 @@ func (t *TemplateFiller) FillDirectory(src string, ignorePaths []string, outputI
 		}
 
 		// Get a new version of the file content with the first hidden parameter of the 'toFile' function injected.
-		fileContent, err := injectCustomToFileFuncPaths(filePath, string(fileBytes), outputInTerminal)
+		fileContent, err := injectCustomToFileFuncPaths(src, filePath, string(fileBytes), outputInTerminal)
 		if err != nil {
 			return err
 		}
@@ -154,7 +151,7 @@ func (t *TemplateFiller) CreateFilledDirectory(src string, dest string, ignorePa
 		}
 
 		// Get a new version of the file content with the first hidden parameter of the 'toFile' function injected.
-		fileContent, err := injectCustomToFileFuncPaths(targetFilePath, string(fileBytes), false)
+		fileContent, err := injectCustomToFileFuncPaths(dest, targetFilePath, string(fileBytes), false)
 		if err != nil {
 			return err
 		}

@@ -42,9 +42,6 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 		}
 
 		// If a token is provided, authenticate with it.
-		if token == "" {
-			token = appConfig.GitToken
-		}
 		steps.AuthenticateToRepository(repository, token)
 
 		// Get the metadata file content.
@@ -115,7 +112,7 @@ By default, it will get information from the current directory, assuming it is a
 	// Define command-line flags for the 'info' command.
 	infoCmd.Flags().StringP("branch", "b", "main", "Git branch, if referencing a git repository")
 	infoCmd.Flags().StringP("tag", "t", "", "Git tag, if referencing a git repository")
-	infoCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository")
+	infoCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private git repository (not recommended)")
 
 	return infoCmd
 }
