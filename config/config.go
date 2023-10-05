@@ -37,6 +37,9 @@ type AppConfig struct {
 
 	// CloneyExampleRepositoryURL is the URL of the Cloney example repository used when creating a new template repository.
 	CloneyExampleRepositoryURL string
+
+	// CloneyDocumentationURL is the URL of the Cloney documentation.
+	CloneyDocumentationURL string
 }
 
 // globalConfig is the global application configuration.
@@ -58,6 +61,7 @@ var globalConfig = &AppConfig{
 	DefaultMetadataTemplateVersionValue: "0.0.0",
 
 	CloneyExampleRepositoryURL: "https://github.com/ArthurSudbrackIbarra/cloney-example.git",
+	CloneyDocumentationURL:     "https://arthursudbrackibarra.github.io/cloney-documentation",
 }
 
 // GetAppConfig returns a copy of the global application configuration.
