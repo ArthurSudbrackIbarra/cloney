@@ -52,9 +52,6 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// If a token is provided, authenticate with it.
-	if token == "" {
-		token = appConfig.GitToken
-	}
 	steps.AuthenticateToRepository(repository, token)
 
 	// Calculate the clone path.

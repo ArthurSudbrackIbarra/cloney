@@ -1,9 +1,5 @@
 package config
 
-import (
-	"github.com/spf13/viper"
-)
-
 // AppConfig represents the application configuration.
 type AppConfig struct {
 	// AppVersion is the current version of the application.
@@ -41,10 +37,6 @@ type AppConfig struct {
 
 	// CloneyExampleRepositoryURL is the URL of the Cloney example repository used when creating a new template repository.
 	CloneyExampleRepositoryURL string
-
-	// GitToken is the token used to authenticate when dealing with private git repositories.
-	// This variable is configured using the CLONEY_GIT_TOKEN environment variable.
-	GitToken string `mapstructure:"GIT_TOKEN"`
 }
 
 // globalConfig is the global application configuration.
@@ -69,39 +61,7 @@ var globalConfig = &AppConfig{
 	CloneyExampleRepositoryURL: "https://github.com/ArthurSudbrackIbarra/cloney-example.git",
 }
 
-// LoadConfig loads the global application configuration.
-func LoadConfig() error {
-	// Enable reading environment variables with a prefix.
-	viper.SetEnvPrefix("CLONEY")
-	viper.AutomaticEnv()
-
-	// Unmarshal the configuration into the globalConfig variable.
-	err := viper.Unmarshal(globalConfig)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // GetAppConfig returns a copy of the global application configuration.
-func GetAppConfig() *AppConfig {
-	return &AppConfig{
-		AppVersion: globalConfig.AppVersion,
-
-		MetadataFileName:          globalConfig.MetadataFileName,
-		MetadataManifestVersion:   globalConfig.MetadataManifestVersion,
-		SupportedManifestVersions: append([]string{}, globalConfig.SupportedManifestVersions...),
-
-		DefaultUserVariablesFileName: globalConfig.DefaultUserVariablesFileName,
-		DefaultDryRunDirectoryName:   globalConfig.DefaultDryRunDirectoryName,
-		DefaultCloneyProjectName:     globalConfig.DefaultCloneyProjectName,
-
-		DefaultMetadataDescriptionValue:     globalConfig.DefaultMetadataDescriptionValue,
-		DefaultMetadataLicenseValue:         globalConfig.DefaultMetadataLicenseValue,
-		DefaultMetadataTemplateVersionValue: globalConfig.DefaultMetadataTemplateVersionValue,
-
-		CloneyExampleRepositoryURL: globalConfig.CloneyExampleRepositoryURL,
-
-		GitToken: globalConfig.GitToken,
-	}
+func GetAppConfig() AppConfig {
+	return *globalConfig
 }
