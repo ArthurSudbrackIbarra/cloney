@@ -2,7 +2,7 @@
 
 <br>
 <p align="center">
-  <img src="images/cloney-logo.png">
+  <img src="images/cloney-logo-rounded.png">
 </p>
 <br>
 
