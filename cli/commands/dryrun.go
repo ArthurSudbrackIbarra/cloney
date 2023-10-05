@@ -119,7 +119,7 @@ The 'cloney dry-run' command is for debugging purposes.
 With this command, you can check the output your template repository will generate with the given variables.
 
 By default, 'cloney dry-run' searches for a file named '%s' in your current directory.
-You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
+You can specify a different file or pass the variables inline as YAML using the '--variables' flag.`, appConfig.DefaultUserVariablesFileName),
 		Example: strings.Join([]string{
 			"  dry-run",
 			"  dry-run ./path/to/my/template",

@@ -122,7 +122,7 @@ func CreateCloneCommand() *cobra.Command {
 		Long: fmt.Sprintf(`Clone a template repository.
 
 The 'cloney clone' command will search for a file named '%s' in your current directory by default.
-You can specify a different file using the '--variables' flag or pass the variables inline as YAML.`, appConfig.DefaultUserVariablesFileName),
+You can specify a different file or pass the variables inline as YAML using the '--variables' flag.`, appConfig.DefaultUserVariablesFileName),
 		Example: strings.Join([]string{
 			"  clone https://github.com/username/repository.git",
 			"  clone https://github.com/username/repository.git -v variables.yaml",
@@ -138,7 +138,7 @@ You can specify a different file using the '--variables' flag or pass the variab
 	cloneCmd.Flags().StringP("branch", "b", "main", "Git branch")
 	cloneCmd.Flags().StringP("tag", "t", "", "Git tag")
 	cloneCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
-	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private Git repository")
+	cloneCmd.Flags().StringP("token", "k", "", "Git token, if referencing a private Git repository (not recommended)")
 
 	return cloneCmd
 }
