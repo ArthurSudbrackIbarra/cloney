@@ -114,11 +114,10 @@ func ShouldIgnorePath(baseDirectory string, path string, ignorePaths []string) (
 			fullIgnorePath = filepath.ToSlash(fullIgnorePath)
 			path = filepath.ToSlash(path)
 		}
-		match, err := regexp.MatchString(fullIgnorePath, path)
-		if err != nil {
-			return false, fmt.Errorf("error matching path %s: %w", path, err)
-		}
-		if match {
+		// Replace * with .* to allow for regex matching.
+		fullIgnorePath = strings.ReplaceAll(fullIgnorePath, "*", ".*")
+		regex := regexp.MustCompile(fullIgnorePath)
+		if regex.MatchString(path) {
 			return true, nil
 		}
 	}
