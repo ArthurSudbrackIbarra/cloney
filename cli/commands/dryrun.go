@@ -80,6 +80,10 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	} else {
 		// Create a new directory to save the filled template files.
 		err = steps.CreateFilledDirectory(sourcePath, outputPath, ignorePaths, variablesMap)
+
+		// Delete files and directories starting with "_".
+		// These are files that should be processed by Cloney but not copied to the output directory.
+		steps.DeleteIgnoredPaths(cloneyMetadata, outputPath)
 	}
 
 	if err != nil {

@@ -85,24 +85,14 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 		return runtime.GOARCH, nil
 	}
 
-	// "quoteComma" function is a custom function provided by Cloney, which takes a list and returns a string
-	// with the list elements separated by commas and surrounded by quotes.
-	funcMap["quoteComma"] = func(list []interface{}) (string, error) {
+	// joinQuote is a custom function provided by Cloney, which takes a list and returns a string
+	// with the list elements separated by a separator and surrounded by double quotes.
+	funcMap["joinQuote"] = func(list []interface{}, separator string) (string, error) {
 		var quoted []string
 		for _, item := range list {
 			quoted = append(quoted, fmt.Sprintf("\"%s\"", item))
 		}
-		return strings.Join(quoted, ", "), nil
-	}
-
-	// quoteCommaNewLine is a custom function provided by Cloney, which takes a list and returns a string
-	// with the list elements separated by commas and surrounded by quotes, with each element on a new line.
-	funcMap["quoteCommaNewLine"] = func(list []interface{}) (string, error) {
-		var quoted []string
-		for _, item := range list {
-			quoted = append(quoted, fmt.Sprintf("\"%s\"", item))
-		}
-		return strings.Join(quoted, ",\n"), nil
+		return strings.Join(quoted, separator), nil
 	}
 
 	// Implement your own custom functions here...

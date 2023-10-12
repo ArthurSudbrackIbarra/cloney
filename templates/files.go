@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ShouldIgnorePath determines whether a given file or directory path should be ignored
@@ -11,8 +12,9 @@ import (
 // path should be ignored according to any of the provided patterns, and false otherwise.
 func ShouldIgnorePath(baseDirectory string, path string, ignorePaths []string) (bool, error) {
 	for _, ignorePath := range ignorePaths {
-		newIgnorePath := filepath.Join(baseDirectory, ignorePath)
-		match, err := filepath.Match(newIgnorePath, path)
+		// Construct the full path for comparison.
+		fullIgnorePath := filepath.Join(baseDirectory, ignorePath)
+		match, err := filepath.Match(fullIgnorePath, path)
 		if err != nil {
 			return false, fmt.Errorf("error matching path %s: %w", path, err)
 		}
@@ -34,6 +36,11 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
 
+		// Skip the root directory.
+		if path == directoryPath {
+			return nil
+		}
+
 		// Check if the path should be ignored.
 		ignore, err := ShouldIgnorePath(directoryPath, path, ignorePaths)
 		if err != nil {
@@ -41,17 +48,15 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 		}
 
 		if info.IsDir() {
-			// Check if the directory should be ignored.
+			// Check if the directory should be ignored and skip it if necessary.
 			if ignore {
 				return filepath.SkipDir
 			}
 		} else {
-			// Check if the file should be ignored.
-			if ignore {
-				return nil
+			// Check if the file should be ignored and skip it if necessary.
+			if !ignore {
+				filePaths = append(filePaths, path) // Add the file path to the list.
 			}
-			// Add the file path to the list.
-			filePaths = append(filePaths, path)
 		}
 		return nil
 	})
@@ -66,31 +71,44 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 // DeleteIgnoredFiles recursively walks through a directory and its subdirectories
 // specified by 'directoryPath'. It deletes files and directories that match any
 // of the patterns in 'ignorePaths'.
+// Additionally, it deletes files and directories starting with "_", which are files that should
+// be processed by Cloney but not copied when the template is cloned.
 func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
-	// Walk the directory and its subdirectories
+	// Walk the directory and its subdirectories.
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
 
+		// Skip the root directory.
+		if path == directoryPath {
+			return nil
+		}
+
+		// Check if the path starts with "_".
+		var delete bool
+		if strings.HasPrefix(filepath.Base(path), "_") {
+			delete = true
+		}
+
 		// Check if the path should be ignored.
-		ignore, err := ShouldIgnorePath(directoryPath, path, ignorePaths)
-		if err != nil {
-			return fmt.Errorf("error checking if path %s should be ignored: %w", path, err)
+		if !delete {
+			delete, err = ShouldIgnorePath(directoryPath, path, ignorePaths)
+			if err != nil {
+				return fmt.Errorf("error checking if path %s should be ignored: %w", path, err)
+			}
 		}
 
 		// If the path should be ignored, delete it.
-		if info.IsDir() && ignore {
+		if info.IsDir() && delete {
 			err := os.RemoveAll(path)
-			// Check if error is because the directory does not exist.
-			// If not, return the error.
+			// Check if the error is due to the directory not existing.
 			if err != nil && !os.IsNotExist(err) {
 				return fmt.Errorf("error removing directory %s: %w", path, err)
 			}
-		} else if ignore {
+		} else if delete {
 			err := os.Remove(path)
-			// Check if error is because the file does not exist.
-			// If not, return the error.
+			// Check if the error is due to the file not existing.
 			if err != nil && !os.IsNotExist(err) {
 				return fmt.Errorf("error removing file %s: %w", path, err)
 			}
