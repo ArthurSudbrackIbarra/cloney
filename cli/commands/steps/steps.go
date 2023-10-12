@@ -100,7 +100,12 @@ func CalculatePath(path string, defaultName string) (string, error) {
 	if path == "" {
 		return filepath.Join(currentDir, defaultName), nil
 	}
-	return filepath.Join(currentDir, path), nil
+	newPath := filepath.Join(currentDir, path)
+	if os.PathSeparator == '\\' {
+		newPath = filepath.ToSlash(newPath)
+	}
+
+	return newPath, nil
 }
 
 // CloneRepository clones the repository.

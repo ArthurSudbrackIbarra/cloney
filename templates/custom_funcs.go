@@ -45,16 +45,7 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 		// Calculate the absolute path of the file.
 		absPath := filepath.Join(fileDir, relativePath)
 
-		// If on Windows, replace forward slashes with backslashes.
-		if os.PathSeparator == '\\' {
-			absPath = strings.ReplaceAll(absPath, "/", "\\")
-		}
-
-		// If the path is out of the scope of the template directory, return an error.
-		if os.PathSeparator == '\\' {
-			absPath = strings.ReplaceAll(absPath, "\\", "/")
-		}
-		if !strings.HasPrefix(absPath, templateDir) {
+		if !strings.HasPrefix(filepath.ToSlash(absPath), filepath.ToSlash(templateDir)) {
 			return "", fmt.Errorf("cannot create file outside the scope of the template directory: %s", relativePath)
 		}
 
