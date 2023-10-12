@@ -45,18 +45,18 @@ func injectCustomToFileFuncPaths(templateDir, filePath, fileContent string, outp
 		// Inject the "hidden" parameters.
 		regex := regexp.MustCompile(`{{-? ?toFile`)
 		fileDir := filepath.Dir(filePath)
+
+		// If on Windows, replace backslashes with forward slashes.
+		if os.PathSeparator == '\\' {
+			templateDir = strings.ReplaceAll(templateDir, "\\", "/")
+			fileDir = strings.ReplaceAll(fileDir, "\\", "/")
+		}
 		newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\" \"%s\"", templateDir, fileDir))
 
 		// If 'outputInTerminal' is true, return an error as "toFile" is not supported in terminal output mode.
 		// if outputInTerminal {
 		if newLine != line && outputInTerminal {
 			return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
-		}
-
-		// If on Windows, replace backslashes with forward slashes.
-		// TODO: This is causing issues because we need to replace only the backslashes that are part of the path.
-		if os.PathSeparator == '\\' {
-			newLine = strings.ReplaceAll(newLine, "\\", "/")
 		}
 
 		// Replace the line in the file content.
