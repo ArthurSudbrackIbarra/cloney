@@ -64,14 +64,9 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Define options for ignoring specific files and directories when filling template variables.
 	ignorePaths := []string{
-		// Ignore specific Cloney files.
-		appConfig.MetadataFileName,
-		appConfig.DefaultUserVariablesFileName,
 		filepath.Base(filepath.Join(currentDir, variables)),
-
-		// Ignore the '.git' directory.
-		".git",
 	}
+	ignorePaths = append(ignorePaths, appConfig.KnownIgnorePaths...)
 	ignorePaths = append(ignorePaths, cloneyMetadata.Configuration.IgnorePaths...)
 
 	// Check if the output should be displayed in the terminal.
@@ -79,6 +74,10 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		// Fill the template variables and display the output in the terminal instead of creating the files.
 		err = steps.FillDirectory(sourcePath, ignorePaths, true, variablesMap)
 	} else {
+		// Delete the default dry-run output directory if it exists.
+		defaultDryRunDir := filepath.Join(sourcePath, appConfig.DefaultDryRunDirectoryName)
+		os.RemoveAll(defaultDryRunDir)
+
 		// Create a new directory to save the filled template files.
 		err = templates.CopyDirectory(sourcePath, outputPath, ignorePaths)
 		if err != nil {

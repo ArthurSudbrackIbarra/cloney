@@ -26,6 +26,10 @@ type AppConfig struct {
 	// DefaultCloneyProjectName is the default name to use when creating a new Cloney project.
 	DefaultCloneyProjectName string
 
+	// KnownIgnorePaths is a collection of paths that should be excluded in the template repository.
+	// These paths typically include directories like .git and node_modules, which are not relevant to the template.
+	KnownIgnorePaths []string
+
 	// DefaultMetadataDescriptionValue is the default value for the description field in the metadata file when creating a new template repository.
 	DefaultMetadataDescriptionValue string
 
@@ -44,7 +48,7 @@ type AppConfig struct {
 
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
-	AppVersion: "0.2.0",
+	AppVersion: "0.3.0",
 
 	MetadataFileName:        ".cloney.yaml",
 	MetadataManifestVersion: "v1",
@@ -55,6 +59,14 @@ var globalConfig = &AppConfig{
 	DefaultUserVariablesFileName: ".cloney-vars.yaml",
 	DefaultDryRunDirectoryName:   "cloney-dry-run-results",
 	DefaultCloneyProjectName:     "cloney-template",
+
+	KnownIgnorePaths: []string{
+		".cloney.yaml",      // Cloney metadata file.
+		".cloney-vars.yaml", // Cloney default user variables file.
+		".git",              // Git directory.
+		"node_modules",      // Node.js modules directory.
+		".venv",             // Python virtual environment directory.
+	},
 
 	DefaultMetadataDescriptionValue:     "A Cloney template repository",
 	DefaultMetadataLicenseValue:         "MIT",

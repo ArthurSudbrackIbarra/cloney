@@ -75,6 +75,11 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 	// Walk the directory and its subdirectories.
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			// Check if the path exists.
+			// If it does not exist, skip it.
+			if os.IsNotExist(err) {
+				return nil
+			}
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
 
@@ -119,6 +124,10 @@ func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
 	// Walk the directory and its subdirectories.
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			if os.IsNotExist(err) {
+				// If the path does not exist, skip it.
+				return nil
+			}
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
 
