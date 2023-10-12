@@ -30,6 +30,9 @@ type AppConfig struct {
 	// These paths typically include directories like .git and node_modules, which are not relevant to the template.
 	KnownIgnorePaths []string
 
+	// IgnorePrefix is the prefix used to ignore files and directories in the template repository.
+	IgnorePrefix string
+
 	// DefaultMetadataDescriptionValue is the default value for the description field in the metadata file when creating a new template repository.
 	DefaultMetadataDescriptionValue string
 
@@ -67,6 +70,7 @@ var globalConfig = &AppConfig{
 		"node_modules",      // Node.js modules directory.
 		".venv",             // Python virtual environment directory.
 	},
+	IgnorePrefix: "_",
 
 	DefaultMetadataDescriptionValue:     "A Cloney template repository",
 	DefaultMetadataLicenseValue:         "MIT",

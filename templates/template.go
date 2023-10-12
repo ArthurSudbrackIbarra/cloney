@@ -9,9 +9,13 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ArthurSudbrackIbarra/cloney/config"
 	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 	"github.com/Masterminds/sprig/v3"
 )
+
+// appConfig is the global application configuration.
+var appConfig = config.GetAppConfig()
 
 // TemplateFiller is a struct used for populating Go templates with variables.
 type TemplateFiller struct {
@@ -38,25 +42,25 @@ func injectCustomToFileFuncPaths(templateDir, filePath, fileContent string, outp
 
 	// Iterate over each line in the template content.
 	for index, line := range fileLines {
-		if strings.Contains(line, "toFile") {
-			// If 'outputInTerminal' is true, return an error as "toFile" is not supported in terminal output mode.
-			if outputInTerminal {
-				return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
-			}
+		// Inject the "hidden" parameters.
+		regex := regexp.MustCompile(`{{-? ?toFile`)
+		fileDir := filepath.Dir(filePath)
+		newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\" \"%s\"", templateDir, fileDir))
 
-			// Inject the "hidden" parameters.
-			regex := regexp.MustCompile(`{{-? ?toFile`)
-			fileDir := filepath.Dir(filePath)
-			newLine := regex.ReplaceAllString(line, fmt.Sprintf("{{- toFile \"%s\" \"%s\"", templateDir, fileDir))
-
-			// If on Windows, replace backslashes with forward slashes.
-			if os.PathSeparator == '\\' {
-				newLine = strings.ReplaceAll(newLine, "\\", "/")
-			}
-
-			// Replace the line in the file content.
-			fileLines[index] = newLine
+		// If 'outputInTerminal' is true, return an error as "toFile" is not supported in terminal output mode.
+		// if outputInTerminal {
+		if newLine != line && outputInTerminal {
+			return "", fmt.Errorf("the 'toFile' function is not supported when outputting the result to the terminal. Use 'cloney dry-run -o <output_directory>' instead")
 		}
+
+		// If on Windows, replace backslashes with forward slashes.
+		// TODO: This is causing issues because we need to replace only the backslashes that are part of the path.
+		if os.PathSeparator == '\\' {
+			newLine = strings.ReplaceAll(newLine, "\\", "/")
+		}
+
+		// Replace the line in the file content.
+		fileLines[index] = newLine
 	}
 
 	// Reconstruct the modified file content.
@@ -115,7 +119,9 @@ func (t *TemplateFiller) FillDirectory(src string, ignorePaths []string, outputI
 
 		// If the 'outputInTerminal' parameter is set, output the result to the terminal.
 		if outputInTerminal {
-			terminal.Message(fmt.Sprintf("\n----- File: %s\n%s\n", filePath, resultBuffer.String()))
+			if !strings.HasPrefix(filepath.Base(filePath), appConfig.IgnorePrefix) {
+				terminal.Message(fmt.Sprintf("\n--- File (%s)\n%s\n", terminal.Blue(filePath), resultBuffer.String()))
+			}
 		} else {
 			// Write the result to the same file.
 			err = os.WriteFile(filePath, resultBuffer.Bytes(), os.ModePerm)

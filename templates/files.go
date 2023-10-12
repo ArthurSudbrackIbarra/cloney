@@ -118,7 +118,7 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 // DeleteIgnoredFiles recursively walks through a directory and its subdirectories
 // specified by 'directoryPath'. It deletes files and directories that match any
 // of the patterns in 'ignorePaths'.
-// Additionally, it deletes files and directories starting with "_", which are files that should
+// Additionally, it deletes files and directories starting with "_" (Ignore Prefix), which are files that should
 // be processed by Cloney but not copied when the template is cloned.
 func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
 	// Walk the directory and its subdirectories.
@@ -136,9 +136,9 @@ func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
 			return nil
 		}
 
-		// Check if the path starts with "_".
+		// Check if the path starts with "_" (Ignore Prefix).
 		var delete bool
-		if strings.HasPrefix(filepath.Base(path), "_") {
+		if strings.HasPrefix(filepath.Base(path), appConfig.IgnorePrefix) {
 			delete = true
 		}
 

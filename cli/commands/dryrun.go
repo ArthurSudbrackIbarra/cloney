@@ -87,7 +87,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		// Fill the template variables in the output directory.
 		err = steps.FillDirectory(outputPath, ignorePaths, false, variablesMap)
 
-		// Delete files and directories starting with "_".
+		// Delete files and directories starting with "_" (Ignore Prefix).
 		// These are files that should be processed by Cloney but not copied to the output directory.
 		steps.DeleteIgnoredPaths(outputPath, ignorePaths)
 	}
