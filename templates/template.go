@@ -72,7 +72,15 @@ func (t *TemplateFiller) FillDirectory(src string, ignorePaths []string, outputI
 		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
 	}
 
-	// Iterate over each file in the directory, applying the template to each file.
+	// Create a template and add custom functions.
+	tmpl := template.New("")
+	tmpl.Funcs(sprig.TxtFuncMap())
+	tmpl.Funcs(CustomTxtFuncMap(tmpl))
+
+	// Create a map to hold the file contents.
+	fileContents := make(map[string]string)
+
+	// Iterate over each file in the directory and read the content.
 	for _, filePath := range filePaths {
 		// Read the content of the file.
 		fileBytes, err := os.ReadFile(filePath)
@@ -86,21 +94,23 @@ func (t *TemplateFiller) FillDirectory(src string, ignorePaths []string, outputI
 			return err
 		}
 
-		// Create a template and add custom functions.
-		tmpl := template.New("cloneyTemplate")
-		tmpl.Funcs(sprig.TxtFuncMap()).Funcs(CustomTxtFuncMap(tmpl))
+		fileContents[filePath] = fileContent
+	}
 
-		// Parse the template.
-		tmpl, err = tmpl.Parse(fileContent)
+	// Parse all file contents into the template.
+	for filePath, fileContent := range fileContents {
+		_, err = tmpl.New(filePath).Parse(fileContent)
 		if err != nil {
-			return fmt.Errorf("error parsing template: %w", err)
+			return fmt.Errorf("error parsing template for file %s: %w", filePath, err)
 		}
+	}
 
-		// Execute the template, replacing placeholders with variables.
+	// Execute the templates for each file.
+	for _, filePath := range filePaths {
 		var resultBuffer bytes.Buffer
-		err = tmpl.Execute(&resultBuffer, t.Variables)
+		err = tmpl.ExecuteTemplate(&resultBuffer, filePath, t.Variables)
 		if err != nil {
-			return fmt.Errorf("error executing template: %w", err)
+			return fmt.Errorf("error executing template for file %s: %w", filePath, err)
 		}
 
 		// If the 'outputInTerminal' parameter is set, output the result to the terminal.
@@ -112,71 +122,6 @@ func (t *TemplateFiller) FillDirectory(src string, ignorePaths []string, outputI
 			if err != nil {
 				return fmt.Errorf("error writing file %s: %w", filePath, err)
 			}
-		}
-	}
-
-	return nil
-}
-
-// CreateFilledDirectory processes template files in a source directory and saves the filled files in a destination directory.
-func (t *TemplateFiller) CreateFilledDirectory(src string, dest string, ignorePaths []string) error {
-	// Get a list of all files in the specified directory, considering ignore options.
-	filePaths, err := GetAllFilePaths(src, ignorePaths)
-	if err != nil {
-		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
-	}
-
-	// Iterate over each file in the directory, applying the template to each file.
-	for _, filePath := range filePaths {
-		// Read the content of the file.
-		fileBytes, err := os.ReadFile(filePath)
-		if err != nil {
-			return fmt.Errorf("error reading file %s: %w", filePath, err)
-		}
-
-		// Calculate the path of the file relative to the source directory to preserve the directory structure.
-		relativeFilePath, err := filepath.Rel(src, filePath)
-		if err != nil {
-			return fmt.Errorf("error calculating relative file path: %w", err)
-		}
-
-		// Calculate the path of the file in the target directory.
-		targetFilePath := filepath.Join(dest, relativeFilePath)
-
-		// If necessary, create the directory where the file will be saved.
-		directory := filepath.Dir(targetFilePath)
-		err = os.MkdirAll(directory, os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("error creating directory %s: %w", directory, err)
-		}
-
-		// Get a new version of the file content with the first hidden parameter of the 'toFile' function injected.
-		fileContent, err := injectCustomToFileFuncPaths(dest, targetFilePath, string(fileBytes), false)
-		if err != nil {
-			return err
-		}
-
-		// Create a template and add custom functions.
-		tmpl := template.New("cloneyTemplate")
-		tmpl.Funcs(sprig.TxtFuncMap()).Funcs(CustomTxtFuncMap(tmpl))
-
-		// Parse the template.
-		tmpl, err = tmpl.Parse(fileContent)
-		if err != nil {
-			return fmt.Errorf("error parsing template: %w", err)
-		}
-
-		// Execute the template, replacing placeholders with variables.
-		var resultBuffer bytes.Buffer
-		err = tmpl.Execute(&resultBuffer, t.Variables)
-		if err != nil {
-			return fmt.Errorf("error executing template: %w", err)
-		}
-
-		// Write the resulting content to the file in the target directory.
-		err = os.WriteFile(targetFilePath, resultBuffer.Bytes(), os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("error writing file %s: %w", targetFilePath, err)
 		}
 	}
 

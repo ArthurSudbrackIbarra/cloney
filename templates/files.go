@@ -7,6 +7,48 @@ import (
 	"strings"
 )
 
+// CopyDirectory copies a directory recursively
+// with options to specify directories and files to ignore.
+func CopyDirectory(src string, dest string, ignorePaths []string) error {
+	// Get a list of all files in the specified directory, considering ignore options.
+	filePaths, err := GetAllFilePaths(src, ignorePaths)
+	if err != nil {
+		return fmt.Errorf("error obtaining file paths in directory %s: %w", src, err)
+	}
+
+	// Iterate over each file in the directory and copy it.
+	for _, filePath := range filePaths {
+		// Get the relative path of the file.
+		relativePath, err := filepath.Rel(src, filePath)
+		if err != nil {
+			return fmt.Errorf("error getting relative path of file %s: %w", filePath, err)
+		}
+
+		// Construct the destination path.
+		destPath := filepath.Join(dest, relativePath)
+
+		// Create the destination directory if it does not exist.
+		err = os.MkdirAll(filepath.Dir(destPath), os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("error creating directory %s: %w", filepath.Dir(destPath), err)
+		}
+
+		// Read the file content.
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			return fmt.Errorf("error reading file %s: %w", filePath, err)
+		}
+
+		// Write the file content to the destination.
+		err = os.WriteFile(destPath, fileContent, os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("error copying file %s: %w", filePath, err)
+		}
+	}
+
+	return nil
+}
+
 // ShouldIgnorePath determines whether a given file or directory path should be ignored
 // based on a list of patterns within a specified base directory. It returns true if the
 // path should be ignored according to any of the provided patterns, and false otherwise.

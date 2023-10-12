@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
+	"github.com/ArthurSudbrackIbarra/cloney/templates"
 
 	"github.com/spf13/cobra"
 )
@@ -79,11 +80,17 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		err = steps.FillDirectory(sourcePath, ignorePaths, true, variablesMap)
 	} else {
 		// Create a new directory to save the filled template files.
-		err = steps.CreateFilledDirectory(sourcePath, outputPath, ignorePaths, variablesMap)
+		err = templates.CopyDirectory(sourcePath, outputPath, ignorePaths)
+		if err != nil {
+			return fmt.Errorf("error creating output directory %s: %w", outputPath, err)
+		}
+
+		// Fill the template variables in the output directory.
+		err = steps.FillDirectory(outputPath, ignorePaths, false, variablesMap)
 
 		// Delete files and directories starting with "_".
 		// These are files that should be processed by Cloney but not copied to the output directory.
-		steps.DeleteIgnoredPaths(cloneyMetadata, outputPath)
+		steps.DeleteIgnoredPaths(outputPath, ignorePaths)
 	}
 
 	if err != nil {

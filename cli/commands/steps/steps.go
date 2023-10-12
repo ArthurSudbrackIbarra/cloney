@@ -153,8 +153,8 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 // Parameters:
 //   - cloneyMetadata: The metadata containing the configuration of the template repository.
 //   - directory: The base directory from which to start removing files and directories.
-func DeleteIgnoredPaths(cloneyMetadata *metadata.CloneyMetadata, directory string) {
-	err := templates.DeleteIgnoredFiles(directory, cloneyMetadata.Configuration.IgnorePaths)
+func DeleteIgnoredPaths(directory string, ignorePaths []string) {
+	err := templates.DeleteIgnoredFiles(directory, ignorePaths)
 	if err != nil {
 		terminal.ErrorMessage("Failed to delete ignored files", err)
 	}
@@ -198,29 +198,6 @@ func FillDirectory(
 	}
 
 	if !suppressPrints && !outputInTerminal {
-		terminal.OKMessage("Template variables successfully filled")
-	}
-
-	return nil
-}
-
-// CreateFilledDirectory takes a source directory with template files and saves the result in a destination directory.
-func CreateFilledDirectory(
-	src string,
-	dest string,
-	ignorePaths []string,
-	variablesMap map[string]interface{}) error {
-	// Create a new template filler with the provided variables.
-	filler := templates.NewTemplateFiller(variablesMap)
-
-	// Fill the template variables and save the result in the destination directory.
-	err := filler.CreateFilledDirectory(src, dest, ignorePaths)
-	if err != nil {
-		terminal.ErrorMessage("Failed to fill the template variables", err)
-		return err
-	}
-
-	if !suppressPrints {
 		terminal.OKMessage("Template variables successfully filled")
 	}
 

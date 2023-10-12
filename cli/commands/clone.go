@@ -97,7 +97,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delete the paths specified in the 'ignore_paths' field of the metadata file.
-	steps.DeleteIgnoredPaths(cloneyMetadata, clonePath)
+	steps.DeleteIgnoredPaths(clonePath, cloneyMetadata.Configuration.IgnorePaths)
 
 	// Set the 'outputInTerminal' parameter to 'false' because we intend to actually fill the template variables.
 	err = steps.FillDirectory(clonePath, []string{}, false, variablesMap)
