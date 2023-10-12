@@ -5,7 +5,60 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/fsnotify/fsnotify"
 )
+
+// WatchDirectory watches a directory and its subdirectories for changes.
+// It receives a function that is called when a change is detected.
+func WatchDirectory(directoryPath string, ignorePaths []string, onChange func()) error {
+	// Get a list of all files in the specified directory, considering ignore options.
+	dirPaths, err := GetAllDirectoryPaths(directoryPath, ignorePaths)
+	if err != nil {
+		return fmt.Errorf("error obtaining file paths in directory %s: %w", directoryPath, err)
+	}
+
+	// Create a new watcher.
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return fmt.Errorf("error creating watcher: %w", err)
+	}
+
+	// Add all directories to the watcher.
+	for _, dirPath := range dirPaths {
+		err = watcher.Add(dirPath)
+		if err != nil {
+			return fmt.Errorf("error adding file %s to watcher: %w", dirPath, err)
+		}
+	}
+
+	// Create a channel to receive events.
+	done := make(chan bool)
+
+	// Start a goroutine to receive events.
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				// Check if the file is not a temporary file.
+				if !strings.HasSuffix(event.Name, "~") {
+					// Close the watcher.
+					watcher.Close()
+
+					// Call the onChange function.
+					onChange()
+				}
+			case err := <-watcher.Errors:
+				terminal.ErrorMessage("Error watching file", err)
+			}
+		}
+	}()
+
+	<-done
+
+	return nil
+}
 
 // CopyDirectory copies a directory recursively
 // with options to specify directories and files to ignore.
@@ -83,11 +136,6 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
 
-		// Skip the root directory.
-		if path == directoryPath {
-			return nil
-		}
-
 		// Check if the path should be ignored.
 		ignore, err := ShouldIgnorePath(directoryPath, path, ignorePaths)
 		if err != nil {
@@ -115,6 +163,44 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 	return filePaths, nil
 }
 
+// GetAllDirectoryPaths returns a list of all directory paths within a directory and its subdirectories,
+// with options to specify directories and files to ignore.
+func GetAllDirectoryPaths(directoryPath string, ignorePaths []string) ([]string, error) {
+	var directoryPaths []string
+
+	// Walk the directory and its subdirectories.
+	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			// Check if the path exists.
+			// If it does not exist, skip it.
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return fmt.Errorf("error walking path %s: %w", path, err)
+		}
+
+		// Check if the path should be ignored.
+		ignore, err := ShouldIgnorePath(directoryPath, path, ignorePaths)
+		if err != nil {
+			return fmt.Errorf("error checking if path %s should be ignored: %w", path, err)
+		}
+
+		if info.IsDir() {
+			// Check if the directory should be ignored and skip it if necessary.
+			if !ignore {
+				directoryPaths = append(directoryPaths, path) // Add the directory path to the list.
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error walking directory %s: %w", directoryPath, err)
+	}
+
+	return directoryPaths, nil
+}
+
 // DeleteIgnoredFiles recursively walks through a directory and its subdirectories
 // specified by 'directoryPath'. It deletes files and directories that match any
 // of the patterns in 'ignorePaths'.
@@ -129,11 +215,6 @@ func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
 				return nil
 			}
 			return fmt.Errorf("error walking path %s: %w", path, err)
-		}
-
-		// Skip the root directory.
-		if path == directoryPath {
-			return nil
 		}
 
 		// Check if the path starts with "_" (Ignore Prefix).

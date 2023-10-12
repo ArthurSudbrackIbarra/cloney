@@ -8,6 +8,7 @@ import (
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 	output, _ := cmd.Flags().GetString("output")
 	outputInTerminal, _ := cmd.Flags().GetBool("output-in-terminal")
+	hotReload, _ := cmd.Flags().GetBool("hot-reload")
 	variables, _ := cmd.Flags().GetString("variables")
 
 	// Variable to store errors.
@@ -105,6 +107,23 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		cmd.Println("\nDone!")
 	}
 
+	// If hot reload mode was enabled, watch for changes in the template repository and re-run the command.
+	if hotReload {
+		cmd.Print(terminal.Yellow("\nWatching for changes..."))
+
+		// Add the output directory to the list of ignored paths, if not in terminal output mode.
+		if !outputInTerminal {
+			// TODO: This is not working because of filepath.Match regex weirdness...
+			ignorePaths = append(ignorePaths, fmt.Sprintf("%s/**", appConfig.DefaultDryRunDirectoryName))
+		}
+		templates.WatchDirectory(sourcePath, ignorePaths, func() {
+			cmd.Println(terminal.Yellow("\nDetected changes, reloading...\n"))
+
+			// Re-run the command.
+			dryRunCmdRun(cmd, args)
+		})
+	}
+
 	return nil
 }
 
@@ -113,6 +132,7 @@ func ResetDryRunFlags(dryRunCmd *cobra.Command) {
 	dryRunCmd.Flags().Set("output", appConfig.DefaultDryRunDirectoryName)
 	dryRunCmd.Flags().Set("output-in-terminal", "false")
 	dryRunCmd.Flags().Set("variables", appConfig.DefaultUserVariablesFileName)
+	dryRunCmd.Flags().Set("hot-reload", "false")
 }
 
 // CreateDryRunCommand creates the 'dry-run' command and its respective flags.
@@ -144,6 +164,7 @@ You can specify a different file or pass the variables inline as YAML using the 
 	// Define command-line flags for the 'dryrun' command.
 	dryRunCmd.Flags().StringP("output", "o", appConfig.DefaultDryRunDirectoryName, "Path to output the filled template files")
 	dryRunCmd.Flags().BoolP("output-in-terminal", "i", false, "Output the filled template file contents in the terminal instead of creating the files")
+	dryRunCmd.Flags().BoolP("hot-reload", "r", false, "Enable hot reload mode")
 	dryRunCmd.Flags().StringP("variables", "v", appConfig.DefaultUserVariablesFileName, "Path to a template variables file or raw YAML")
 
 	return dryRunCmd
