@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/terminal"
@@ -109,7 +110,11 @@ func ShouldIgnorePath(baseDirectory string, path string, ignorePaths []string) (
 	for _, ignorePath := range ignorePaths {
 		// Construct the full path for comparison.
 		fullIgnorePath := filepath.Join(baseDirectory, ignorePath)
-		match, err := filepath.Match(fullIgnorePath, path)
+		if os.PathSeparator == '\\' {
+			fullIgnorePath = filepath.ToSlash(fullIgnorePath)
+			path = filepath.ToSlash(path)
+		}
+		match, err := regexp.MatchString(fullIgnorePath, path)
 		if err != nil {
 			return false, fmt.Errorf("error matching path %s: %w", path, err)
 		}
@@ -129,7 +134,7 @@ func GetAllFilePaths(directoryPath string, ignorePaths []string) ([]string, erro
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			// Check if the path exists.
-			// If it does not exist, skip it.
+			// If it does not exist, continue.
 			if os.IsNotExist(err) {
 				return nil
 			}
@@ -172,7 +177,7 @@ func GetAllDirectoryPaths(directoryPath string, ignorePaths []string) ([]string,
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			// Check if the path exists.
-			// If it does not exist, skip it.
+			// If it does not exist, continue.
 			if os.IsNotExist(err) {
 				return nil
 			}
@@ -211,7 +216,7 @@ func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			if os.IsNotExist(err) {
-				// If the path does not exist, skip it.
+				// If the path does not exist, continue.
 				return nil
 			}
 			return fmt.Errorf("error walking path %s: %w", path, err)

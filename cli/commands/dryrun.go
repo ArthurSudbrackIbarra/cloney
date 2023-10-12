@@ -111,11 +111,9 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	if hotReload {
 		cmd.Print(terminal.Yellow("\nWatching for changes..."))
 
-		// Add the output directory to the list of ignored paths, if not in terminal output mode.
-		if !outputInTerminal {
-			// TODO: This is not working because of filepath.Match regex weirdness...
-			ignorePaths = append(ignorePaths, fmt.Sprintf("%s/**", appConfig.DefaultDryRunDirectoryName))
-		}
+		// Do not monitor the output directory.
+		ignorePaths = append(ignorePaths, filepath.Base(outputPath))
+
 		templates.WatchDirectory(sourcePath, ignorePaths, func() {
 			cmd.Println(terminal.Yellow("\nDetected changes, reloading...\n"))
 
