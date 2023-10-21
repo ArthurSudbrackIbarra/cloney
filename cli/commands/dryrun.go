@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
@@ -118,7 +119,8 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 
 	// If hot reload mode was enabled, watch for changes in the template repository and re-run the command.
 	if hotReload {
-		cmd.Print(terminal.Yellow("\nWatching for changes..."))
+		currentTime := time.Now().Format("15:04:05")
+		cmd.Printf("\n[%s] Watching for changes...\n", terminal.Blue(currentTime))
 
 		// Create a new watcher.
 		watcher, err = fsnotify.NewWatcher()
@@ -132,7 +134,8 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 
 		// Start watching for changes.
 		templates.WatchDirectory(watcher, sourcePath, ignorePaths, func() {
-			cmd.Println(terminal.Yellow("\nDetected changes, reloading...\n"))
+			currentTime := time.Now().Format("15:04:05")
+			cmd.Printf("[%s] Changes detected, reloading...\n\n", terminal.Blue(currentTime))
 
 			// Re-run the command.
 			dryRunCmdRun(cmd, args)
