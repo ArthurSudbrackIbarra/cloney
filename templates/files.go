@@ -7,23 +7,26 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 	"github.com/fsnotify/fsnotify"
 )
 
-// WatchDirectory watches a directory and its subdirectories for changes.
-// It receives a function that is called when a change is detected.
-func WatchDirectory(directoryPath string, ignorePaths []string, onChange func()) error {
+// WatchDirectory monitors a directory and its subdirectories for changes,
+// including create, write, remove, rename, and chmod events. It receives a
+// function that is called when any of these events are detected.
+//
+// Parameters:
+//
+//	watcher:      An initialized fsnotify.Watcher.
+//	directoryPath: The path of the directory to watch.
+//	ignorePaths:  An optional list of file paths to ignore during monitoring.
+//	onChange:     A callback function to execute when any valid event is detected.
+//
+// Returns an error if any issues occur during setup or monitoring.
+func WatchDirectory(watcher *fsnotify.Watcher, directoryPath string, ignorePaths []string, onChange func()) error {
 	// Get a list of all files in the specified directory, considering ignore options.
 	dirPaths, err := GetAllDirectoryPaths(directoryPath, ignorePaths)
 	if err != nil {
 		return fmt.Errorf("error obtaining file paths in directory %s: %w", directoryPath, err)
-	}
-
-	// Create a new watcher.
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return fmt.Errorf("error creating watcher: %w", err)
 	}
 
 	// Add all directories to the watcher.
@@ -42,16 +45,14 @@ func WatchDirectory(directoryPath string, ignorePaths []string, onChange func())
 		for {
 			select {
 			case event := <-watcher.Events:
-				// Check if the file is not a temporary file.
-				if !strings.HasSuffix(event.Name, "~") {
-					// Close the watcher.
-					watcher.Close()
-
+				// Check if the event is a create, write, remove, rename, or chmod event.
+				if event.Op&(fsnotify.Create|fsnotify.Write|fsnotify.Remove|fsnotify.Rename|fsnotify.Chmod) != 0 {
 					// Call the onChange function.
 					onChange()
 				}
-			case err := <-watcher.Errors:
-				terminal.ErrorMessage("Error watching file", err)
+
+			case <-watcher.Errors:
+				// Error occurred.
 			}
 		}
 	}()

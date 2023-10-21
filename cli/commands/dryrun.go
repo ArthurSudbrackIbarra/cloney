@@ -10,11 +10,23 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/templates"
 	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
 
+// Watcher to monitor changes in the template repository.
+var watcher *fsnotify.Watcher
+
 // dryRunCmdRun is the function that runs when the 'dry-run' command is called.
 func dryRunCmdRun(cmd *cobra.Command, args []string) error {
+	// Variable to store errors.
+	var err error
+
+	// Reset the watcher if it was already created.
+	if watcher != nil {
+		watcher.Close()
+	}
+
 	// Get command-line arguments.
 	var repositorySource string
 	if len(args) >= 1 {
@@ -25,18 +37,15 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	hotReload, _ := cmd.Flags().GetBool("hot-reload")
 	variables, _ := cmd.Flags().GetString("variables")
 
-	// Variable to store errors.
-	var err error
-
 	// Get the current working directory.
 	currentDir, err := steps.GetCurrentWorkingDirectory()
-	if err != nil {
+	if err != nil && !hotReload {
 		return err
 	}
 
 	// Get the template variables provided by the user.
 	variablesMap, err := steps.GetUserVariablesMap(currentDir, variables)
-	if err != nil {
+	if err != nil && !hotReload {
 		return err
 	}
 
@@ -47,20 +56,20 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	// Read the repository metadata file.
 	metadataFilePath := filepath.Join(sourcePath, appConfig.MetadataFileName)
 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
-	if err != nil {
+	if err != nil && !hotReload {
 		return err
 	}
 
 	// Parse the metadata file.
 	cloneyMetadata, err := steps.ParseRepositoryMetadata(metadataContent, appConfig.SupportedManifestVersions)
-	if err != nil {
+	if err != nil && !hotReload {
 		return err
 	}
 
 	// Validate if the user variables match the template variables.
 	// Also, fill default values of the variables if they are not defined.
 	err = steps.MatchUserVariables(cloneyMetadata, variablesMap)
-	if err != nil {
+	if err != nil && !hotReload {
 		return err
 	}
 
@@ -76,13 +85,13 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		// Fill the template variables and display the output in the terminal instead of creating the files.
 		err = steps.FillDirectory(sourcePath, ignorePaths, true, variablesMap)
 	} else {
-		// Delete the default dry-run output directory if it exists.
-		defaultDryRunDir := filepath.Join(sourcePath, appConfig.DefaultDryRunDirectoryName)
-		os.RemoveAll(defaultDryRunDir)
+		// Delete the output directory if it already exists.
+		// This is necessary to avoid conflicts when creating the output directory.
+		os.RemoveAll(outputPath)
 
 		// Create a new directory to save the filled template files.
 		err = templates.CopyDirectory(sourcePath, outputPath, ignorePaths)
-		if err != nil {
+		if err != nil && !hotReload {
 			return fmt.Errorf("error creating output directory %s: %w", outputPath, err)
 		}
 
@@ -94,7 +103,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		steps.DeleteIgnoredPaths(outputPath, ignorePaths)
 	}
 
-	if err != nil {
+	if err != nil && !hotReload {
 		// If it was not possible to fill the template variables, delete the created directory (if not a dry run).
 		if !outputInTerminal {
 			os.RemoveAll(outputPath)
@@ -103,7 +112,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Display a completion message if not in terminal output mode.
-	if !outputInTerminal {
+	if !outputInTerminal && !hotReload {
 		cmd.Println("\nDone!")
 	}
 
@@ -111,10 +120,18 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	if hotReload {
 		cmd.Print(terminal.Yellow("\nWatching for changes..."))
 
+		// Create a new watcher.
+		watcher, err = fsnotify.NewWatcher()
+		if err != nil {
+			terminal.ErrorMessage("Could not monitor changes in the template repository.", err)
+			return err
+		}
+
 		// Do not monitor the output directory.
 		ignorePaths = append(ignorePaths, filepath.Base(outputPath))
 
-		templates.WatchDirectory(sourcePath, ignorePaths, func() {
+		// Start watching for changes.
+		templates.WatchDirectory(watcher, sourcePath, ignorePaths, func() {
 			cmd.Println(terminal.Yellow("\nDetected changes, reloading...\n"))
 
 			// Re-run the command.
