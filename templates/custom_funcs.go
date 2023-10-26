@@ -76,9 +76,19 @@ func CustomTxtFuncMap(tmpl *template.Template) template.FuncMap {
 		return runtime.GOARCH, nil
 	}
 
-	// joinQuote is a custom function provided by Cloney, which takes a list and returns a string
+	// joinSingleQuote is a custom function provided by Cloney, which takes a list and returns a string
+	// with the list elements separated by a separator and surrounded by single quotes.
+	funcMap["joinSingleQuote"] = func(list []interface{}, separator string) (string, error) {
+		var quoted []string
+		for _, item := range list {
+			quoted = append(quoted, fmt.Sprintf("'%s'", item))
+		}
+		return strings.Join(quoted, separator), nil
+	}
+
+	// joinDoubleQuote is a custom function provided by Cloney, which takes a list and returns a string
 	// with the list elements separated by a separator and surrounded by double quotes.
-	funcMap["joinQuote"] = func(list []interface{}, separator string) (string, error) {
+	funcMap["joinDoubleQuote"] = func(list []interface{}, separator string) (string, error) {
 		var quoted []string
 		for _, item := range list {
 			quoted = append(quoted, fmt.Sprintf("\"%s\"", item))

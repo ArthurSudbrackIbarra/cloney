@@ -25,3 +25,6 @@ cloney.exe
 .cloney.yaml
 .cloney-vars.yaml
 .cloney-vars.yml
+
+# SYSO properties file.
+resource.syso
