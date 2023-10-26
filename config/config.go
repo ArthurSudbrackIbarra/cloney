@@ -51,7 +51,7 @@ type AppConfig struct {
 
 // globalConfig is the global application configuration.
 var globalConfig = &AppConfig{
-	AppVersion: "0.3.0",
+	AppVersion: "1.0.0",
 
 	MetadataFileName:        ".cloney.yaml",
 	MetadataManifestVersion: "v1",
@@ -70,7 +70,7 @@ var globalConfig = &AppConfig{
 		"node_modules",      // Node.js modules directory.
 		".venv",             // Python virtual environment directory.
 	},
-	IgnorePrefix: "_",
+	IgnorePrefix: "__",
 
 	DefaultMetadataDescriptionValue:     "A Cloney template repository",
 	DefaultMetadataLicenseValue:         "MIT",
