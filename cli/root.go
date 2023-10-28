@@ -2,6 +2,7 @@ package cli
 
 import (
 	"os"
+	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands"
 
@@ -24,6 +25,16 @@ var rootCmd = &cobra.Command{
 
 	// Errors are printed by the commands.
 	SilenceErrors: true,
+}
+
+// Helper function to check if the error is related to "command not found."
+func isUnknownCommandError(err error) bool {
+	return strings.Contains(err.Error(), "unknown command")
+}
+
+// Helper function to check if the error is related to an "unknown flag."
+func isUnknownFlagError(err error) bool {
+	return strings.Contains(err.Error(), "unknown flag") || strings.Contains(err.Error(), "unknown shorthand flag")
 }
 
 // Initialize initializes the CLI.
@@ -58,6 +69,10 @@ func Initialize() {
 
 	// Execute the root command.
 	if err := rootCmd.Execute(); err != nil {
+		// Print the error only if it is related to "command not found" or "unknown flag."
+		if isUnknownCommandError(err) || isUnknownFlagError(err) {
+			rootCmd.Println(err)
+		}
 		// Exit with an error code if there was an issue executing the command.
 		os.Exit(1)
 	}
