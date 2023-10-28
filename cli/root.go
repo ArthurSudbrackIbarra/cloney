@@ -19,7 +19,7 @@ func rootCmdRun(cmd *cobra.Command, args []string) {
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:          "cloney",
-	Short:        "Cloney is a tool to clone and create dynamic template git repositories.\nCopyright - Arthur Sudbrack Ibarra - 2023.",
+	Short:        "Cloney is a tool to clone and create dynamic template git repositories.\nCopyright © - Arthur Sudbrack Ibarra - 2023.",
 	Run:          rootCmdRun,
 	SilenceUsage: true,
 

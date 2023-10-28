@@ -28,6 +28,7 @@ func SetCmd(newCommand *cobra.Command) {
 
 // Message prints a message with no prefix.
 func Message(message string) {
+	cmd.SetOut(cmd.OutOrStdout())
 	if cmd != nil {
 		cmd.Print(fmt.Sprintf("%s\n", message))
 	}
@@ -35,6 +36,7 @@ func Message(message string) {
 
 // OKMessage prints a success message with a green "[OK]" prefix.
 func OKMessage(message string) {
+	cmd.SetOut(cmd.OutOrStdout())
 	if cmd != nil {
 		cmd.Print(fmt.Sprintf("[%s] %s\n", Green("OK"), message))
 	}
@@ -42,6 +44,7 @@ func OKMessage(message string) {
 
 // WarningMessage prints a warning message with a yellow "[Warning]" prefix.
 func WarningMessage(message string) {
+	cmd.SetOut(cmd.OutOrStdout())
 	if cmd != nil {
 		cmd.Print(fmt.Sprintf("[%s] %s\n", Yellow("Warning"), message))
 	}
@@ -49,6 +52,7 @@ func WarningMessage(message string) {
 
 // ErrorMessage prints an error message with a red "[Error]" prefix.
 func ErrorMessage(message string, err error) {
+	cmd.SetOut(cmd.ErrOrStderr())
 	if cmd != nil {
 		cmd.Print(fmt.Sprintf("[%s] %s: %v\n", Red("Error"), message, err))
 	}
