@@ -2,16 +2,17 @@
 
 This document lists all significant changes to the Cloney project, following [Keep a Changelog](http://keepachangelog.com/) and adhering to [Semantic Versioning](http://semver.org/).
 
-## Cloney 0.3.0 - 2023-XX-XX
+## (Major) Cloney 1.0.0 - 2023-11-XX
 
 ### Added
 
-- Introducing the `joinQuote` template function. It joins a list with a given separator and surrounds each item with double quotes.
+- Introducing the `joinDoubleQuote` and `joinSingleQuote` template functions. They join a list with a given separator and surround each item with double/single quotes.
+- Error feedback has been added to inform users when they use an unknown command or unsupported flags.
 
 ### Changed
 
 - Enhanced template repository handling:
-  - Files and directories starting with `_` are now ignored, allowing them to be used for internal purposes within the template repository without being included in the final output. For example, you can use these files to define templates that are reused in other files, ensuring they are not part of the output.
+  - Files and directories starting with `__` (double underscore) are now ignored, allowing them to be used for internal purposes within the template repository without being included in the final output. For example, you can use these files to define templates that are reused in other files, ensuring they are not part of the output.
   - Template definitions can now be shared between multiple files, promoting reusability.
   - Automatic exclusion of known files and directories, such as `node_modules` and `.venv`, to prevent unnecessary processing.
 
@@ -20,8 +21,9 @@ This document lists all significant changes to the Cloney project, following [Ke
 - Resolved Windows-specific issues:
   - Prevented occasional crashes during the `dry-run` and `clone` commands due to path problems.
   - Fixed the issue where backslashes (`\`) were sometimes replaced with forward slashes (`/`) on Windows.
+- Resolved an issue where command outputs were incorrectly directed to `stderr` instead of `stdout`.
 
-## Cloney 0.2.0 - 2023-10-05
+## (Minor) Cloney 0.2.0 - 2023-10-05
 
 ### Added
 
