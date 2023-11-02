@@ -222,7 +222,7 @@ func DeleteIgnoredFiles(directoryPath string, ignorePaths []string) error {
 			return fmt.Errorf("error walking path %s: %w", path, err)
 		}
 
-		// Check if the path starts with "_" (Ignore Prefix).
+		// Check if the path starts with "__" (Ignore Prefix).
 		var delete bool
 		if strings.HasPrefix(filepath.Base(path), appConfig.IgnorePrefix) {
 			delete = true
