@@ -187,13 +187,12 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 
 // GetGeneralInfo returns the general information of the Cloney template repository as a string.
 func (m *CloneyMetadata) GetGeneralInfo() string {
-	result := terminal.WhiteBoldUnderline("\nGeneral Information\n")
+	result := terminal.WhiteBoldUnderline("\nGeneral Information\n\n")
 	result += fmt.Sprintf("%s: %s\n", "Template Name", m.Name)
 	result += fmt.Sprintf("%s: %s\n", "Template Description", m.Description)
 	result += fmt.Sprintf("%s: %s\n", "Template Version", m.TemplateVersion)
 	result += fmt.Sprintf("%s: %s\n", "Template License", m.License)
 	result += fmt.Sprintf("%s: %s\n", "Template Author(s)", strings.Join(m.Authors, ", "))
-
 	return result
 }
 
@@ -202,16 +201,35 @@ func (m *CloneyMetadata) GetVariables() string {
 	result := "\n"
 	for index, variable := range m.Variables {
 		if variable.Default == nil {
-			result += fmt.Sprintf("%s %s\n", terminal.WhiteBoldUnderline("Variable"), fmt.Sprintf("%s (%s)", terminal.BlueBoldUnderline(variable.Name), terminal.Yellow("Required")))
+			result += fmt.Sprintf("%s %s\n\n", terminal.WhiteBoldUnderline("Variable"), fmt.Sprintf("%s (%s)", terminal.BlueBoldUnderline(variable.Name), terminal.Yellow("Required")))
 		} else {
-			result += fmt.Sprintf("%s %s\n", terminal.WhiteBoldUnderline("Variable"), terminal.BlueBoldUnderline(variable.Name))
+			result += fmt.Sprintf("%s %s\n\n", terminal.WhiteBoldUnderline("Variable"), terminal.BlueBoldUnderline(variable.Name))
 		}
+
 		result += fmt.Sprintf("%s: %s\n", "Variable Description", variable.Description)
-		result += fmt.Sprintf("%s:\n%s\n", "Variable Type", VariableType(variable.Example))
-		if variable.Default != nil {
-			result += fmt.Sprintf("%s:\n%s\n", "Default Value", VariableValue(variable.Default))
+
+		varType := VariableType(variable.Example)
+		if !strings.Contains(varType, "\n") {
+			result += fmt.Sprintf("%s: %s\n", "Variable Type", VariableType(variable.Example))
+		} else {
+			result += fmt.Sprintf("%s:\n%s\n", "Variable Type", VariableType(variable.Example))
 		}
-		result += fmt.Sprintf("%s:\n%s\n", "Example Value", VariableValue(variable.Example))
+
+		if variable.Default != nil {
+			varDefault := VariableValue(variable.Default)
+			if !strings.Contains(varDefault, "\n") {
+				result += fmt.Sprintf("%s: %s\n", "Default Value", VariableValue(variable.Default))
+			} else {
+				result += fmt.Sprintf("%s:\n%s\n", "Default Value", VariableValue(variable.Default))
+			}
+		}
+
+		varExample := VariableValue(variable.Example)
+		if !strings.Contains(varExample, "\n") {
+			result += fmt.Sprintf("%s: %s\n", "Example Value", VariableValue(variable.Example))
+		} else {
+			result += fmt.Sprintf("%s:\n%s\n", "Example Value", VariableValue(variable.Example))
+		}
 		if index != len(m.Variables)-1 {
 			result += "\n"
 		}
