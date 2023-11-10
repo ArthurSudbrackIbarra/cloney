@@ -1,7 +1,6 @@
 package metadata
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/go-playground/validator/v10"
-	tw "github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v3"
 )
 
@@ -189,64 +187,41 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 
 // GetGeneralInfo returns the general information of the Cloney template repository as a string.
 func (m *CloneyMetadata) GetGeneralInfo() string {
-	var buffer bytes.Buffer
-	table := tw.NewWriter(&buffer)
-	table.SetHeader([]string{"Name", "Description", "Template Version", "Authors", "License"})
-	table.SetHeaderColor(
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-	)
-	table.SetAlignment(tw.ALIGN_LEFT)
-	table.Append([]string{m.Name, m.Description, m.TemplateVersion, strings.Join(m.Authors, ", "), m.License})
-	table.Render()
-	return buffer.String()
+	result := terminal.WhiteBoldUnderline("\nGeneral Information\n")
+	result += fmt.Sprintf("%s: %s\n", "Template Name", m.Name)
+	result += fmt.Sprintf("%s: %s\n", "Template Description", m.Description)
+	result += fmt.Sprintf("%s: %s\n", "Template Version", m.TemplateVersion)
+	result += fmt.Sprintf("%s: %s\n", "Template License", m.License)
+	result += fmt.Sprintf("%s: %s\n", "Template Author(s)", strings.Join(m.Authors, ", "))
+
+	return result
 }
 
 // GetVariables returns the variables of the Cloney template repository as a string.
 func (m *CloneyMetadata) GetVariables() string {
-	if len(m.Variables) == 0 {
-		return "This template repository has no variables.\n"
-	}
-	var buffer bytes.Buffer
-	table := tw.NewWriter(&buffer)
-	table.SetHeader([]string{"Name", "Description", "Type", "Default", "YAML Example"})
-	table.SetHeaderColor(
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-		tw.Colors{tw.Bold, tw.BgBlueColor},
-	)
-	table.SetAlignment(tw.ALIGN_LEFT)
-	table.SetAutoWrapText(false)
-	table.SetRowLine(true)
-	for _, variable := range m.Variables {
-		// Paint the variable name yellow if it is required.
-		variableName := ""
+	result := "\n"
+	for index, variable := range m.Variables {
 		if variable.Default == nil {
-			variableName = terminal.Yellow(variable.Name)
+			result += fmt.Sprintf("%s %s\n", terminal.WhiteBoldUnderline("Variable"), fmt.Sprintf("%s (%s)", terminal.BlueBoldUnderline(variable.Name), terminal.Yellow("Required")))
 		} else {
-			variableName = variable.Name
+			result += fmt.Sprintf("%s %s\n", terminal.WhiteBoldUnderline("Variable"), terminal.BlueBoldUnderline(variable.Name))
 		}
-		table.Append(
-			[]string{variableName, variable.Description, VariableType(variable.Example), VariableValue(variable.Default), VariableValue(variable.Example)},
-		)
+		result += fmt.Sprintf("%s: %s\n", "Variable Description", variable.Description)
+		result += fmt.Sprintf("%s:\n%s\n", "Variable Type", VariableType(variable.Example))
+		if variable.Default != nil {
+			result += fmt.Sprintf("%s:\n%s\n", "Default Value", VariableValue(variable.Default))
+		}
+		result += fmt.Sprintf("%s:\n%s\n", "Example Value", VariableValue(variable.Example))
+		if index != len(m.Variables)-1 {
+			result += "\n"
+		}
 	}
-	table.Render()
-	return buffer.String()
+	return result
 }
 
 // String returns the string representation of the CloneyMetadata struct.
 func (m *CloneyMetadata) String() string {
-	result := "General information about this template repository:\n\n"
-	result += m.GetGeneralInfo()
-
-	result += "\nVariables of this template repository.\n"
-	result += "Variables painted in yellow are required:\n\n"
+	result := m.GetGeneralInfo()
 	result += m.GetVariables()
-
 	return result
 }

@@ -14,6 +14,9 @@ var (
 	Yellow = color.New(color.FgYellow).SprintFunc()
 	Red    = color.New(color.FgRed).SprintFunc()
 	Blue   = color.New(color.FgBlue).SprintFunc()
+
+	BlueBoldUnderline  = color.New(color.FgBlue, color.Bold, color.Underline).SprintFunc()
+	WhiteBoldUnderline = color.New(color.FgWhite, color.Bold, color.Underline).SprintFunc()
 )
 
 // cmd is the current command being executed.
