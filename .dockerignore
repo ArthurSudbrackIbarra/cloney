@@ -1,0 +1,43 @@
+# Binaries for programs and plugins.
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`.
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE.
+*.out
+
+# Dependency directories (remove the comment below to include it).
+# vendor/
+
+# Visual Studio Code workspace file.
+.vscode
+
+# Go workspace file.
+go.work
+
+# Application binary files.
+cloney
+cloney.exe
+
+# Cloney files.
+.cloney.yaml
+.cloney-vars.yaml
+.cloney-vars.yml
+
+# SYSO properties file.
+resource.syso
+
+# Irrelevant files/folders that should not be copied to the container.
+.github
+images
+.gitignore
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+LICENSE
+README.md
