@@ -114,13 +114,13 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Display a completion message if not in terminal output mode.
 	if !outputInTerminal && !hotReload {
-		cmd.Println("\nDone!")
+		terminal.Message("\nDone!")
 	}
 
 	// If hot reload mode was enabled, watch for changes in the template repository and re-run the command.
 	if hotReload {
 		currentTime := time.Now().Format("15:04:05")
-		cmd.Printf("\n[%s] Watching for changes...\n", terminal.Blue(currentTime))
+		terminal.Messagef("\n[%s] Watching for changes...\n", terminal.Blue(currentTime))
 
 		// Create a new watcher.
 		watcher, err = fsnotify.NewWatcher()
@@ -135,7 +135,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		// Start watching for changes.
 		templates.WatchDirectory(watcher, sourcePath, ignorePaths, func() {
 			currentTime := time.Now().Format("15:04:05")
-			cmd.Printf("[%s] Changes detected, reloading...\n\n", terminal.Blue(currentTime))
+			terminal.Messagef("[%s] Changes detected, reloading...\n\n", terminal.Blue(currentTime))
 
 			// Re-run the command.
 			dryRunCmdRun(cmd, args)

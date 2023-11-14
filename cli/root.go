@@ -1,10 +1,13 @@
 package cli
 
 import (
+	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands"
+	"github.com/ArthurSudbrackIbarra/cloney/config"
 
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"
@@ -18,8 +21,9 @@ func rootCmdRun(cmd *cobra.Command, args []string) {
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:          "cloney",
-	Short:        "Cloney is a tool to clone and create dynamic template git repositories.\nCopyright © - Arthur Sudbrack Ibarra - 2023.",
+	Use: "cloney",
+	Short: fmt.Sprintf(`Cloney is a tool to clone and create dynamic template git repositories.
+Cloney version %s %s %s, created by Arthur Sudbrack Ibarra, 2023.`, config.GetAppConfig().AppVersion, runtime.GOOS, runtime.GOARCH),
 	Run:          rootCmdRun,
 	SilenceUsage: true,
 
@@ -71,6 +75,7 @@ func Initialize() {
 	if err := rootCmd.Execute(); err != nil {
 		// Print the error only if it is related to "command not found" or "unknown flag."
 		if isUnknownCommandError(err) || isUnknownFlagError(err) {
+			rootCmd.SetOut(rootCmd.ErrOrStderr())
 			rootCmd.Println(err)
 		}
 		// Exit with an error code if there was an issue executing the command.

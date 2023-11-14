@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,7 @@ func TestVersionCommandOutput(t *testing.T) {
 
 	// Redirect stdout to a buffer.
 	var buffer bytes.Buffer
-	testVersionCmd.SetOut(&buffer)
+	terminal.SetTestMode(&buffer)
 
 	// Execute the command.
 	err := testVersionCmd.Execute()

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
+	"github.com/ArthurSudbrackIbarra/cloney/terminal"
 
 	"github.com/spf13/cobra"
 )
@@ -40,7 +41,7 @@ func validateCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// If the metadata file was parsed successfully, then the template is valid.
-	cmd.Println("\nYour Cloney template is valid!")
+	terminal.Message("\nYour Cloney template is valid!")
 
 	return nil
 }

@@ -203,7 +203,7 @@ func (m *CloneyMetadata) GetVariables() string {
 		if variable.Default == nil {
 			result += fmt.Sprintf("%s %s\n\n", terminal.WhiteBoldUnderline("Variable"), fmt.Sprintf("%s (%s)", terminal.BlueBoldUnderline(variable.Name), terminal.Yellow("Required")))
 		} else {
-			result += fmt.Sprintf("%s %s\n\n", terminal.WhiteBoldUnderline("Variable"), terminal.BlueBoldUnderline(variable.Name))
+			result += fmt.Sprintf("%s %s (Optional)\n\n", terminal.WhiteBoldUnderline("Variable"), terminal.BlueBoldUnderline(variable.Name))
 		}
 
 		result += fmt.Sprintf("%s: %s\n", "Variable Description", variable.Description)

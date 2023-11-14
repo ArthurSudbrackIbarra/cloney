@@ -15,7 +15,7 @@ import (
 // cloneCmdRun is the function that runs when the 'clone' command is called.
 func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		cmd.Printf("[%s] %s\n\n", terminal.Red("Error"), "You must provide a repository URL")
+		terminal.ErrorMessage("You must provide a repository URL\n", nil)
 
 		// Display command help if no repository URL is provided.
 		cmd.Help()
@@ -112,7 +112,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Delete the paths specified in the 'ignore_paths' field of the metadata file.
 	steps.DeleteIgnoredPaths(clonePath, ignorePaths)
 
-	cmd.Println("\nDone!")
+	terminal.Message("\nDone!")
 
 	return nil
 }

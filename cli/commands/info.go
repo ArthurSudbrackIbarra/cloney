@@ -73,7 +73,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Print metadata.
-	cmd.Println(cloneyMetadata)
+	terminal.Message(cloneyMetadata.String())
 
 	return nil
 }

@@ -30,8 +30,8 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	// If the non-interactive flag is not set, ask the user for the information.
 	if !nonInteractive {
 		scanner := bufio.NewScanner(os.Stdin)
-		cmd.Println("Please answer the following questions to create the template repository.")
-		cmd.Print("Press enter to use the default values.\n\n")
+		terminal.Message("Please answer the following questions to create the template repository.")
+		terminal.Message("Press enter to use the default values.\n")
 
 		if name == "" {
 			name = terminal.InputWithDefaultValue(
@@ -115,7 +115,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		appConfig.CloneyExampleRepositoryURL, "basic", "",
 	)
 	if err != nil {
-		cmd.Println("Error when cloning the example Cloney repository from GitHub.")
+		terminal.ErrorMessage("Error when cloning the example Cloney repository from GitHub.", nil)
 		return err
 	}
 
@@ -144,7 +144,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cmd.Println("\nDone!")
+	terminal.Message("\nDone!")
 
 	return nil
 }
