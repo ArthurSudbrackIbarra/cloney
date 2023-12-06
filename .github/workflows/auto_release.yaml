@@ -23,6 +23,16 @@ jobs:
         with:
           go-version: "1.21"
 
+      # Install goversioninfo to embed properties into the Windows executable.
+      - name: Install goversioninfo
+        run: |
+          go get github.com/josephspurrier/goversioninfo@v1.4.0
+          go install github.com/josephspurrier/goversioninfo
+
+      # Run go generate.
+      - name: Run Go Generate
+        run: go generate
+
       # Build the application for different platforms.
       - name: Build Application
         run: |
@@ -43,11 +53,21 @@ jobs:
           zip -r cloney-darwin-amd64.zip cloney-darwin-amd64
           zip -r cloney-darwin-arm64.zip cloney-darwin-arm64
 
+      # Generate checksums for the application.
+      - name: Generate Checksums
+        run: |
+          sha256sum cloney-windows-amd64.zip > cloney-windows-amd64-checksum.sha256
+          sha256sum cloney-windows-arm64.zip > cloney-windows-arm64-checksum.sha256
+          sha256sum cloney-linux-amd64.zip > cloney-linux-amd64-checksum.sha256
+          sha256sum cloney-linux-arm64.zip > cloney-linux-arm64-checksum.sha256
+          sha256sum cloney-darwin-amd64.zip > cloney-darwin-amd64-checksum.sha256
+          sha256sum cloney-darwin-arm64.zip > cloney-darwin-arm64-checksum.sha256
+
       # Use the release-action GitHub action to create a release.
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "cloney-*.zip"
+          artifacts: "cloney-*.zip,cloney-*.sha256"
         env:
           # Use a personal access token to create the release.
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
