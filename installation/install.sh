@@ -3,9 +3,14 @@
 # set -e: exit as soon as any command fails.
 set -e
 
+# Colors.
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
 # Check if this script is being run as root.
 if [ "$EUID" -ne 0 ]
-then echo "Error: please run this script as root."
+then echo -e "${RED}Error: Please run this script as root.${NC}"
     exit 1
 fi
 
@@ -29,12 +34,12 @@ elif [ "$OPERATING_SYSTEM" = "darwin" ] && { [ "$ARCHITECTURE" = "aarch64" ] || 
 then
     FILE_NAME="cloney-darwin-arm64"
 else
-    echo "Error: your operating system and/or architecture is not supported."
+    echo -e "${RED}Error: Unsupported Operating System and/or Architecture.${NC}"
     exit 1
 fi
 
 # Define other variables.
-CLONEY_VERSION="0.2.0"
+CLONEY_VERSION="0.2.0" # Change to 1.0.0 when releasing.
 BINARY_LOCATION="/usr/local/bin/cloney"
 
 # Download Cloney Zip.
@@ -58,4 +63,4 @@ rm -rf $FILE_NAME.zip $FILE_NAME
 echo "Removed trash from installation."
 
 echo
-echo "Cloney $CLONEY_VERSION has been installed successfully!"
+echo -e "${GREEN}Cloney $CLONEY_VERSION was successfully installed!${NC}"
