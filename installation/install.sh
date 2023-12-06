@@ -31,7 +31,7 @@ else
 fi
 
 # Define other variables.
-CLONEY_VERSION="0.2.0"
+CLONEY_VERSION="1.0.0"
 BINARY_LOCATION="/usr/local/bin/cloney"
 
 # Download Cloney Zip.
@@ -44,7 +44,7 @@ unzip $FILE_NAME.zip
 echo "Unzipped Cloney $CLONEY_VERSION."
 
 # Move Cloney to /usr/local/bin.
-sudo mv $FILE_NAME/cloney $BINARY_LOCATION
+sudo mv -f $FILE_NAME/cloney $BINARY_LOCATION
 echo "Moved Cloney $CLONEY_VERSION to $BINARY_LOCATION."
 
 # Make Cloney executable.
