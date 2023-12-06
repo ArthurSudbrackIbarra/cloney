@@ -21,8 +21,8 @@ FROM alpine:3.17 as cloney
 RUN apk update
 
 # Copy the compiled application binary from the builder stage.
-# Copy to /usr/bin so that the application is available in the PATH.
-COPY --from=builder /app/cloney /usr/bin
+# Copy to /usr/local/bin so that the application is available in the PATH.
+COPY --from=builder /app/cloney /usr/local/bin
 
 # Sleep forever to keep the container running.
 CMD ["sleep", "infinity"]
