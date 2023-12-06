@@ -52,11 +52,11 @@ unzip $FILE_NAME.zip
 echo "Unzipped Cloney $CLONEY_VERSION."
 
 # Move Cloney to /usr/local/bin.
-sudo mv -f $FILE_NAME/cloney $BINARY_LOCATION
+mv -f $FILE_NAME/cloney $BINARY_LOCATION
 echo "Moved Cloney $CLONEY_VERSION to $BINARY_LOCATION."
 
 # Make Cloney executable.
-sudo chmod +x $BINARY_LOCATION
+chmod +x $BINARY_LOCATION
 
 # Remove Trash.
 rm -rf $FILE_NAME.zip $FILE_NAME
