@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# set -e: exit as soon as any command fails.
+set -e
+
 # Check if this script is being run as root.
 if [ "$EUID" -ne 0 ]
 then echo "Error: please run this script as root."
@@ -31,7 +34,7 @@ else
 fi
 
 # Define other variables.
-CLONEY_VERSION="1.0.0"
+CLONEY_VERSION="0.2.0"
 BINARY_LOCATION="/usr/local/bin/cloney"
 
 # Download Cloney Zip.
