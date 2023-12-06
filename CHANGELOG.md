@@ -2,7 +2,7 @@
 
 This document lists all significant changes to the Cloney project, following [Keep a Changelog](http://keepachangelog.com/) and adhering to [Semantic Versioning](http://semver.org/).
 
-## (Major) Cloney 1.0.0 - 2023-11-XX
+## (Major) Cloney 1.0.0 - 2023-12-06
 
 ### Added
 
@@ -12,7 +12,7 @@ This document lists all significant changes to the Cloney project, following [Ke
 ### Changed
 
 - Enhanced template repository handling:
-  - Files and directories starting with `__` (double underscore) are now ignored, allowing them to be used for internal purposes within the template repository without being included in the final output. For example, you can use these files to define templates that are reused in other files, ensuring they are not part of the output.
+  - Files and directories starting with `__` (double underscore) are now ignored (Ghost files), allowing them to be used for internal purposes within the template repository without being included in the final output. For example, you can use these files to define templates that are reused in other files, ensuring they are not part of the output.
   - Template definitions can now be shared between multiple files, promoting reusability.
   - Automatic exclusion of known files and directories, such as `node_modules` and `.venv`, to prevent unnecessary processing.
 
