@@ -35,7 +35,7 @@ else
 fi
 
 # Define other variables.
-CLONEY_VERSION="0.2.0" # Change to 1.0.0 when releasing.
+CLONEY_VERSION="1.0.0"
 BINARY_LOCATION="/usr/local/bin/cloney"
 
 # Download Cloney Zip.
