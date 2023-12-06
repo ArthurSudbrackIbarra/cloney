@@ -48,7 +48,7 @@ curl -A "Cloney Download Script" -OL \
 echo "Downloaded Cloney $CLONEY_VERSION."
 
 # Unzip Cloney.
-unzip $FILE_NAME.zip
+unzip -o $FILE_NAME.zip
 echo "Unzipped Cloney $CLONEY_VERSION."
 
 # Move Cloney to /usr/local/bin.
