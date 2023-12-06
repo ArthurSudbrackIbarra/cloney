@@ -2,7 +2,7 @@
 
 <br>
 <p align="center">
-  <img src="images/cloney-logo-rounded.png">
+  <img src="assets/images/cloney-logo-rounded.png">
 </p>
 <br>
 
@@ -20,5 +20,5 @@ For comprehensive and detailed information about Cloney and how to make the most
 
 <br>
 <p align="center">
-  <img src="images/cloney-documentation.png">
+  <img src="assets/images/cloney-documentation.png">
 </p>

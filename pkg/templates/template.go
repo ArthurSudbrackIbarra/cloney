@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ArthurSudbrackIbarra/cloney/config"
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/config"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/terminal"
 	"github.com/Masterminds/sprig/v3"
 )
 

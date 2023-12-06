@@ -6,7 +6,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/terminal"
+
 	"github.com/stretchr/testify/assert"
 )
 

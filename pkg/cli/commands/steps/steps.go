@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ArthurSudbrackIbarra/cloney/git"
-	"github.com/ArthurSudbrackIbarra/cloney/metadata"
-	"github.com/ArthurSudbrackIbarra/cloney/templates"
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/git"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/metadata"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/templates"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/terminal"
 )
 
 // This file defines common steps used by multiple commands.

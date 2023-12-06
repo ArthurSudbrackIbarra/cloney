@@ -5,7 +5,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/terminal"
+
 	"github.com/spf13/cobra"
 )
 

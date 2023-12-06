@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	basicoperations "github.com/ArthurSudbrackIbarra/cloney/basic-operations"
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/terminal"
 
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
@@ -103,7 +102,14 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 	}
 
 	// Check if manifest version is supported.
-	if !basicoperations.ListContainsString(supportedManifestVersions, metadata.ManifestVersion) {
+	versionSupported := false
+	for _, supportedManifestVersion := range supportedManifestVersions {
+		if metadata.ManifestVersion == supportedManifestVersion {
+			versionSupported = true
+			break
+		}
+	}
+	if !versionSupported {
 		return nil, fmt.Errorf(
 			"manifest version '%s' is not supported in this Cloney version.\nPlease update or downgrade your Cloney version.\n\nSupported versions: %s",
 			metadata.ManifestVersion,

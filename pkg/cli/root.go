@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ArthurSudbrackIbarra/cloney/cli/commands"
-	"github.com/ArthurSudbrackIbarra/cloney/config"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/cli/commands"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/config"
 
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"

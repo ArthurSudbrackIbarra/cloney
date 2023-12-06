@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ArthurSudbrackIbarra/cloney/cli/commands/steps"
-	"github.com/ArthurSudbrackIbarra/cloney/templates"
-	"github.com/ArthurSudbrackIbarra/cloney/terminal"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/cli/commands/steps"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/templates"
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/terminal"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
