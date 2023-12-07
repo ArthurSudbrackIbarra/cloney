@@ -100,7 +100,7 @@ func (r *GitRepository) Clone(path string) error {
 // GetFileContent returns the content of a raw file in the git repository.
 func (r *GitRepository) GetFileContent(filePath string) (string, error) {
 	// Clone the repository in a temporary directory.
-	temporaryDir := fmt.Sprintf("%s/cloney/pkg%s", os.TempDir(), r.GetName())
+	temporaryDir := fmt.Sprintf("%s/cloney/%s", os.TempDir(), r.GetName())
 	err := r.Clone(temporaryDir)
 	if err != nil {
 		return "", err
