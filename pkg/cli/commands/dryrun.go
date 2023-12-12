@@ -122,9 +122,9 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	if hotReload {
 		currentTime := time.Now().Format("15:04:05")
 		if runtime.GOOS != "darwin" {
-			terminal.Messagef("\n[%s] Watching for changes... (Press \"Ctrl\" + \"C\" to Stop)\n", terminal.Blue(currentTime))
+			terminal.Messagef("\n[%s] Watching for changes... (press \"Ctrl\" + \"C\" to stop)\n", terminal.Blue(currentTime))
 		} else {
-			terminal.Messagef("\n[%s] Watching for changes... (Press \"⌘\" + \"Z\" to Stop)\n", terminal.Blue(currentTime))
+			terminal.Messagef("\n[%s] Watching for changes... (press \"⌘\" + \"Z\" to stop)\n", terminal.Blue(currentTime))
 		}
 
 		// Create a new watcher.
