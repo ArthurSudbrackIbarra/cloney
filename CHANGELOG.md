@@ -2,6 +2,22 @@
 
 This document lists all significant changes to the Cloney project, following [Keep a Changelog](http://keepachangelog.com/) and adhering to [Semantic Versioning](http://semver.org/).
 
+## (Minor) Cloney 1.1.0 - 2023-X-X
+
+### Added
+
+- No new features were added in this release.
+
+### Changed
+
+- No changes were made in this release.
+
+TODO...
+
+### Fixed
+
+- Addressed an issue where executing the `dry-run` command with the `--hot-reload, -r` flag occasionally failed to wait for the variables file to be saved before initiating the template reload.
+
 ## (Major) Cloney 1.0.0 - 2023-12-06
 
 ### Added
