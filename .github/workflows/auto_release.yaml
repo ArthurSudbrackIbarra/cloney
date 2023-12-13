@@ -36,14 +36,14 @@ jobs:
       - name: Build Application
         run: |
           goversioninfo -64
-          stat resources.syso
+          stat resource.syso
           GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
-          rm -f resources.syso
+          rm -f resource.syso
 
           goversioninfo -arm
-          stat resources.syso
+          stat resource.syso
           GOOS=windows GOARCH=arm64 go build -o cloney-windows-arm64/cloney.exe
-          rm -f resources.syso
+          rm -f resource.syso
 
           GOOS=linux GOARCH=amd64 go build -o cloney-linux-amd64/cloney
           GOOS=linux GOARCH=arm64 go build -o cloney-linux-arm64/cloney

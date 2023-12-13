@@ -97,10 +97,9 @@ jobs:
       - name: Validate Build for Windows
         run: |
           goversioninfo -64
-          ls -l
-          stat resources.syso
+          stat resource.syso
           GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
-          rm -f resources.syso
+          rm -f resource.syso
 
       # Step 11: Validate creating a zip archive.
       - name: Validate Zip Application
