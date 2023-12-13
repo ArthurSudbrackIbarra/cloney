@@ -22,6 +22,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
+
+    # Give permissions to modify repository contents.
+    permissions:
+      contents: write
       
     steps:
       # Step 1: Check out the repository.
