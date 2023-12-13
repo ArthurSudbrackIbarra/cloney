@@ -48,8 +48,8 @@ jobs:
       - name: Validate Build for Windows
         run: |
           goversioninfo -64
+          stat resources.syso
           GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
-          # stat resources.syso
           rm -f resources.syso
 
       # Step 6: Validate creating a zip archive.
@@ -88,9 +88,9 @@ jobs:
       # Step 11: Validate Edit the versioninfo.json file to update the version.
       - name: Validate Edit versioninfo.json File
         run: |
-          sed -i "s/\"Major\": -1/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
-          sed -i "s/\"Minor\": -1/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
-          sed -i "s/\"Patch\": -1/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
+          sed -i "s/\"Major\": 0/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
+          sed -i "s/\"Minor\": 0/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
+          sed -i "s/\"Patch\": 0/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
           sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
           cat versioninfo.json
 
