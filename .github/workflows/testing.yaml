@@ -23,10 +23,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # Step 1: Check out the repository.
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      # Step 2: Set up Go.
-      - uses: actions/setup-go@v4
+      # Step 2: Setup Go.
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
           go-version: "1.21"
 
@@ -60,3 +62,45 @@ jobs:
       # Step 8: Validate checksum matches.
       - name: Validate Checksum Matches
         run: sha256sum -c cloney-windows-amd64-checksum.sha256
+
+      #
+      # Validate auto-tagging steps.
+      #
+
+      # Step 9: Run auto-tag in dry-run mode to determine the next version of Cloney.
+      - name: Validate Determine Next Version
+        id: determine_next_version
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          # Do not prepend the 'v' prefix to the tag.
+          WITH_V: false
+          DRY_RUN: true
+
+      # Step 10: Extract version information from the output of the previous step.
+      - name: Validate Export Version Information
+        run: |
+          export CLONEY_NEXT_VERSION_FULL=${{ steps.determine_next_version.outputs.new_tag }}
+          export CLONEY_NEXT_VERSION_MAJOR=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f1)
+          export CLONEY_NEXT_VERSION_MINOR=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)
+          export CLONEY_NEXT_VERSION_PATCH=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)
+
+      # Step 11: Validate Edit the versioninfo.json file to update the version.
+      - name: Validate Edit versioninfo.json File
+        run: |
+          sed -i 's/"Major": -1/"Major": '$CLONEY_NEXT_VERSION_MAJOR'/' versioninfo.json
+          sed -i 's/"Minor": -1/"Minor": '$CLONEY_NEXT_VERSION_MINOR'/' versioninfo.json
+          sed -i 's/"Patch": -1/"Patch": '$CLONEY_NEXT_VERSION_PATCH'/' versioninfo.json
+          sed -i 's/"ProductVersion": "X.X.X"/"ProductVersion": "$CLONEY_NEXT_VERSION_FULL"/' versioninfo.json
+          cat versioninfo.json
+
+      # Step 12: Validate Edit the pkg/config/config.go file to update the version.
+      - name: Validate Edit pkg/config/config.go File
+        run: |
+          sed -i 's/AppVersion: "X.X.X"/AppVersion: "$CLONEY_NEXT_VERSION_FULL"/' pkg/config/config.go
+          cat pkg/config/config.go
+
+      # Step 13: Validate Edit the installation/install.sh file to update the version.
+      - name: Validate Edit installation/install.sh File
+        run: |
+          sed -i 's/CLONEY_VERSION="X.X.X"/CLONEY_VERSION="$CLONEY_NEXT_VERSION_FULL"/' installation/install.sh
+          cat installation/install.sh
