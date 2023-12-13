@@ -135,3 +135,8 @@ jobs:
           git add versioninfo.json pkg/config/config.go installation/install.sh
           git commit -m "Bump Version to $CLONEY_NEXT_VERSION_FULL."
           git push origin version-bump-$CLONEY_NEXT_VERSION_FULL
+
+      # Delete the branch created in Step 7.
+      - name: Delete Version Bump Branch
+        run: |
+          git push origin --delete version-bump-$CLONEY_NEXT_VERSION_FULL

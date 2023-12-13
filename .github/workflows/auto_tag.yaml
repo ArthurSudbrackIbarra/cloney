@@ -102,6 +102,6 @@ jobs:
           WITH_V: false
 
       # Step 9: Delete the branch created in Step 7.
-      # - name: Delete Version Bump Branch
-      #   run: |
-      #     git push origin --delete version-bump-$CLONEY_NEXT_VERSION_FULL
+      - name: Delete Version Bump Branch
+        run: |
+          git push origin --delete version-bump-$CLONEY_NEXT_VERSION_FULL
