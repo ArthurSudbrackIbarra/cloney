@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -120,7 +121,11 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	// If hot reload mode was enabled, watch for changes in the template repository and re-run the command.
 	if hotReload {
 		currentTime := time.Now().Format("15:04:05")
-		terminal.Messagef("\n[%s] Watching for changes...\n", terminal.Blue(currentTime))
+		if runtime.GOOS != "darwin" {
+			terminal.Messagef("\n[%s] Watching for changes... (press \"Ctrl\" + \"C\" to stop)\n", terminal.Blue(currentTime))
+		} else {
+			terminal.Messagef("\n[%s] Watching for changes... (press \"⌘\" + \"Z\" to stop)\n", terminal.Blue(currentTime))
+		}
 
 		// Create a new watcher.
 		watcher, err = fsnotify.NewWatcher()
@@ -136,6 +141,9 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 		templates.WatchDirectory(watcher, sourcePath, ignorePaths, func() {
 			currentTime := time.Now().Format("15:04:05")
 			terminal.Messagef("[%s] Changes detected, reloading...\n\n", terminal.Blue(currentTime))
+
+			// Sleep for 500 milliseconds to avoid running the command before the file is saved.
+			time.Sleep(500 * time.Millisecond)
 
 			// Re-run the command.
 			dryRunCmdRun(cmd, args)

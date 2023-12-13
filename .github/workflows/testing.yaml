@@ -1,12 +1,20 @@
-name: Run Automated Tests
+# Workflow Name: Run Automated Tests
 
-# Trigger when a PR is created against the main branch and when a commit is pushed to the main branch.
+# Description:
+# This GitHub Actions workflow is triggered when a pull request is created against the main branch 
+# or when a commit is pushed to the main branch. It runs automated tests for the Go application, 
+# and validates the build steps (e.g., building the Windows executable, creating a zip archive, 
+# and generating checksums) without actually releasing the application.
+
 on:
+  # Trigger when a PR is created against the main branch.
   pull_request:
     types:
       - opened
+      - synchronize
     branches:
       - main
+  # Trigger when a commit is pushed to the main branch.
   push:
     branches:
       - main
@@ -14,45 +22,102 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
+      
     steps:
-      # Check out the repository.
-      - uses: actions/checkout@v3
+      # Step 1: Check out the repository.
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      # Set up Go.
-      - uses: actions/setup-go@v4
+      # Step 2: Setup Go.
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
           go-version: "1.21"
 
-      # Run the tests.
+      # Step 3: Run the tests.
       - name: Run Tests
         run: go test ./... -v 
 
       #
-      # Check if there are no errors when building the application.
+      # Validate auto-tagging steps.
       #
 
-      # Install goversioninfo to embed properties into the Windows executable.
-      - name: Check Install goversioninfo
+      # Step 4: Run auto-tag in dry-run mode to determine the next version of Cloney.
+      - name: Validate Determine Next Version
+        id: determine_next_version
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          # Do not prepend the 'v' prefix to the tag.
+          WITH_V: false
+          DRY_RUN: true
+
+      # Step 5: Extract version information from the output of the previous step.
+      - name: Validate Export Version Information
         run: |
-          go get github.com/josephspurrier/goversioninfo@v1.4.0
-          go install github.com/josephspurrier/goversioninfo
+          CLONEY_NEXT_VERSION_FULL="${{ steps.determine_next_version.outputs.new_tag }}"
+          CLONEY_NEXT_VERSION_MAJOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f1)"
+          CLONEY_NEXT_VERSION_MINOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)"
+          CLONEY_NEXT_VERSION_PATCH="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)"
 
-      # Run go generate.
-      - name: Check Run Go Generate
-        run: go generate
+          echo "CLONEY_NEXT_VERSION_FULL=$CLONEY_NEXT_VERSION_FULL" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_MAJOR=$CLONEY_NEXT_VERSION_MAJOR" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_MINOR=$CLONEY_NEXT_VERSION_MINOR" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_PATCH=$CLONEY_NEXT_VERSION_PATCH" >> "$GITHUB_ENV"
 
-      # Build the application.
-      - name: Build Application
-        run: GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+      # Step 6: Validate Edit the versioninfo.json file to update the version.
+      - name: Validate Edit versioninfo.json File
+        run: |
+          sed -i "s/\"Major\": 0/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
+          sed -i "s/\"Minor\": 0/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
+          sed -i "s/\"Patch\": 0/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
+          sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
+          if git diff --exit-code versioninfo.json; then
+            echo "versioninfo.json is unchanged but should have been updated."
+            exit 1
+          fi
 
-      # Zip the application.
-      - name: Check Zip Application
+      # Step 7: Validate Edit the pkg/config/config.go file to update the version.
+      - name: Validate Edit pkg/config/config.go File
+        run: |
+          sed -i "s/AppVersion: \"X.X.X\"/AppVersion: \"$CLONEY_NEXT_VERSION_FULL\"/" pkg/config/config.go
+          if git diff --exit-code pkg/config/config.go; then
+            echo "pkg/config/config.go is unchanged but should have been updated."
+            exit 1
+          fi
+
+      # Step 8: Validate Edit the installation/install.sh file to update the version.
+      - name: Validate Edit installation/install.sh File
+        run: |
+          sed -i "s/CLONEY_VERSION=\"X.X.X\"/CLONEY_VERSION=\"$CLONEY_NEXT_VERSION_FULL\"/" installation/install.sh
+          if git diff --exit-code installation/install.sh; then
+            echo "installation/install.sh is unchanged but should have been updated."
+            exit 1
+          fi
+
+      #
+      # Validate build steps (not actual release).
+      #
+
+      # Step 9: Install goversioninfo to embed properties into the Windows executable.
+      - name: Install goversioninfo
+        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
+
+      # Step 10: Validate building the application for Windows.
+      - name: Validate Build for Windows
+        run: |
+          goversioninfo -64
+          stat resource.syso
+          GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+          rm -f resource.syso
+
+      # Step 11: Validate creating a zip archive.
+      - name: Validate Zip Application
         run: zip -r cloney-windows-amd64.zip cloney-windows-amd64
 
-      # Generate checksum for the application.
-      - name: Check Generate Checksums
+      # Step 12: Validate generating checksum for the application.
+      - name: Validate Generate Checksums
         run: sha256sum cloney-windows-amd64.zip > cloney-windows-amd64-checksum.sha256
 
-      # Check if the checksum matches.
-      - name: Check Checksum Matches
+      # Step 13: Validate checksum matches.
+      - name: Validate Checksum Matches
         run: sha256sum -c cloney-windows-amd64-checksum.sha256

@@ -1,7 +1,7 @@
 {
     "FixedFileInfo": {
         "ProductVersion": {
-            "Major": 1,
+            "Major": 0,
             "Minor": 0,
             "Patch": 0,
             "Build": 0
@@ -22,7 +22,7 @@
         "OriginalFilename": "",
         "PrivateBuild": "",
         "ProductName": "Cloney",
-        "ProductVersion": "1.0.0",
+        "ProductVersion": "X.X.X",
         "SpecialBuild": ""
     },
     "VarFileInfo": {

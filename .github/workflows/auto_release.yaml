@@ -1,7 +1,12 @@
-name: Automatic Release
+# Workflow Name: Automatic Release
 
-# Trigger the workflow when a tag is pushed.
+# Description:
+# This GitHub Actions workflow is triggered when a tag is pushed. It builds the Cloney application 
+# for multiple platforms, creates zip archives, generates checksums, and releases the artifacts 
+# using the release-action GitHub action.
+
 on:
+  # Trigger when a tag is pushed.
   push:
     tags:
       - "*"
@@ -15,35 +20,37 @@ jobs:
       contents: write
 
     steps:
-      # Check out the repository.
+      # Step 1: Check out the repository.
       - uses: actions/checkout@v3
 
-      # Setup Go.
+      # Step 2: Setup Go.
       - uses: actions/setup-go@v4
         with:
           go-version: "1.21"
 
-      # Install goversioninfo to embed properties into the Windows executable.
+      # Step 3: Install goversioninfo to embed properties into the Windows executable.
       - name: Install goversioninfo
-        run: |
-          go get github.com/josephspurrier/goversioninfo@v1.4.0
-          go install github.com/josephspurrier/goversioninfo
+        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
 
-      # Run go generate.
-      - name: Run Go Generate
-        run: go generate
-
-      # Build the application for different platforms.
+      # Step 4: Build the application for different platforms.
       - name: Build Application
         run: |
+          goversioninfo -64
+          stat resource.syso
           GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+          rm -f resource.syso
+
+          goversioninfo -arm
+          stat resource.syso
           GOOS=windows GOARCH=arm64 go build -o cloney-windows-arm64/cloney.exe
+          rm -f resource.syso
+
           GOOS=linux GOARCH=amd64 go build -o cloney-linux-amd64/cloney
           GOOS=linux GOARCH=arm64 go build -o cloney-linux-arm64/cloney
           GOOS=darwin GOARCH=amd64 go build -o cloney-darwin-amd64/cloney
           GOOS=darwin GOARCH=arm64 go build -o cloney-darwin-arm64/cloney
 
-      # Zip the application for different platforms.
+      # Step 5: Zip the application for different platforms.
       - name: Zip Application
         run: |
           zip -r cloney-windows-amd64.zip cloney-windows-amd64
@@ -53,7 +60,7 @@ jobs:
           zip -r cloney-darwin-amd64.zip cloney-darwin-amd64
           zip -r cloney-darwin-arm64.zip cloney-darwin-arm64
 
-      # Generate checksums for the application.
+      # Step 6: Generate checksums for the application.
       - name: Generate Checksums
         run: |
           sha256sum cloney-windows-amd64.zip > cloney-windows-amd64-checksum.sha256
@@ -63,7 +70,7 @@ jobs:
           sha256sum cloney-darwin-amd64.zip > cloney-darwin-amd64-checksum.sha256
           sha256sum cloney-darwin-arm64.zip > cloney-darwin-arm64-checksum.sha256
 
-      # Use the release-action GitHub action to create a release.
+      # Step 7: Use the release-action GitHub action to create a release.
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:

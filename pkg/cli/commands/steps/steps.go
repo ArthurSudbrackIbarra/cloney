@@ -1,9 +1,11 @@
 package steps
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/ArthurSudbrackIbarra/cloney/pkg/config"
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/git"
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/metadata"
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/templates"
@@ -125,8 +127,13 @@ func CloneRepository(repository *git.GitRepository, clonePath string) error {
 // ReadRepositoryMetadata reads the repository metadata.
 func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 	metadataBytes, err := os.ReadFile(metadataFilePath)
-	if err != nil {
-		terminal.ErrorMessage("Could not find the template repository metadata file", err)
+	if err != nil && os.IsNotExist(err) {
+		terminal.ErrorMessage(
+			fmt.Sprintf("Could not find the \"%s\" template repository metadata file: directory \"%s\" is not a Cloney template repository", config.GetAppConfig().MetadataFileName, filepath.Dir(metadataFilePath)), nil,
+		)
+		return "", err
+	} else if err != nil {
+		terminal.ErrorMessage(fmt.Sprintf("Could not read the \"%s\" template repository metadata file", config.GetAppConfig().MetadataFileName), err)
 		return "", err
 	}
 	if !suppressPrints {

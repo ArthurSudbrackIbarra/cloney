@@ -23,11 +23,11 @@ echo "Architecture: $ARCHITECTURE"
 # Define file name according to OS and Architecture.
 if [ "$OPERATING_SYSTEM" = "linux" ] && { [ "$ARCHITECTURE" = "x86_64" ] || [ "$ARCHITECTURE" = "amd64" ]; }; then
     FILE_NAME="cloney-linux-amd64"
-elif [ "$OPERATING_SYSTEM" = "linux" ] && { [ "$ARCHITECTURE" = "aarch64" ] || [ "$ARCHITECTURE" = "arm64" ]; }; then
+    elif [ "$OPERATING_SYSTEM" = "linux" ] && { [ "$ARCHITECTURE" = "aarch64" ] || [ "$ARCHITECTURE" = "arm64" ]; }; then
     FILE_NAME="cloney-linux-arm64"
-elif [ "$OPERATING_SYSTEM" = "darwin" ] && { [ "$ARCHITECTURE" = "x86_64" ] || [ "$ARCHITECTURE" = "amd64" ]; }; then
+    elif [ "$OPERATING_SYSTEM" = "darwin" ] && { [ "$ARCHITECTURE" = "x86_64" ] || [ "$ARCHITECTURE" = "amd64" ]; }; then
     FILE_NAME="cloney-darwin-amd64"
-elif [ "$OPERATING_SYSTEM" = "darwin" ] && { [ "$ARCHITECTURE" = "aarch64" ] || [ "$ARCHITECTURE" = "arm64" ]; }; then
+    elif [ "$OPERATING_SYSTEM" = "darwin" ] && { [ "$ARCHITECTURE" = "aarch64" ] || [ "$ARCHITECTURE" = "arm64" ]; }; then
     FILE_NAME="cloney-darwin-arm64"
 else
     echo -e "${RED}Error: Unsupported operating system and/or architecture.${NC}"
@@ -35,37 +35,39 @@ else
 fi
 
 # Define other variables.
-CLONEY_VERSION="1.0.0"
+#! CLONEY_VERSION is set automatically during the pipeline that tags the release (.github/workflows/auto_tag.yaml).
+#! Keep this value as it is.
+CLONEY_VERSION="X.X.X"
 BINARY_LOCATION="/usr/local/bin/cloney"
 
 # Download Cloney Zip.
 curl -A "Cloney Download Script" -OL \
-    "https://github.com/ArthurSudbrackIbarra/cloney/releases/download/$CLONEY_VERSION/$FILE_NAME.zip" ||
-    {
-        echo -e "${RED}Error: Failed to download Cloney. Please check your internet connection.${NC}"
-        exit 1
-    }
+"https://github.com/ArthurSudbrackIbarra/cloney/releases/download/$CLONEY_VERSION/$FILE_NAME.zip" ||
+{
+    echo -e "${RED}Error: Failed to download Cloney. Please check your internet connection.${NC}"
+    exit 1
+}
 
 # Unzip Cloney.
 unzip -o "$FILE_NAME.zip" ||
-    {
-        echo -e "${RED}Error: Failed to unzip Cloney. Please install the zip package.${NC}"
-        exit 1
-    }
+{
+    echo -e "${RED}Error: Failed to unzip Cloney. Please install the zip package.${NC}"
+    exit 1
+}
 
 # Move Cloney to /usr/local/bin.
 mv -f "$FILE_NAME/cloney" $BINARY_LOCATION ||
-    {
-        echo -e "${RED}Error: Failed to move Cloney to $BINARY_LOCATION.${NC}"
-        exit 1
-    }
+{
+    echo -e "${RED}Error: Failed to move Cloney to $BINARY_LOCATION.${NC}"
+    exit 1
+}
 
 # Make Cloney executable.
 chmod +x $BINARY_LOCATION ||
-    {
-        echo -e "${RED}Error: Failed to make Cloney binary executable.${NC}"
-        exit 1
-    }
+{
+    echo -e "${RED}Error: Failed to make Cloney binary executable.${NC}"
+    exit 1
+}
 
 # Remove trash.
 rm -rf "$FILE_NAME.zip" $FILE_NAME
