@@ -71,18 +71,30 @@ jobs:
           sed -i "s/\"Minor\": 0/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
           sed -i "s/\"Patch\": 0/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
           sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
+          if git diff --exit-code versioninfo.json; then
+            echo "versioninfo.json is unchanged but should have been updated."
+            exit 1
+          fi
           cat versioninfo.json
 
       # Step 7: Validate Edit the pkg/config/config.go file to update the version.
       - name: Validate Edit pkg/config/config.go File
         run: |
           sed -i "s/AppVersion: \"X.X.X\"/AppVersion: \"$CLONEY_NEXT_VERSION_FULL\"/" pkg/config/config.go
+          if git diff --exit-code pkg/config/config.go; then
+            echo "pkg/config/config.go is unchanged but should have been updated."
+            exit 1
+          fi
           cat pkg/config/config.go
 
       # Step 8: Validate Edit the installation/install.sh file to update the version.
       - name: Validate Edit installation/install.sh File
         run: |
           sed -i "s/CLONEY_VERSION=\"X.X.X\"/CLONEY_VERSION=\"$CLONEY_NEXT_VERSION_FULL\"/" installation/install.sh
+          if git diff --exit-code installation/install.sh; then
+            echo "installation/install.sh is unchanged but should have been updated."
+            exit 1
+          fi
           cat installation/install.sh
 
       #
