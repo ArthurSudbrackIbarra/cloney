@@ -1,7 +1,11 @@
-name: Automatic Tag
+# Workflow Name: Automatic Tag
 
-# Trigger the workflow when a pull request is closed on the 'main' branch.
+# Description: 
+# This GitHub Actions workflow automates the tagging process when a pull request is closed on the 'main' branch.
+# It determines the next version using the GitHub Tag Action, updates version-related files, and pushes the tag.
+
 on:
+  # Trigger the workflow when a pull request is closed on the 'main' branch.
   pull_request:
     types:
       - closed
@@ -17,7 +21,7 @@ jobs:
       contents: write
 
     steps:
-      # Check out the repository.
+      # Step 1: Check out the repository.
       - uses: actions/checkout@v3
         with:
           # Check out the specific commit associated with the closed pull request.
@@ -25,7 +29,7 @@ jobs:
           # Fetch all commit history for tags to work correctly.
           fetch-depth: "0"
 
-      # Run auto-tag in dry-run mode to determine the next version.
+      # Step 2: Run auto-tag in dry-run mode to determine the next version of Cloney.
       - name: Determine Next Version
         id: determine_next_version
         uses: anothrNick/github-tag-action@1.64.0
@@ -34,7 +38,7 @@ jobs:
           WITH_V: false
           DRY_RUN: true
 
-      # Get the output of the previous step.
+      # Step 3: Extract version information from the output of the previous step.
       - name: Export Version Information
         run: |
           export CLONEY_NEXT_VERSION_FULL=${{ steps.determine_next_version.outputs.new_tag }}
@@ -42,7 +46,7 @@ jobs:
           export CLONEY_NEXT_VERSION_MINOR=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)
           export CLONEY_NEXT_VERSION_PATCH=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)
 
-      # Edit the versioninfo.json file to update the version.
+      # Step 4: Edit the versioninfo.json file to update the version.
       - name: Edit versioninfo.json File
         run: |
           sed -i 's/"Major": -1/"Major": '$CLONEY_NEXT_VERSION_MAJOR'/' versioninfo.json
@@ -51,19 +55,19 @@ jobs:
           sed -i 's/"ProductVersion": "X.X.X"/"ProductVersion": "$CLONEY_NEXT_VERSION_FULL"/' versioninfo.json
           cat versioninfo.json
 
-      # Edit the pkg/config/config.go file to update the version.
+      # Step 5: Edit the pkg/config/config.go file to update the version.
       - name: Edit pkg/config/config.go File
         run: |
           sed -i 's/AppVersion: "X.X.X"/AppVersion: "$CLONEY_NEXT_VERSION_FULL"/' pkg/config/config.go
           cat pkg/config/config.go
 
-      # Edit the installation/install.sh file to update the version.
+      # Step 6: Edit the installation/install.sh file to update the version.
       - name: Edit installation/install.sh File
         run: |
           sed -i 's/CLONEY_VERSION="X.X.X"/CLONEY_VERSION="$CLONEY_NEXT_VERSION_FULL"/' installation/install.sh
           cat installation/install.sh
 
-      # Use the GitHub Tag Action to create tags.
+      # Step 7: Use the GitHub Tag Action to create the tag and push it to the repository.
       - name: Bump Version and Push Tag.
         uses: anothrNick/github-tag-action@1.64.0
         env:

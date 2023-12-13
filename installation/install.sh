@@ -35,7 +35,7 @@ else
 fi
 
 # Define other variables.
-#! CLONEY_VERSION is set automatically during the pipeline that tags the release.
+#! CLONEY_VERSION is set automatically during the pipeline that tags the release (.github/workflows/auto_tag.yaml).
 #! Keep this value as it is.
 CLONEY_VERSION="X.X.X"
 BINARY_LOCATION="/usr/local/bin/cloney"

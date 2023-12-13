@@ -1,12 +1,19 @@
-name: Run Automated Tests
+# Workflow Name: Run Automated Tests
 
-# Trigger when a PR is created against the main branch and when a commit is pushed to the main branch.
+# Description:
+# This GitHub Actions workflow is triggered when a pull request is created against the main branch 
+# or when a commit is pushed to the main branch. It runs automated tests for the Go application, 
+# and validates the build steps (e.g., building the Windows executable, creating a zip archive, 
+# and generating checksums) without actually releasing the application.
+
 on:
+  # Trigger when a PR is created against the main branch.
   pull_request:
     types:
       - opened
     branches:
       - main
+  # Trigger when a commit is pushed to the main branch.
   push:
     branches:
       - main
@@ -15,41 +22,41 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     steps:
-      # Check out the repository.
+      # Step 1: Check out the repository.
       - uses: actions/checkout@v3
 
-      # Set up Go.
+      # Step 2: Set up Go.
       - uses: actions/setup-go@v4
         with:
           go-version: "1.21"
 
-      # Run the tests.
+      # Step 3: Run the tests.
       - name: Run Tests
         run: go test ./... -v 
 
       #
-      # Check if there are no errors when building the application.
+      # Validate build steps (not actual release).
       #
 
-      # Install goversioninfo to embed properties into the Windows executable.
+      # Step 4: Install goversioninfo to embed properties into the Windows executable.
       - name: Install goversioninfo
         run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
 
-      # Build the application.
-      - name: Build Application
+      # Step 5: Validate building the application for Windows.
+      - name: Validate Build for Windows
         run: |
           goversioninfo -64
           GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
           rm -f resources.syso
 
-      # Zip the application.
-      - name: Check Zip Application
+      # Step 6: Validate creating a zip archive.
+      - name: Validate Zip Application
         run: zip -r cloney-windows-amd64.zip cloney-windows-amd64
 
-      # Generate checksum for the application.
-      - name: Check Generate Checksums
+      # Step 7: Validate generating checksum for the application.
+      - name: Validate Generate Checksums
         run: sha256sum cloney-windows-amd64.zip > cloney-windows-amd64-checksum.sha256
 
-      # Check if the checksum matches.
-      - name: Check Checksum Matches
+      # Step 8: Validate checksum matches.
+      - name: Validate Checksum Matches
         run: sha256sum -c cloney-windows-amd64-checksum.sha256
