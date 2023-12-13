@@ -82,12 +82,12 @@ jobs:
       # Step 7: Commit the changes in a new branch.
       - name: Commit Version Updates
         run: |
-          git checkout -b version-bump-${{ github.run_id }}
+          git checkout -b version-bump-$CLONEY_NEXT_VERSION_FULL
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add versioninfo.json pkg/config/config.go installation/install.sh
           git commit -m "Bump Version to $CLONEY_NEXT_VERSION_FULL."
-          git push origin version-bump-${{ github.run_id }}
+          git push origin version-bump-$CLONEY_NEXT_VERSION_FULL
 
 
       # Step 8: Use the GitHub Tag Action to create the tag and push it to the repository.
@@ -95,7 +95,7 @@ jobs:
         uses: anothrNick/github-tag-action@1.64.0
         env:
           # Create the tag from the branch created in the previous step.
-          DEFAULT_BRANCH: version-bump-${{ github.run_id }}
+          DEFAULT_BRANCH: version-bump-$CLONEY_NEXT_VERSION_FULL
           # Use a personal access token to push the tag.
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           # Do not prepend the 'v' prefix to the tag.
@@ -104,4 +104,4 @@ jobs:
       # Step 9: Delete the branch created in Step 7.
       # - name: Delete Version Bump Branch
       #   run: |
-      #     git push origin --delete version-bump-${{ github.run_id }}
+      #     git push origin --delete version-bump-$CLONEY_NEXT_VERSION_FULL
