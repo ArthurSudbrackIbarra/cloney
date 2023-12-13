@@ -97,6 +97,7 @@ jobs:
       - name: Validate Build for Windows
         run: |
           goversioninfo -64
+          ls -l
           stat resources.syso
           GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
           rm -f resources.syso
