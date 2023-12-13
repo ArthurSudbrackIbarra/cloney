@@ -49,22 +49,22 @@ jobs:
       # Step 4: Edit the versioninfo.json file to update the version.
       - name: Edit versioninfo.json File
         run: |
-          sed -i 's/"Major": -1/"Major": '$CLONEY_NEXT_VERSION_MAJOR'/' versioninfo.json
-          sed -i 's/"Minor": -1/"Minor": '$CLONEY_NEXT_VERSION_MINOR'/' versioninfo.json
-          sed -i 's/"Patch": -1/"Patch": '$CLONEY_NEXT_VERSION_PATCH'/' versioninfo.json
-          sed -i 's/"ProductVersion": "X.X.X"/"ProductVersion": "$CLONEY_NEXT_VERSION_FULL"/' versioninfo.json
+          sed -i "s/\"Major\": -1/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
+          sed -i "s/\"Minor\": -1/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
+          sed -i "s/\"Patch\": -1/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
+          sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
           cat versioninfo.json
 
       # Step 5: Edit the pkg/config/config.go file to update the version.
       - name: Edit pkg/config/config.go File
         run: |
-          sed -i 's/AppVersion: "X.X.X"/AppVersion: "$CLONEY_NEXT_VERSION_FULL"/' pkg/config/config.go
+          sed -i "s/AppVersion: \"X.X.X\"/AppVersion: \"$CLONEY_NEXT_VERSION_FULL\"/" pkg/config/config.go
           cat pkg/config/config.go
 
       # Step 6: Edit the installation/install.sh file to update the version.
       - name: Edit installation/install.sh File
         run: |
-          sed -i 's/CLONEY_VERSION="X.X.X"/CLONEY_VERSION="$CLONEY_NEXT_VERSION_FULL"/' installation/install.sh
+          sed -i "s/CLONEY_VERSION=\"X.X.X\"/CLONEY_VERSION=\"$CLONEY_NEXT_VERSION_FULL\"/" installation/install.sh
           cat installation/install.sh
 
       # Step 7: Use the GitHub Tag Action to create the tag and push it to the repository.
