@@ -89,3 +89,112 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           # Do not prepend the 'v' prefix to the tag.
           WITH_V: false
+# Workflow Name: Automatic Tag
+
+# Description: 
+# This GitHub Actions workflow automates the tagging process when a pull request is closed on the 'main' branch.
+# It determines the next version using the GitHub Tag Action, updates version-related files, and pushes the tag.
+
+on:
+  # Trigger the workflow when a pull request is closed on the 'main' branch.
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-22.04
+
+    # Give permissions to modify repository contents.
+    permissions:
+      contents: write
+
+    steps:
+      # Step 1: Check out the repository.
+      - uses: actions/checkout@v3
+        with:
+          # Check out the specific commit associated with the closed pull request.
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          # Fetch all commit history for tags to work correctly.
+          fetch-depth: "0"
+
+      # Step 2: Run auto-tag in dry-run mode to determine the next version of Cloney.
+      - name: Determine Next Version
+        id: determine_next_version
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          # Do not prepend the 'v' prefix to the tag.
+          WITH_V: false
+          DRY_RUN: true
+
+      # Step 3: Extract version information from the output of the previous step.
+      - name: Export Version Information
+        run: |
+          CLONEY_NEXT_VERSION_FULL="${{ steps.determine_next_version.outputs.new_tag }}"
+          CLONEY_NEXT_VERSION_MAJOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f1)"
+          CLONEY_NEXT_VERSION_MINOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)"
+          CLONEY_NEXT_VERSION_PATCH="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)"
+
+          echo "CLONEY_NEXT_VERSION_FULL=$CLONEY_NEXT_VERSION_FULL" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_MAJOR=$CLONEY_NEXT_VERSION_MAJOR" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_MINOR=$CLONEY_NEXT_VERSION_MINOR" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_PATCH=$CLONEY_NEXT_VERSION_PATCH" >> "$GITHUB_ENV"
+
+      # Step 4: Edit the versioninfo.json file to update the version.
+      - name: Edit versioninfo.json File
+        run: |
+          sed -i "s/\"Major\": -1/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
+          sed -i "s/\"Minor\": -1/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
+          sed -i "s/\"Patch\": -1/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
+          sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
+          if git diff --exit-code versioninfo.json; then
+            echo "versioninfo.json is unchanged but should have been updated."
+            exit 1
+          fi
+
+      # Step 5: Edit the pkg/config/config.go file to update the version.
+      - name: Edit pkg/config/config.go File
+        run: |
+          sed -i "s/AppVersion: \"X.X.X\"/AppVersion: \"$CLONEY_NEXT_VERSION_FULL\"/" pkg/config/config.go
+          if git diff --exit-code pkg/config/config.go; then
+            echo "pkg/config/config.go is unchanged but should have been updated."
+            exit 1
+          fi
+
+      # Step 6: Edit the installation/install.sh file to update the version.
+      - name: Edit installation/install.sh File
+        run: |
+          sed -i "s/CLONEY_VERSION=\"X.X.X\"/CLONEY_VERSION=\"$CLONEY_NEXT_VERSION_FULL\"/" installation/install.sh
+          if git diff --exit-code installation/install.sh; then
+            echo "installation/install.sh is unchanged but should have been updated."
+            exit 1
+          fi
+
+      # Step 7: Commit the changes in a new branch.
+      - name: Commit Version Updates
+        run: |
+          git checkout -b version-bump-${{ github.run_id }}
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add versioninfo.json pkg/config/config.go installation/install.sh
+          git commit -m "Bump Version to $CLONEY_NEXT_VERSION_FULL."
+          git push origin version-bump-${{ github.run_id }}
+
+
+      # Step 8: Use the GitHub Tag Action to create the tag and push it to the repository.
+      - name: Bump Version and Push Tag.
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          # Create the tag from the branch created in the previous step.
+          DEFAULT_BRANCH: version-bump-${{ github.run_id }}
+          # Use a personal access token to push the tag.
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # Do not prepend the 'v' prefix to the tag.
+          WITH_V: false
+
+      # Step 9: Delete the branch created in Step 7.
+      # - name: Delete Version Bump Branch
+      #   run: |
+      #     git push origin --delete version-bump-${{ github.run_id }}

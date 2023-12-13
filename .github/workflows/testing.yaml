@@ -121,3 +121,13 @@ jobs:
       # Step 13: Validate checksum matches.
       - name: Validate Checksum Matches
         run: sha256sum -c cloney-windows-amd64-checksum.sha256
+
+      # Commit the changes in a new branch.
+      - name: Commit Version Updates
+        run: |
+          git checkout -b version-bump-${{ github.run_id }}
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add versioninfo.json pkg/config/config.go installation/install.sh
+          git commit -m "Bump Version to $CLONEY_NEXT_VERSION_FULL."
+          git push origin version-bump-${{ github.run_id }}
