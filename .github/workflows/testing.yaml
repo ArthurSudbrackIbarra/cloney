@@ -75,7 +75,6 @@ jobs:
             echo "versioninfo.json is unchanged but should have been updated."
             exit 1
           fi
-          cat versioninfo.json
 
       # Step 7: Validate Edit the pkg/config/config.go file to update the version.
       - name: Validate Edit pkg/config/config.go File
@@ -85,7 +84,6 @@ jobs:
             echo "pkg/config/config.go is unchanged but should have been updated."
             exit 1
           fi
-          cat pkg/config/config.go
 
       # Step 8: Validate Edit the installation/install.sh file to update the version.
       - name: Validate Edit installation/install.sh File
@@ -95,7 +93,6 @@ jobs:
             echo "installation/install.sh is unchanged but should have been updated."
             exit 1
           fi
-          cat installation/install.sh
 
       #
       # Validate build steps (not actual release).

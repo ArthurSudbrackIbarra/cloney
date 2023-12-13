@@ -62,7 +62,6 @@ jobs:
             echo "versioninfo.json is unchanged but should have been updated."
             exit 1
           fi
-          cat versioninfo.json
 
       # Step 5: Edit the pkg/config/config.go file to update the version.
       - name: Edit pkg/config/config.go File
@@ -72,7 +71,6 @@ jobs:
             echo "pkg/config/config.go is unchanged but should have been updated."
             exit 1
           fi
-          cat pkg/config/config.go
 
       # Step 6: Edit the installation/install.sh file to update the version.
       - name: Edit installation/install.sh File
@@ -82,7 +80,6 @@ jobs:
             echo "installation/install.sh is unchanged but should have been updated."
             exit 1
           fi
-          cat installation/install.sh
 
       # Step 7: Use the GitHub Tag Action to create the tag and push it to the repository.
       - name: Bump Version and Push Tag.

@@ -2,7 +2,7 @@
 
 This document lists all significant changes to the Cloney project, following [Keep a Changelog](http://keepachangelog.com/) and adhering to [Semantic Versioning](http://semver.org/).
 
-## (Minor) Cloney 1.1.0 - 2023-X-X
+## (Minor) Cloney 1.1.0 - 2023-12-13
 
 ### Added
 
