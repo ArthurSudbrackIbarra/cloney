@@ -15,12 +15,6 @@ on:
 jobs:
   tag:
     runs-on: ubuntu-22.04
-    env:
-      # These variables are updated by the auto-tagging steps.
-      CLONEY_NEXT_VERSION_FULL: ""
-      CLONEY_NEXT_VERSION_MAJOR: ""
-      CLONEY_NEXT_VERSION_MINOR: ""
-      CLONEY_NEXT_VERSION_PATCH: ""
 
     # Give permissions to modify repository contents.
     permissions:
@@ -47,10 +41,15 @@ jobs:
       # Step 3: Extract version information from the output of the previous step.
       - name: Export Version Information
         run: |
-          export CLONEY_NEXT_VERSION_FULL=${{ steps.determine_next_version.outputs.new_tag }}
-          export CLONEY_NEXT_VERSION_MAJOR=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f1)
-          export CLONEY_NEXT_VERSION_MINOR=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)
-          export CLONEY_NEXT_VERSION_PATCH=$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)
+          CLONEY_NEXT_VERSION_FULL="${{ steps.determine_next_version.outputs.new_tag }}"
+          CLONEY_NEXT_VERSION_MAJOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f1)"
+          CLONEY_NEXT_VERSION_MINOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)"
+          CLONEY_NEXT_VERSION_PATCH="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)"
+
+          ::set-env name=CLONEY_NEXT_VERSION_FULL::$CLONEY_NEXT_VERSION_FULL
+          ::set-env name=CLONEY_NEXT_VERSION_MAJOR::$CLONEY_NEXT_VERSION_MAJOR
+          ::set-env name=CLONEY_NEXT_VERSION_MINOR::$CLONEY_NEXT_VERSION_MINOR
+          ::set-env name=CLONEY_NEXT_VERSION_PATCH::$CLONEY_NEXT_VERSION_PATCH
 
       # Step 4: Edit the versioninfo.json file to update the version.
       - name: Edit versioninfo.json File
