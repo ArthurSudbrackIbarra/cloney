@@ -15,6 +15,12 @@ on:
 jobs:
   tag:
     runs-on: ubuntu-22.04
+    env:
+      # These variables are updated by the auto-tagging steps.
+      CLONEY_NEXT_VERSION_FULL: ""
+      CLONEY_NEXT_VERSION_MAJOR: ""
+      CLONEY_NEXT_VERSION_MINOR: ""
+      CLONEY_NEXT_VERSION_PATCH: ""
 
     # Give permissions to modify repository contents.
     permissions:
