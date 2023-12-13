@@ -11,6 +11,7 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
     branches:
       - main
   # Trigger when a commit is pushed to the main branch.
