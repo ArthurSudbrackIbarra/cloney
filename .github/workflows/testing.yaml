@@ -37,13 +37,12 @@ jobs:
           go get github.com/josephspurrier/goversioninfo@v1.4.0
           go install github.com/josephspurrier/goversioninfo
 
-      # Run go generate.
-      - name: Check Run Go Generate
-        run: go generate
-
       # Build the application.
       - name: Build Application
-        run: GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+        run: |
+          goversioninfo -64
+          GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+          rm -f resources.syso
 
       # Zip the application.
       - name: Check Zip Application

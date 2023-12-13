@@ -12,6 +12,10 @@ Please provide a brief description of the changes introduced by this pull reques
 - [ ] I have added tests that prove my fix is effective or that my feature works (if applicable).
 - [ ] I have checked for security issues and addressed them (if applicable).
 - [ ] I have added or modified relevant comments and documentation in the code.
+- [ ] I have updated the `AppVersion` field in `pkg/config/config.go`.
+- [ ] I have updated the `ProductVersion` field in `versioninfo.json`.
+- [ ] I have updated the `CLONEY_VERSION` variable in `installation/install.sh`.
+- [ ] I have updated the `CHANGELOG.md` file.
 
 ## Related Issues
 
