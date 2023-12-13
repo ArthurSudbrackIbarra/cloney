@@ -53,7 +53,7 @@ type AppConfig struct {
 var globalConfig = &AppConfig{
 	//! AppVersion is set automatically during the pipeline that tags the release (.github/workflows/auto_tag.yaml).
 	//! Keep this value as it is.
-	AppVersion: "X.X.X",
+	AppVersion: "1.1.0",
 
 	MetadataFileName:        ".cloney.yaml",
 	MetadataManifestVersion: "v1",
