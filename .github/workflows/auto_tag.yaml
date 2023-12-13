@@ -89,7 +89,6 @@ jobs:
           git commit -m "Bump Version to $CLONEY_NEXT_VERSION_FULL."
           git push origin version-bump-$CLONEY_NEXT_VERSION_FULL
 
-
       # Step 8: Use the GitHub Tag Action to create the tag and push it to the repository.
       - name: Bump Version and Push Tag.
         uses: anothrNick/github-tag-action@1.64.0
