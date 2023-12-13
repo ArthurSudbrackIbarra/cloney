@@ -46,10 +46,10 @@ jobs:
           CLONEY_NEXT_VERSION_MINOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)"
           CLONEY_NEXT_VERSION_PATCH="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)"
 
-          ::set-env name=CLONEY_NEXT_VERSION_FULL::$CLONEY_NEXT_VERSION_FULL
-          ::set-env name=CLONEY_NEXT_VERSION_MAJOR::$CLONEY_NEXT_VERSION_MAJOR
-          ::set-env name=CLONEY_NEXT_VERSION_MINOR::$CLONEY_NEXT_VERSION_MINOR
-          ::set-env name=CLONEY_NEXT_VERSION_PATCH::$CLONEY_NEXT_VERSION_PATCH
+          echo "CLONEY_NEXT_VERSION_FULL=$CLONEY_NEXT_VERSION_FULL" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_MAJOR=$CLONEY_NEXT_VERSION_MAJOR" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_MINOR=$CLONEY_NEXT_VERSION_MINOR" >> "$GITHUB_ENV"
+          echo "CLONEY_NEXT_VERSION_PATCH=$CLONEY_NEXT_VERSION_PATCH" >> "$GITHUB_ENV"
 
       # Step 4: Edit the versioninfo.json file to update the version.
       - name: Edit versioninfo.json File
