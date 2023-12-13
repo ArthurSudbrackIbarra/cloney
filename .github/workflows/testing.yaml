@@ -37,38 +37,10 @@ jobs:
         run: go test ./... -v 
 
       #
-      # Validate build steps (not actual release).
-      #
-
-      # Step 4: Install goversioninfo to embed properties into the Windows executable.
-      - name: Install goversioninfo
-        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
-
-      # Step 5: Validate building the application for Windows.
-      - name: Validate Build for Windows
-        run: |
-          goversioninfo -64
-          stat resources.syso
-          GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
-          rm -f resources.syso
-
-      # Step 6: Validate creating a zip archive.
-      - name: Validate Zip Application
-        run: zip -r cloney-windows-amd64.zip cloney-windows-amd64
-
-      # Step 7: Validate generating checksum for the application.
-      - name: Validate Generate Checksums
-        run: sha256sum cloney-windows-amd64.zip > cloney-windows-amd64-checksum.sha256
-
-      # Step 8: Validate checksum matches.
-      - name: Validate Checksum Matches
-        run: sha256sum -c cloney-windows-amd64-checksum.sha256
-
-      #
       # Validate auto-tagging steps.
       #
 
-      # Step 9: Run auto-tag in dry-run mode to determine the next version of Cloney.
+      # Step 4: Run auto-tag in dry-run mode to determine the next version of Cloney.
       - name: Validate Determine Next Version
         id: determine_next_version
         uses: anothrNick/github-tag-action@1.64.0
@@ -77,7 +49,7 @@ jobs:
           WITH_V: false
           DRY_RUN: true
 
-      # Step 10: Extract version information from the output of the previous step.
+      # Step 5: Extract version information from the output of the previous step.
       - name: Validate Export Version Information
         run: |
           export CLONEY_NEXT_VERSION_FULL="${{ steps.determine_next_version.outputs.new_tag }}"
@@ -85,7 +57,7 @@ jobs:
           export CLONEY_NEXT_VERSION_MINOR="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f2)"
           export CLONEY_NEXT_VERSION_PATCH="$(echo $CLONEY_NEXT_VERSION_FULL | cut -d. -f3)"
 
-      # Step 11: Validate Edit the versioninfo.json file to update the version.
+      # Step 6: Validate Edit the versioninfo.json file to update the version.
       - name: Validate Edit versioninfo.json File
         run: |
           sed -i "s/\"Major\": 0/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
@@ -94,14 +66,42 @@ jobs:
           sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
           cat versioninfo.json
 
-      # Step 12: Validate Edit the pkg/config/config.go file to update the version.
+      # Step 7: Validate Edit the pkg/config/config.go file to update the version.
       - name: Validate Edit pkg/config/config.go File
         run: |
           sed -i "s/AppVersion: \"X.X.X\"/AppVersion: \"$CLONEY_NEXT_VERSION_FULL\"/" pkg/config/config.go
           cat pkg/config/config.go
 
-      # Step 13: Validate Edit the installation/install.sh file to update the version.
+      # Step 8: Validate Edit the installation/install.sh file to update the version.
       - name: Validate Edit installation/install.sh File
         run: |
           sed -i "s/CLONEY_VERSION=\"X.X.X\"/CLONEY_VERSION=\"$CLONEY_NEXT_VERSION_FULL\"/" installation/install.sh
           cat installation/install.sh
+
+      #
+      # Validate build steps (not actual release).
+      #
+
+      # Step 9: Install goversioninfo to embed properties into the Windows executable.
+      - name: Install goversioninfo
+        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
+
+      # Step 10: Validate building the application for Windows.
+      - name: Validate Build for Windows
+        run: |
+          goversioninfo -64
+          stat resources.syso
+          GOOS=windows GOARCH=amd64 go build -o cloney-windows-amd64/cloney.exe
+          rm -f resources.syso
+
+      # Step 11: Validate creating a zip archive.
+      - name: Validate Zip Application
+        run: zip -r cloney-windows-amd64.zip cloney-windows-amd64
+
+      # Step 12: Validate generating checksum for the application.
+      - name: Validate Generate Checksums
+        run: sha256sum cloney-windows-amd64.zip > cloney-windows-amd64-checksum.sha256
+
+      # Step 13: Validate checksum matches.
+      - name: Validate Checksum Matches
+        run: sha256sum -c cloney-windows-amd64-checksum.sha256
