@@ -25,6 +25,28 @@ jobs:
           # Fetch all commit history for tags to work correctly.
           fetch-depth: "0"
 
+      # Run auto-tag in dry-run mode to determine the next version.
+      - name: Determine Next Version
+        id: determine_next_version
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          # Do not prepend the 'v' prefix to the tag.
+          WITH_V: false
+          DRY_RUN: true
+
+      # Get the output of the previous step.
+      - name: Export Next Version
+        run: export CLONEY_NEXT_VERSION=${{ steps.determine_next_version.outputs.new_tag }}
+
+      # Edit the versioninfo.json file to update the version.
+      - name: Edit versioninfo.json File
+
+      # Edit the pkg/config/config.go file to update the version.
+      - name: Edit pkg/config/config.go File
+
+      # Edit the installation/install.sh file to update the version.
+      - name: Edit installation/install.sh File
+
       # Use the GitHub Tag Action to create tags.
       - name: Bump Version and Push Tag.
         uses: anothrNick/github-tag-action@1.64.0
