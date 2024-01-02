@@ -1,28 +1,39 @@
-# Use the Go 1.21 base image for building the application.
-FROM golang:1.21-alpine as builder
+# Stage 1:
 
-# Set the working directory inside the container for building.
-WORKDIR /app
-
-# Copy the Go application source code to the working directory.
-COPY ./ /app
-
-# Download dependencies using Go Modules.
-RUN go mod download
-
-# Build the Go application binary.
-RUN go build -o /app/cloney
-
-# Stage 2: Create the final lightweight image.
-# Use Alpine Linux 3.17 as the base image.
-FROM alpine:3.17 as cloney
+# Use a recent version of Alpine Linux as the base image.
+FROM alpine:3.9.6 as builder
 
 # Update the package repository on the Alpine system.
 RUN apk update
 
-# Copy the compiled application binary from the builder stage.
-# Copy to /usr/local/bin so that the application is available in the PATH.
-COPY --from=builder /app/cloney /usr/local/bin
+# Install the required packages.
+RUN apk add --no-cache \
+  bash \
+  curl \
+  unzip
 
-# Sleep forever to keep the container running.
-CMD ["sleep", "infinity"]
+#! Set the version of Cloney to install.
+#! Use the --build-arg flag to override this value.
+#! Example: docker build --build-arg CLONEY_VERSION=1.1.0 .
+ARG CLONEY_VERSION=1.1.0
+
+# Download Cloney.
+RUN curl -sSL \
+  "https://raw.githubusercontent.com/ArthurSudbrackIbarra/cloney/${CLONEY_VERSION}/installation/install.sh" | bash
+
+# Stage 2:
+
+# Use a recent version of Alpine Linux as the base image.
+FROM alpine:3.9.6 as cloney
+
+# Update the package repository on the Alpine system.
+RUN apk update
+
+# Copy the application binary from the builder stage.
+COPY --from=builder /usr/local/bin/cloney /usr/local/bin
+
+# Configure the permission to execute the binary.
+RUN chmod +x /usr/local/bin/cloney
+
+# Set the entrypoint to the Cloney binary.
+ENTRYPOINT ["/usr/local/bin/cloney"]

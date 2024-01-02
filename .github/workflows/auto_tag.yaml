@@ -52,9 +52,9 @@ jobs:
       # Step 4: Edit the versioninfo.json file to update the version.
       - name: Edit versioninfo.json File
         run: |
-          sed -i "s/\"Major\": -1/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
-          sed -i "s/\"Minor\": -1/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
-          sed -i "s/\"Patch\": -1/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
+          sed -i "s/\"Major\": 0/\"Major\": $CLONEY_NEXT_VERSION_MAJOR/" versioninfo.json
+          sed -i "s/\"Minor\": 0/\"Minor\": $CLONEY_NEXT_VERSION_MINOR/" versioninfo.json
+          sed -i "s/\"Patch\": 0/\"Patch\": $CLONEY_NEXT_VERSION_PATCH/" versioninfo.json
           sed -i "s/\"ProductVersion\": \"X.X.X\"/\"ProductVersion\": \"$CLONEY_NEXT_VERSION_FULL\"/" versioninfo.json
           if git diff --exit-code versioninfo.json; then
             echo "versioninfo.json is unchanged but should have been updated."

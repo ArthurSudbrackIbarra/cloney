@@ -52,6 +52,8 @@ curl -A "Cloney Download Script" -OL \
 unzip -o "$FILE_NAME.zip" ||
 {
     echo -e "${RED}Error: Failed to unzip Cloney. Please install the zip package.${NC}"
+    # Remove trash.
+    rm -rf "$FILE_NAME.zip"
     exit 1
 }
 
@@ -59,6 +61,8 @@ unzip -o "$FILE_NAME.zip" ||
 mv -f "$FILE_NAME/cloney" $BINARY_LOCATION ||
 {
     echo -e "${RED}Error: Failed to move Cloney to $BINARY_LOCATION.${NC}"
+    # Remove trash.
+    rm -rf "$FILE_NAME.zip" $FILE_NAME
     exit 1
 }
 
@@ -66,6 +70,8 @@ mv -f "$FILE_NAME/cloney" $BINARY_LOCATION ||
 chmod +x $BINARY_LOCATION ||
 {
     echo -e "${RED}Error: Failed to make Cloney binary executable.${NC}"
+    # Remove trash.
+    rm -rf "$FILE_NAME.zip" $FILE_NAME
     exit 1
 }
 
