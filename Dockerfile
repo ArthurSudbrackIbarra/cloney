@@ -19,8 +19,5 @@ RUN apt-get install -y \
 RUN curl -sSL \
   "https://raw.githubusercontent.com/ArthurSudbrackIbarra/cloney/${CLONEY_VERSION}/installation/install.sh" | bash
 
-# Grant execute permissions to the Cloney binary.
-RUN chmod +x /usr/local/bin/cloney
-
 # Set the default command to sleep indefinitely, providing a placeholder for future commands.
 CMD ["sleep", "infinity"]
