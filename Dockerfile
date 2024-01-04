@@ -1,39 +1,26 @@
-# Stage 1:
+# Use Ubuntu 24.04 as the base image.
+FROM ubuntu:24.04
 
-# Use a recent version of Alpine Linux as the base image.
-FROM alpine:3.9.6 as builder
+#! Set the default version of Cloney to install.
+#! You can override this value using the --build-arg flag.
+#! Example: docker build --build-arg CLONEY_VERSION=1.1.0 .
+ARG CLONEY_VERSION=1.1.0
+#! --------------------------------------------------------
 
-# Update the package repository on the Alpine system.
-RUN apk update
+# Update the package repository on the container.
+RUN apt-get update
 
-# Install the required packages.
-RUN apk add --no-cache \
-  bash \
+# Install essential packages (curl and unzip) for the installation process.
+RUN apt-get install -y \
   curl \
   unzip
 
-#! Set the version of Cloney to install.
-#! Use the --build-arg flag to override this value.
-#! Example: docker build --build-arg CLONEY_VERSION=1.1.0 .
-ARG CLONEY_VERSION=1.1.0
-
-# Download Cloney.
+# Download Cloney using the specified version from the official repository.
 RUN curl -sSL \
   "https://raw.githubusercontent.com/ArthurSudbrackIbarra/cloney/${CLONEY_VERSION}/installation/install.sh" | bash
 
-# Stage 2:
-
-# Use a recent version of Alpine Linux as the base image.
-FROM alpine:3.9.6 as cloney
-
-# Update the package repository on the Alpine system.
-RUN apk update
-
-# Copy the application binary from the builder stage.
-COPY --from=builder /usr/local/bin/cloney /usr/local/bin
-
-# Configure the permission to execute the binary.
+# Grant execute permissions to the Cloney binary.
 RUN chmod +x /usr/local/bin/cloney
 
-# Set the entrypoint to the Cloney binary.
-ENTRYPOINT ["/usr/local/bin/cloney"]
+# Set the default command to sleep indefinitely, providing a placeholder for future commands.
+CMD ["sleep", "infinity"]
