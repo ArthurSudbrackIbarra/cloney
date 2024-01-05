@@ -7,6 +7,9 @@ FROM ubuntu:24.04
 ARG CLONEY_VERSION=1.1.0
 #! --------------------------------------------------------
 
+# Set the working directory.
+WORKDIR /home/cloney
+
 # Update the package repository on the container.
 RUN apt-get update
 
