@@ -27,7 +27,7 @@ func docsCmdRun(cmd *cobra.Command, args []string) error {
 		terminal.ErrorMessage("Compatibility error", fmt.Errorf("unsupported operating system"))
 	}
 	if err != nil {
-		terminal.ErrorMessage("Error opening Cloney documentation in default browser", err)
+		terminal.ErrorMessage("Failed to open Cloney's documentation in the default browser", err)
 	}
 
 	return nil

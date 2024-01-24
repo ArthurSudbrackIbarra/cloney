@@ -1,3 +1,6 @@
+# Docker Hub Dockerfile.
+# Run with: docker build --build-arg CLONEY_VERSION=X.X.X .
+
 # Use Ubuntu 24.04 as the base image.
 FROM ubuntu:24.04
 

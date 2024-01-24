@@ -27,7 +27,7 @@ func validateCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Read the repository metadata file.
+	// Read the repository's metadata file.
 	metadataFilePath := filepath.Join(sourcePath, appConfig.MetadataFileName)
 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
 	if err != nil {
@@ -41,7 +41,7 @@ func validateCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// If the metadata file was parsed successfully, then the template is valid.
-	terminal.Message("\nYour Cloney template is valid!")
+	terminal.Message("\nYour Cloney template repository is valid!")
 
 	return nil
 }

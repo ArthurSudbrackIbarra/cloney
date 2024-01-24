@@ -48,7 +48,7 @@ func infoCmdRun(cmd *cobra.Command, args []string) error {
 		metadataContent, err = repository.GetFileContent(appConfig.MetadataFileName)
 		if err != nil {
 			terminal.ErrorMessage(
-				fmt.Sprintf("Error reading the repository '%s' metadata file:", appConfig.MetadataFileName), err,
+				fmt.Sprintf("Error reading the repository's '%s' metadata file:", appConfig.MetadataFileName), err,
 			)
 			return err
 		}

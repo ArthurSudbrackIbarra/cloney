@@ -63,7 +63,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Read the repository metadata file.
+	// Read the repository's metadata file.
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
 	if err != nil {
@@ -72,7 +72,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Delete the repository metadata file.
+	// Delete the repository's metadata file.
 	os.Remove(metadataFilePath)
 
 	// Delete the .git directory.
@@ -112,7 +112,7 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Delete the paths specified in the 'ignore_paths' field of the metadata file.
 	steps.DeleteIgnoredPaths(clonePath, ignorePaths)
 
-	terminal.Message("\nDone!\n")
+	terminal.Message("\nDone!")
 
 	// Run the post-clone commands.
 	err = steps.RunPostCloneCommands(clonePath, cloneyMetadata)

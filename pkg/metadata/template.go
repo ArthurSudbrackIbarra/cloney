@@ -12,13 +12,13 @@ import (
 
 // CloneyMetadataConfiguration represents the configuration of a Cloney template repository.
 type CloneyMetadataConfiguration struct {
-	// IgnorePaths is the list of paths to ignore when cloning the template repository.
+	// IgnorePaths is a list of paths to ignore when cloning the template repository.
 	IgnorePaths []string `yaml:"ignore_paths"`
 
-	// Commands is the list of commands to run after cloning the template repository.
+	// PostCloneCommands is a list of commands to run after cloning the template repository.
 	// Each command is a list of strings, where the first element is the command name and the rest are the arguments.
 	// Example: [["echo", "Hello World!"]]
-	Commands [][]string `yaml:"commands"`
+	PostCloneCommands [][]string `yaml:"post_clone_commands"`
 }
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
@@ -155,10 +155,10 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 }
 
 // MatchUserVariables validates if a given map of variables matches the variables defined
-// in the template repository metadata file.
+// in the template repository's metadata file.
 // It also adds the default values of the variables to the user variables if they are not defined.
 func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}) (map[string]interface{}, error) {
-	// Iterate over the variables defined in the template repository metadata file.
+	// Iterate over the variables defined in the template repository's metadata file.
 	for _, variable := range m.Variables {
 		// Check if the variable is defined in the user variables.
 		if _, contains := userVariables[variable.Name]; !contains {
@@ -177,7 +177,7 @@ func (m *CloneyMetadata) MatchUserVariables(userVariables map[string]interface{}
 		}
 
 		// Check if the variables are of the same type.
-		// User variables are compared against the example value of the template repository metadata file.
+		// User variables are compared against the example value of the template repository's metadata file.
 		type1 := VariableType(variable.Example)
 		type2 := VariableType(userVariables[variable.Name])
 

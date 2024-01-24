@@ -55,7 +55,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 	sourcePath, _ := steps.CalculatePath(repositorySource, "")
 	outputPath, _ := steps.CalculatePath(output, "")
 
-	// Read the repository metadata file.
+	// Read the repository's metadata file.
 	metadataFilePath := filepath.Join(sourcePath, appConfig.MetadataFileName)
 	metadataContent, err := steps.ReadRepositoryMetadata(metadataFilePath)
 	if err != nil && !hotReload {
@@ -115,7 +115,7 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Display a completion message if not in terminal output mode.
 	if !outputInTerminal && !hotReload {
-		terminal.Message("\nDone!\n")
+		terminal.Message("\nDone!")
 	}
 
 	// Run the post-clone commands.

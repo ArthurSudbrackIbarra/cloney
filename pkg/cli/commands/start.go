@@ -115,7 +115,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 		appConfig.CloneyExampleRepositoryURL, "basic", "",
 	)
 	if err != nil {
-		terminal.ErrorMessage("Error when cloning the example Cloney repository from GitHub.", nil)
+		terminal.ErrorMessage("Unable to clone the example Cloney repository from GitHub", nil)
 		return err
 	}
 
@@ -140,7 +140,7 @@ func startCmdRun(cmd *cobra.Command, args []string) error {
 	metadataFilePath := filepath.Join(clonePath, appConfig.MetadataFileName)
 	err = os.WriteFile(metadataFilePath, []byte(rawMetadata), os.ModePerm)
 	if err != nil {
-		terminal.ErrorMessage("Error creating the repository metadata file", err)
+		terminal.ErrorMessage("Failed to create the repository's metadata file.", err)
 		return err
 	}
 
@@ -168,7 +168,7 @@ func CreateStartCommand() *cobra.Command {
 		Short: "Start a new Cloney template repository",
 		Long: `Start a new Cloney template repository.
 
-The 'cloney start' command will create a directory with the necessary files to start a new cloney template repository.`,
+The 'cloney start' command will create a directory with the necessary files to start a new Cloney template repository.`,
 		Example: strings.Join([]string{
 			"  cloney start",
 			"  cloney start -y",
@@ -178,7 +178,7 @@ The 'cloney start' command will create a directory with the necessary files to s
 	}
 
 	// Define command-line flags for the 'start' command.
-	startCmd.Flags().StringP("output", "o", "", "Where to save the template repository")
+	startCmd.Flags().StringP("output", "o", "", "Where to create the template repository")
 	startCmd.Flags().StringP("name", "n", "", "The name of the template repository")
 	startCmd.Flags().StringP("description", "d", "", "The description of the template repository")
 	startCmd.Flags().StringArrayP("authors", "a", []string{}, "The authors of the template repository")

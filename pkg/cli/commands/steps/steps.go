@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/config"
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/git"
@@ -29,7 +30,7 @@ func SetSuppressPrints(value bool) {
 func GetCurrentWorkingDirectory() (string, error) {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		terminal.ErrorMessage("Could not get user's current directory", err)
+		terminal.ErrorMessage("An issue occurred while attempting to retrieve the current directory", err)
 		return "", err
 	}
 
@@ -67,11 +68,11 @@ func CreateAndValidateRepository(repositoryURL, branch, tag string) (*git.GitRep
 	// Validate the repository.
 	err := repository.Validate()
 	if err != nil {
-		terminal.ErrorMessage("Error validating repository", err)
+		terminal.ErrorMessage("The template repository's reference is invalid or inaccessible", err)
 		return nil, err
 	}
 	if !suppressPrints {
-		terminal.OKMessage("The template repository reference is valid")
+		terminal.OKMessage("The template repository's reference is valid")
 	}
 
 	return repository, nil
@@ -131,15 +132,15 @@ func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 	metadataBytes, err := os.ReadFile(metadataFilePath)
 	if err != nil && os.IsNotExist(err) {
 		terminal.ErrorMessage(
-			fmt.Sprintf("Could not find the \"%s\" template repository metadata file: directory \"%s\" is not a Cloney template repository", config.GetAppConfig().MetadataFileName, filepath.Dir(metadataFilePath)), nil,
+			fmt.Sprintf("Could not find the \"%s\" template repository's metadata file: directory \"%s\" is not a Cloney template repository", config.GetAppConfig().MetadataFileName, filepath.Dir(metadataFilePath)), nil,
 		)
 		return "", err
 	} else if err != nil {
-		terminal.ErrorMessage(fmt.Sprintf("Could not read the \"%s\" template repository metadata file", config.GetAppConfig().MetadataFileName), err)
+		terminal.ErrorMessage(fmt.Sprintf("Could not read the \"%s\" template repository's metadata file", config.GetAppConfig().MetadataFileName), err)
 		return "", err
 	}
 	if !suppressPrints {
-		terminal.OKMessage("The template repository metadata file was found")
+		terminal.OKMessage("The template repository's metadata file was located")
 	}
 
 	return string(metadataBytes), nil
@@ -150,11 +151,11 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 	// Create the metadata struct from raw YAML data.
 	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent, supportedManifestVersions)
 	if err != nil {
-		terminal.ErrorMessage("Could not parse the template repository template metadata", err)
+		terminal.ErrorMessage("Could not parse the template repository's metadata file", err)
 		return nil, err
 	}
 	if !suppressPrints {
-		terminal.OKMessage("The template repository metadata file is valid")
+		terminal.OKMessage("The template repository's metadata file is valid")
 	}
 
 	return cloneyMetadata, nil
@@ -170,7 +171,7 @@ func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions [
 func DeleteIgnoredPaths(directory string, ignorePaths []string) {
 	err := templates.DeleteIgnoredFiles(directory, ignorePaths)
 	if err != nil {
-		terminal.ErrorMessage("Failed to delete ignored files", err)
+		terminal.ErrorMessage("An issue occurred while attempting to remove ignored files.", err)
 	}
 }
 
@@ -181,11 +182,11 @@ func MatchUserVariables(cloneyMetadata *metadata.CloneyMetadata, variablesMap ma
 	var err error
 	_, err = cloneyMetadata.MatchUserVariables(variablesMap)
 	if err != nil {
-		terminal.ErrorMessage("Error validating your template variables", err)
+		terminal.ErrorMessage("Your provided variables do not match the variable definitions in the template repository", err)
 		return err
 	}
 	if !suppressPrints {
-		terminal.OKMessage("Your variables are valid and match the template repository variables")
+		terminal.OKMessage("Your provided variables align with the template repository's variable definitions")
 	}
 
 	return nil
@@ -204,15 +205,15 @@ func FillDirectory(
 	err := filler.FillDirectory(src, ignorePaths, outputInTerminal)
 	if err != nil {
 		if outputInTerminal {
-			terminal.ErrorMessage("Failed to print results to the terminal", err)
+			terminal.ErrorMessage("Unable to output results to the terminal", err)
 		} else {
-			terminal.ErrorMessage("Failed to fill the template variables", err)
+			terminal.ErrorMessage("Unable to populate the template with your provided variables", err)
 		}
 		return err
 	}
 
 	if !suppressPrints && !outputInTerminal {
-		terminal.OKMessage("Template variables successfully filled")
+		terminal.OKMessage("Your variables have been successfully applied to the template")
 	}
 
 	return nil
@@ -220,29 +221,56 @@ func FillDirectory(
 
 // RunPostCloneCommands runs the post-clone commands.
 func RunPostCloneCommands(clonePath string, cloneyMetadata *metadata.CloneyMetadata) error {
-	for _, command := range cloneyMetadata.Configuration.Commands {
-		var cmd *exec.Cmd
+	// Determine the default shell for the current operating system.
+	shell := determineDefaultShell()
+
+	for _, command := range cloneyMetadata.Configuration.PostCloneCommands {
+		// Create a new exec.Cmd with the determined shell and appropriate flags.
+		cmd := exec.Command(shell)
 		if runtime.GOOS == "windows" {
-			cmd = exec.Command("powershell", "-Command")
+			// On Windows, use PowerShell with the -Command flag.
+			cmd.Args = append(cmd.Args, "-Command")
 		} else {
-			cmd = exec.Command("sh", "-c")
+			// On Unix-like systems, use the -c flag.
+			cmd.Args = append(cmd.Args, "-c")
 		}
-		cmd.Args = append(cmd.Args, command[0:]...)
+		cmd.Args = append(cmd.Args, command...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		cmd.Dir = clonePath
+		fullCommand := strings.Join(command, " ")
+
+		// Run the command
 		err := cmd.Run()
 		if err != nil {
 			terminal.Message("")
-			terminal.ErrorMessage("Failed to run post-clone command '"+command[0]+"'", err)
+			terminal.ErrorMessage("Failed to run post-clone command '"+fullCommand+"'", err)
 			return err
 		}
+
+		// Display success message if prints are not suppressed.
 		if !suppressPrints {
 			terminal.Message("")
-			terminal.OKMessage("Post-clone command '" + command[0] + "' successfully executed")
+			terminal.OKMessage("Post-clone command '" + fullCommand + "' successfully executed")
 		}
 	}
 
 	return nil
+}
+
+// determineDefaultShell returns the default shell based on the operating system.
+func determineDefaultShell() string {
+	if runtime.GOOS == "windows" {
+		// On Windows, use PowerShell as the default shell
+		return "powershell"
+	}
+
+	// On Unix-like systems, use the SHELL environment variable or fallback to "sh".
+	shell := os.Getenv("SHELL")
+	if shell == "" {
+		shell = "sh"
+	}
+
+	return shell
 }
