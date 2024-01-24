@@ -56,9 +56,9 @@ var globalConfig = &AppConfig{
 	AppVersion: "X.X.X",
 
 	MetadataFileName:        ".cloney.yaml",
-	MetadataManifestVersion: "v1",
+	MetadataManifestVersion: "v2",
 	SupportedManifestVersions: []string{
-		"v1",
+		"v1", "v2",
 	},
 
 	DefaultUserVariablesFileName: ".cloney-vars.yaml",

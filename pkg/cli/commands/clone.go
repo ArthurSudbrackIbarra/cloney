@@ -112,7 +112,13 @@ func cloneCmdRun(cmd *cobra.Command, args []string) error {
 	// Delete the paths specified in the 'ignore_paths' field of the metadata file.
 	steps.DeleteIgnoredPaths(clonePath, ignorePaths)
 
-	terminal.Message("\nDone!")
+	terminal.Message("\nDone!\n")
+
+	// Run the post-clone commands.
+	err = steps.RunPostCloneCommands(clonePath, cloneyMetadata)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

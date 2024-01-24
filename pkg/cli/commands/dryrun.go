@@ -115,7 +115,13 @@ func dryRunCmdRun(cmd *cobra.Command, args []string) error {
 
 	// Display a completion message if not in terminal output mode.
 	if !outputInTerminal && !hotReload {
-		terminal.Message("\nDone!")
+		terminal.Message("\nDone!\n")
+	}
+
+	// Run the post-clone commands.
+	err = steps.RunPostCloneCommands(outputPath, cloneyMetadata)
+	if err != nil {
+		return err
 	}
 
 	// If hot reload mode was enabled, watch for changes in the template repository and re-run the command.

@@ -3,7 +3,9 @@ package steps
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/config"
 	"github.com/ArthurSudbrackIbarra/cloney/pkg/git"
@@ -211,6 +213,35 @@ func FillDirectory(
 
 	if !suppressPrints && !outputInTerminal {
 		terminal.OKMessage("Template variables successfully filled")
+	}
+
+	return nil
+}
+
+// RunPostCloneCommands runs the post-clone commands.
+func RunPostCloneCommands(clonePath string, cloneyMetadata *metadata.CloneyMetadata) error {
+	for _, command := range cloneyMetadata.Configuration.Commands {
+		var cmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			cmd = exec.Command("powershell", "-Command")
+		} else {
+			cmd = exec.Command("sh", "-c")
+		}
+		cmd.Args = append(cmd.Args, command[0:]...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		cmd.Dir = clonePath
+		err := cmd.Run()
+		if err != nil {
+			terminal.Message("")
+			terminal.ErrorMessage("Failed to run post-clone command '"+command[0]+"'", err)
+			return err
+		}
+		if !suppressPrints {
+			terminal.Message("")
+			terminal.OKMessage("Post-clone command '" + command[0] + "' successfully executed")
+		}
 	}
 
 	return nil

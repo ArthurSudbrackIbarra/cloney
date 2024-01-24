@@ -14,6 +14,11 @@ import (
 type CloneyMetadataConfiguration struct {
 	// IgnorePaths is the list of paths to ignore when cloning the template repository.
 	IgnorePaths []string `yaml:"ignore_paths"`
+
+	// Commands is the list of commands to run after cloning the template repository.
+	// Each command is a list of strings, where the first element is the command name and the rest are the arguments.
+	// Example: [["echo", "Hello World!"]]
+	Commands [][]string `yaml:"commands"`
 }
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
@@ -90,7 +95,6 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 			} else if field == "templateversion" {
 				field = "template_version"
 			}
-
 			switch validationError.Tag() {
 			case "required":
 				return nil, fmt.Errorf("missing required field '%s' at root level", field)
