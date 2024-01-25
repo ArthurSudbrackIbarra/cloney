@@ -121,6 +121,12 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 		)
 	}
 
+	// Validate the configuration block.
+	// If manifest_version is v1, post_clone_commands field is not supported.
+	if metadata.ManifestVersion == "v1" && len(metadata.Configuration.PostCloneCommands) > 0 {
+		return nil, fmt.Errorf("manifest version '%s' does not support the 'post_clone_commands' field, please update the manifest version to 'v2'", metadata.ManifestVersion)
+	}
+
 	// Validate variables separately because 'validator' package does not validate struct slices.
 	for _, variable := range metadata.Variables {
 		err = validate.Struct(variable)

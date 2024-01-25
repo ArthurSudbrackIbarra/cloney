@@ -188,7 +188,7 @@ You can specify a different file or pass the variables inline as YAML using the 
 			"  dry-run ./path/to/my/template -v variables.yaml",
 			"  dry-run ./path/to/my/template -v '{ var1: value, var2: value }'",
 		}, "\n"),
-		Aliases:          []string{"dryrun", "dr", "fill"},
+		Aliases:          []string{"dryrun", "dr"},
 		PersistentPreRun: persistentPreRun,
 		RunE:             dryRunCmdRun,
 	}
