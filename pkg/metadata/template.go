@@ -19,6 +19,9 @@ type CloneyMetadataConfiguration struct {
 	// Each command is a list of strings, where the first element is the command name and the rest are the arguments.
 	// Example: [["echo", "Hello World!"]]
 	PostCloneCommands [][]string `yaml:"post_clone_commands"`
+
+	// UnknownFields captures all unknown fields within configuration and must be empty after parsing.
+	UnknownFields map[string]interface{} `yaml:",inline"`
 }
 
 // CloneyMetadataVariable represents a variable in a Cloney template repository.
@@ -39,6 +42,9 @@ type CloneyMetadataVariable struct {
 	// It is a pointer to a bool because if the field is not defined in the YAML file,
 	// the default value should be true.
 	Validate *bool `yaml:"validate"`
+
+	// UnknownFields captures all unknown fields within variables and must be empty after parsing.
+	UnknownFields map[string]interface{} `yaml:",inline"`
 }
 
 // CloneyMetadata represents the metadata file of a Cloney template repository.
@@ -66,6 +72,9 @@ type CloneyMetadata struct {
 
 	// Variables is the list of variables of the template repository.
 	Variables []CloneyMetadataVariable `yaml:"variables"`
+
+	// UnknownFields captures all unknown fields at root level and must be empty after parsing.
+	UnknownFields map[string]interface{} `yaml:",inline"`
 }
 
 // NewCloneyMetadataFromRawYAML creates a new CloneyMetadata struct from a YAML string.
@@ -76,6 +85,11 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 	err := yaml.Unmarshal([]byte(rawYAML), &metadata)
 	if err != nil {
 		return nil, err
+	}
+
+	// Check for unknown fields at the root level.
+	if len(metadata.UnknownFields) > 0 {
+		return nil, fmt.Errorf("unknown field(s) at root level: %s", getKeys(metadata.UnknownFields))
 	}
 
 	// Validate metadata.
@@ -124,7 +138,12 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 	// Validate the configuration block.
 	// If manifest_version is v1, post_clone_commands field is not supported.
 	if metadata.ManifestVersion == "v1" && len(metadata.Configuration.PostCloneCommands) > 0 {
-		return nil, fmt.Errorf("manifest version '%s' does not support the 'post_clone_commands' field, please update the manifest version to 'v2'", metadata.ManifestVersion)
+		return nil, fmt.Errorf("manifest version '%s' does not support the 'configuration.post_clone_commands' field, please update the manifest version to 'v2'", metadata.ManifestVersion)
+	}
+
+	// Check for unknown fields in Configuration.
+	if len(metadata.Configuration.UnknownFields) > 0 {
+		return nil, fmt.Errorf("unknown field(s) in the configuration block: %s", getKeys(metadata.Configuration.UnknownFields))
 	}
 
 	// Validate variables separately because 'validator' package does not validate struct slices.
@@ -155,9 +174,23 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 				VariableType(variable.Example),
 			)
 		}
+
+		// Check for unknown fields in Variables.
+		if len(variable.UnknownFields) > 0 {
+			return nil, fmt.Errorf("unknown field(s) for variable '%s': %s", variable.Name, getKeys(variable.UnknownFields))
+		}
 	}
 
 	return &metadata, nil
+}
+
+// getKeysString returns the keys of a map as a string with comma-separated values surrounded by single quotes.
+func getKeys(m map[string]interface{}) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, fmt.Sprintf("'%s'", k))
+	}
+	return strings.Join(keys, ", ")
 }
 
 // MatchUserVariables validates if a given map of variables matches the variables defined

@@ -6,11 +6,11 @@ This document lists all significant changes to the Cloney project, following [Ke
 
 ### Added
 
-- Added a new `manifest_version` v2, which includes a new configuration field `post_clone_commands` that allows users to specify a list of commands to be executed after the template repository has been cloned. This is useful for running commands such as `npm install` or `pip install -r requirements.txt` to install dependencies.
+- Added a new `manifest_version` v2, which includes a new configuration field `configuration.post_clone_commands` that allows users to specify a list of commands to be executed after the template repository has been cloned. This is useful for running commands such as `npm install` or `pip install -r requirements.txt` to install dependencies.
 
 ### Changed
 
-- No changes were made in this release.
+- Unknown YAML fields in the `.cloney.yaml` metadata will now result in an error instead of being ignored.
 
 ### Fixed
 
