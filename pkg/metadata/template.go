@@ -79,17 +79,22 @@ type CloneyMetadata struct {
 
 // NewCloneyMetadataFromRawYAML creates a new CloneyMetadata struct from a YAML string.
 // It also validates the manifest version and the metadata structure.
-func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []string) (*CloneyMetadata, error) {
+func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []string) (*CloneyMetadata, []error) {
+	// List to store errors found during validation.
+	// This is to return all errors at once instead of returning the first error found.
+	errors := make([]error, 0)
+
 	// Parse YAML.
 	var metadata CloneyMetadata
 	err := yaml.Unmarshal([]byte(rawYAML), &metadata)
 	if err != nil {
-		return nil, err
+		errors = append(errors, fmt.Errorf("Invalid YAML: %w", err))
+		return nil, errors
 	}
 
 	// Check for unknown fields at the root level.
 	if len(metadata.UnknownFields) > 0 {
-		return nil, fmt.Errorf("unknown field(s) at root level: %s", getKeys(metadata.UnknownFields))
+		errors = append(errors, fmt.Errorf("Unknown field(s) at root level: %s", getKeys(metadata.UnknownFields)))
 	}
 
 	// Validate metadata.
@@ -111,12 +116,16 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 			}
 			switch validationError.Tag() {
 			case "required":
-				return nil, fmt.Errorf("missing required field '%s' at root level", field)
+				errors = append(errors, fmt.Errorf("Missing required field '%s' at root level", field))
 			case "semver":
-				return nil, fmt.Errorf("invalid semantic version '%s' for field %s", validationError.Value(), field)
+				errors = append(errors, fmt.Errorf("Invalid semantic version '%s' for field %s", validationError.Value(), field))
+			default:
+				{
+					errors = append(errors, fmt.Errorf("Invalid metadata file structure: %w", err))
+					return nil, errors
+				}
 			}
 		}
-		return nil, fmt.Errorf("invalid metadata file structure: %w", err)
 	}
 
 	// Check if manifest version is supported.
@@ -128,22 +137,23 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 		}
 	}
 	if !versionSupported {
-		return nil, fmt.Errorf(
-			"manifest version '%s' is not supported in this Cloney version.\nPlease update or downgrade your Cloney version.\n\nSupported versions: %s",
+		errors = append(errors, fmt.Errorf(
+			"Manifest version '%s' is not supported in this Cloney version.\nPlease update or downgrade your Cloney version.\n\nSupported versions: %s",
 			metadata.ManifestVersion,
 			strings.Join(supportedManifestVersions, ", "),
-		)
+		))
+		return nil, errors
 	}
 
 	// Validate the configuration block.
 	// If manifest_version is v1, post_clone_commands field is not supported.
 	if metadata.ManifestVersion == "v1" && len(metadata.Configuration.PostCloneCommands) > 0 {
-		return nil, fmt.Errorf("manifest version '%s' does not support the 'configuration.post_clone_commands' field, please update the manifest version to 'v2'", metadata.ManifestVersion)
+		errors = append(errors, fmt.Errorf("Manifest version '%s' does not support the 'configuration.post_clone_commands' field, please update the manifest version to 'v2'", metadata.ManifestVersion))
 	}
 
 	// Check for unknown fields in Configuration.
 	if len(metadata.Configuration.UnknownFields) > 0 {
-		return nil, fmt.Errorf("unknown field(s) in the configuration block: %s", getKeys(metadata.Configuration.UnknownFields))
+		errors = append(errors, fmt.Errorf("Unknown field(s) in the configuration block: %s", getKeys(metadata.Configuration.UnknownFields)))
 	}
 
 	// Validate variables separately because 'validator' package does not validate struct slices.
@@ -155,30 +165,38 @@ func NewCloneyMetadataFromRawYAML(rawYAML string, supportedManifestVersions []st
 			for _, validationError := range validationErrors {
 				switch validationError.Tag() {
 				case "required":
-					return nil, fmt.Errorf(
-						"missing required field '%s' for variable '%s'",
+					errors = append(errors, fmt.Errorf(
+						"Missing required field '%s' for variable '%s'",
 						strings.ToLower(validationError.Field()),
 						variable.Name,
-					)
+					))
+				default:
+					{
+						errors = append(errors, fmt.Errorf("Invalid variable '%s' structure: %w", variable.Name, err))
+					}
 				}
 			}
-			return nil, fmt.Errorf("invalid variable %s: %w", variable.Name, err)
 		}
 
 		// If the variable has a default value, check if it is of the same type as the example value.
-		if variable.Default != nil && !AreVariablesSameType(variable.Example, variable.Default) {
-			return nil, fmt.Errorf(
-				"variable '%s' has a default value of type '%s' but its example value is of type '%s'",
+		if variable.Default != nil && variable.Example != nil && !AreVariablesSameType(variable.Example, variable.Default) {
+			errors = append(errors, fmt.Errorf(
+				"Variable '%s' has a default value of type '%s' but its example value is of type '%s'",
 				variable.Name,
 				VariableType(variable.Default),
 				VariableType(variable.Example),
-			)
+			))
 		}
 
 		// Check for unknown fields in Variables.
 		if len(variable.UnknownFields) > 0 {
-			return nil, fmt.Errorf("unknown field(s) for variable '%s': %s", variable.Name, getKeys(variable.UnknownFields))
+			errors = append(errors, fmt.Errorf("Unknown field(s) for variable '%s': %s", variable.Name, getKeys(variable.UnknownFields)))
 		}
+	}
+
+	// If there are errors, return them.
+	if len(errors) > 0 {
+		return nil, errors
 	}
 
 	return &metadata, nil

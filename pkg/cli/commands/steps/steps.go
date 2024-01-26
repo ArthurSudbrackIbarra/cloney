@@ -149,10 +149,16 @@ func ReadRepositoryMetadata(metadataFilePath string) (string, error) {
 // ParseRepositoryMetadata parses the repository metadata.
 func ParseRepositoryMetadata(metadataContent string, supportedManifestVersions []string) (*metadata.CloneyMetadata, error) {
 	// Create the metadata struct from raw YAML data.
-	cloneyMetadata, err := metadata.NewCloneyMetadataFromRawYAML(metadataContent, supportedManifestVersions)
-	if err != nil {
-		terminal.ErrorMessage("Could not parse the template repository's metadata file", err)
-		return nil, err
+	cloneyMetadata, errors := metadata.NewCloneyMetadataFromRawYAML(metadataContent, supportedManifestVersions)
+	if len(errors) > 0 {
+		for index, e := range errors {
+			if index == 0 {
+				terminal.ErrorMessage("Could not parse the template repository's metadata file:", nil)
+			}
+			terminal.Message(fmt.Sprintf("        %d. %s", index+1, e.Error()))
+		}
+		// Return any of the errors to the caller.
+		return nil, errors[0]
 	}
 	if !suppressPrints {
 		terminal.OKMessage("The template repository's metadata file is valid")
