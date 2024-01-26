@@ -128,6 +128,16 @@ func ErrorMessage(message string, err error) {
 	}
 }
 
+// CautionInput prompts the user for input via terminal with a caution prefix and returns the input.
+func CautionInput(scanner *bufio.Scanner, message string) string {
+	if cmd != nil {
+		cmd.SetOut(cmd.OutOrStdout())
+		cmd.Print(fmt.Sprintf("[%s] %s: ", Yellow("Caution"), message))
+	}
+	scanner.Scan()
+	return scanner.Text()
+}
+
 // InputWithDefaultValue prompts the user for input via terminal and returns the input value or the default value.
 func InputWithDefaultValue(scanner *bufio.Scanner, message, defaultValue string) string {
 	if cmd != nil {

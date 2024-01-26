@@ -1,6 +1,7 @@
 package steps
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -247,7 +248,18 @@ func RunPostCloneCommands(clonePath string, cloneyMetadata *metadata.CloneyMetad
 		cmd.Dir = clonePath
 		fullCommand := strings.Join(command, " ")
 
+		// Ask the user for permission to run the command.
+		scanner := bufio.NewScanner(os.Stdin)
+		terminal.Message("")
+		promptMessage := fmt.Sprintf("This Cloney template repository is requesting permission to execute the following post-clone command:\n=> '%s'\nWould you like to grant permission? (y/n)", fullCommand)
+		permission := terminal.CautionInput(scanner, promptMessage)
+		if strings.ToLower(permission) != "y" && strings.ToLower(permission) != "yes" {
+			terminal.Message("Skipping post-clone command...")
+			continue
+		}
+
 		// Run the command
+		terminal.Message("")
 		err := cmd.Run()
 		if err != nil {
 			terminal.Message("")
